@@ -1,0 +1,57 @@
+<UserControl x:Class="Plantify.Views.EncyclopediaView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Plantify.Views"
+             xmlns:vm="clr-namespace:Plantify.ViewModels"
+             mc:Ignorable="d" 
+             d:DataContext="{d:DesignInstance Type=vm:EncyclopediaViewModel, IsDesignTimeCreatable=False}"
+             d:DesignHeight="600" d:DesignWidth="800">
+    <Grid>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <TextBlock Grid.Row="0" Text="Plant Encyclopedia" FontSize="24" FontWeight="Bold" Margin="20"/>
+
+        <StackPanel Grid.Row="1" Orientation="Horizontal" Margin="20,0,20,10">
+            <StackPanel>
+                <TextBlock Text="Search by Name"/>
+                <TextBox Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" Width="300" />
+            </StackPanel>
+
+            <StackPanel Margin="20,0,0,0">
+                <TextBlock Text="Difficulty"/>
+                <ComboBox ItemsSource="{Binding Difficulties}" SelectedItem="{Binding SelectedDifficulty}" Width="150"/>
+            </StackPanel>
+
+            <StackPanel Margin="20,0,0,0">
+                <TextBlock Text="Light Requirement"/>
+                <ComboBox ItemsSource="{Binding LightRequirements}" SelectedItem="{Binding SelectedLightRequirement}" Width="150"/>
+            </StackPanel>
+        </StackPanel>
+
+        <ListBox Grid.Row="2" ItemsSource="{Binding Plants}" HorizontalContentAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
+            <ListBox.ItemsPanel>
+                <ItemsPanelTemplate>
+                    <WrapPanel IsItemsHost="True" />
+                </ItemsPanelTemplate>
+            </ListBox.ItemsPanel>
+            <ListBox.ItemTemplate>
+                <DataTemplate>
+                    <Border BorderBrush="Gray" BorderThickness="1" CornerRadius="5" Margin="10" Padding="15" Width="220">
+                        <StackPanel>
+                            <Image Source="{Binding ImagePath}" Height="120" Stretch="UniformToFill" Margin="0,0,0,10"/>
+                            <TextBlock Text="{Binding Name}" FontSize="18" FontWeight="Bold"/>
+                            <TextBlock Text="{Binding Description}" TextWrapping="Wrap" Margin="0,5,0,0" MaxHeight="100" TextTrimming="CharacterEllipsis"/>
+                            <!-- Later we can add Image, other properties, and an 'Add to my garden' button -->
+                        </StackPanel>
+                    </Border>
+                </DataTemplate>
+            </ListBox.ItemTemplate>
+        </ListBox>
+    </Grid>
+</UserControl>
