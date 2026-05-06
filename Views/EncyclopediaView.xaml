@@ -32,6 +32,7 @@
                 <TextBlock Text="Light Requirement"/>
                 <ComboBox ItemsSource="{Binding LightRequirements}" SelectedItem="{Binding SelectedLightRequirement}" Width="150"/>
             </StackPanel>
+            <Button Content="Manage Plants" Command="{Binding GoToPlantManagementCommand}" Margin="20,20,0,0" Width="150" Height="30" VerticalAlignment="Center"/>
         </StackPanel>
 
         <ListBox Grid.Row="2" ItemsSource="{Binding Plants}" HorizontalContentAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Disabled">
@@ -44,7 +45,7 @@
                 <DataTemplate>
                     <Border BorderBrush="Gray" BorderThickness="1" CornerRadius="5" Margin="10" Padding="15" Width="220">
                         <StackPanel>
-                            <Image Source="{Binding ImagePath}" Height="120" Stretch="UniformToFill" Margin="0,0,0,10"/>
+                            <Image Source="{Binding DisplayImageSource}" Height="120" Stretch="UniformToFill" Margin="0,0,0,10"/>
                             <TextBlock Text="{Binding Name}" FontSize="18" FontWeight="Bold"/>
                             <TextBlock Text="{Binding Description}" TextWrapping="Wrap" Margin="0,5,0,0" MaxHeight="100" TextTrimming="CharacterEllipsis"/>
                             <!-- Later we can add Image, other properties, and an 'Add to my garden' button -->

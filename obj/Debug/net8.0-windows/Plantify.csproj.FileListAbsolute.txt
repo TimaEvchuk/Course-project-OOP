@@ -176,6 +176,7 @@ D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\P
 D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Plantify.AssemblyInfoInputs.cache
 D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Plantify.AssemblyInfo.cs
 D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Plantify.csproj.CoreCompileInputs.cache
+D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Plantify.sourcelink.json
 D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Plantify.csproj.Up2Date
 D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Plantify.dll
 D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\refint\Plantify.dll

@@ -1,19 +1,23 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging; // Added for IMessenger
 using Microsoft.Win32;
 using Plantify.Data;
+using Plantify.Messages; // Added for NavigateMessage
 using Plantify.Models;
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Media.Imaging; // Added for BitmapImage
 
 namespace Plantify.ViewModels
 {
     public partial class PlantManagementViewModel : BaseViewModel
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMessenger _messenger; // Injected messenger
 
         [ObservableProperty]
         private ObservableCollection<Plant> _plants;
@@ -37,10 +41,14 @@ namespace Plantify.ViewModels
         [ObservableProperty]
         private string? _plantImagePath;
 
+        [ObservableProperty]
+        private BitmapImage? _displayImageSource;
 
-        public PlantManagementViewModel(IUnitOfWork unitOfWork)
+
+        public PlantManagementViewModel(IUnitOfWork unitOfWork, IMessenger messenger) // Messenger injected
         {
             _unitOfWork = unitOfWork;
+            _messenger = messenger; // Assign messenger
             _plants = new ObservableCollection<Plant>();
             LoadPlantsCommand.Execute(null);
         }
@@ -56,6 +64,12 @@ namespace Plantify.ViewModels
                 PlantDifficulty = value.Difficulty;
                 PlantImagePath = value.ImagePath;
             }
+            DisplayImageSource = LoadImage(PlantImagePath);
+        }
+
+        partial void OnPlantImagePathChanged(string? value)
+        {
+            DisplayImageSource = LoadImage(value);
         }
 
         [RelayCommand]
@@ -66,6 +80,88 @@ namespace Plantify.ViewModels
             foreach (var plant in plantList)
             {
                 Plants.Add(plant);
+            }
+        }
+
+        // Helper method to load image for display
+        private BitmapImage? LoadImage(string? imagePath)
+        {
+            if (string.IsNullOrEmpty(imagePath)) return null;
+
+            try
+            {
+                var appDomainBasePath = AppDomain.CurrentDomain.BaseDirectory;
+                var fullPath = Path.Combine(appDomainBasePath, imagePath);
+
+                if (!File.Exists(fullPath))
+                {
+                    // Fallback to project root for development scenario
+                    var projectRootPath = Path.GetFullPath(Path.Combine(appDomainBasePath, "..", "..", ".."));
+                    fullPath = Path.Combine(projectRootPath, imagePath);
+                    
+                    if (!File.Exists(fullPath))
+                    {
+                        // Even check relative to app root (e.g., if Images folder is at the solution level)
+                        // This might be tricky with the current setup where images are copied to bin/Debug
+                        // For now, let's assume images are either in bin/Debug/Images/Plants or projectRoot/Images/Plants
+                        MessageBox.Show($"Image file not found at expected locations: {imagePath}");
+                        return null;
+                    }
+                }
+                
+                // Using a FileStream to avoid file locking issues
+                var bitmap = new BitmapImage();
+                bitmap.BeginInit();
+                bitmap.CacheOption = BitmapCacheOption.OnLoad; // Keep image in memory after loading
+                using (var stream = new FileStream(fullPath, FileMode.Open, FileAccess.Read))
+                {
+                    bitmap.StreamSource = stream;
+                    bitmap.EndInit();
+                    bitmap.Freeze(); // Freeze the BitmapImage to make it thread-safe and optimize memory
+                }
+                return bitmap;
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error loading image from {imagePath}: {ex.Message}");
+                return null;
+            }
+        }
+
+        public void ProcessImageFile(string sourcePath)
+        {
+            if (string.IsNullOrEmpty(sourcePath) || !File.Exists(sourcePath))
+            {
+                MessageBox.Show("Invalid image file selected or file does not exist.");
+                return;
+            }
+
+            var fileName = Guid.NewGuid() + Path.GetExtension(sourcePath);
+            var targetDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Images", "Plants");
+            
+            try
+            {
+                Directory.CreateDirectory(targetDirectory);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error creating directory {targetDirectory}: {ex.Message}");
+                return;
+            }
+            
+            var destinationPath = Path.Combine(targetDirectory, fileName);
+            
+            try
+            {
+                File.Copy(sourcePath, destinationPath, true);
+                PlantImagePath = Path.Combine("Images/Plants", fileName).Replace('\\', '/');
+                DisplayImageSource = LoadImage(PlantImagePath); // Update display image
+                // Temporarily keep the MessageBox for debugging, will remove later
+                MessageBox.Show($"Image selected and copied.\nSource: {sourcePath}\nDestination: {destinationPath}\nStored Path: {PlantImagePath}");
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error copying image from {sourcePath} to {destinationPath}: {ex.Message}");
             }
         }
 
@@ -80,14 +176,7 @@ namespace Plantify.ViewModels
 
             if (dialog.ShowDialog() == true)
             {
-                var sourcePath = dialog.FileName;
-                var fileName = Guid.NewGuid() + Path.GetExtension(sourcePath);
-                var destinationPath = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Images", "Plants", fileName);
-                
-                Directory.CreateDirectory(Path.GetDirectoryName(destinationPath)!);
-                File.Copy(sourcePath, destinationPath, true);
-
-                PlantImagePath = Path.Combine("/Images/Plants", fileName).Replace('\\', '/');
+                ProcessImageFile(dialog.FileName);
             }
         }
 
@@ -104,7 +193,22 @@ namespace Plantify.ViewModels
                 ImagePath = PlantImagePath
             };
             await _unitOfWork.Plants.AddAsync(newPlant);
-            await _unitOfWork.CompleteAsync();
+            try
+            {
+                var changes = await _unitOfWork.CompleteAsync();
+                if (changes > 0)
+                {
+                    MessageBox.Show("Plant added successfully!");
+                }
+                else
+                {
+                    MessageBox.Show("Plant added, but no changes were saved to the database.");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error adding plant: {ex.Message}");
+            }
             await LoadPlants(); // Refresh list
         }
 
@@ -123,7 +227,22 @@ namespace Plantify.ViewModels
             SelectedPlant.ImagePath = PlantImagePath;
 
             _unitOfWork.Plants.Update(SelectedPlant);
-            await _unitOfWork.CompleteAsync();
+            try
+            {
+                var changes = await _unitOfWork.CompleteAsync();
+                if (changes > 0)
+                {
+                    MessageBox.Show("Plant updated successfully!");
+                }
+                else
+                {
+                    MessageBox.Show("Plant updated, but no changes were saved to the database.");
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error updating plant: {ex.Message}");
+            }
             await LoadPlants(); // Refresh list
         }
 
@@ -135,6 +254,12 @@ namespace Plantify.ViewModels
             _unitOfWork.Plants.Remove(SelectedPlant);
             await _unitOfWork.CompleteAsync();
             await LoadPlants(); // Refresh list
+        }
+
+        [RelayCommand]
+        private void GoToEncyclopedia()
+        {
+            _messenger.Send(new NavigateMessage(typeof(EncyclopediaViewModel)));
         }
     }
 }

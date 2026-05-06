@@ -6,7 +6,7 @@
              xmlns:local="clr-namespace:Plantify.Views"
              xmlns:vm="clr-namespace:Plantify.ViewModels"
              mc:Ignorable="d" 
-             d:DataContext="{d:DesignInstance Type=vm:DashboardViewModel, IsDesignTimeCreatable=True}"
+             d:DataContext="{d:DesignInstance Type=vm:DashboardViewModel, IsDesignTimeCreatable=False}"
              d:DesignHeight="450" d:DesignWidth="800">
     <Grid>
         <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">

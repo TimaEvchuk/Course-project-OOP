@@ -1,6 +1,8 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging; // Added for IMessenger
 using Plantify.Data;
+using Plantify.Messages; // Added for NavigateMessage
 using Plantify.Models;
 using System;
 using System.Collections.Generic;
@@ -13,6 +15,7 @@ namespace Plantify.ViewModels
     public partial class EncyclopediaViewModel : BaseViewModel
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMessenger _messenger; // Injected messenger
         private List<Plant> _allPlants = new List<Plant>();
 
         [ObservableProperty]
@@ -39,9 +42,10 @@ namespace Plantify.ViewModels
         partial void OnSelectedLightRequirementChanged(string value) => PerformFilter();
 
 
-        public EncyclopediaViewModel(IUnitOfWork unitOfWork)
+        public EncyclopediaViewModel(IUnitOfWork unitOfWork, IMessenger messenger) // Messenger injected
         {
             _unitOfWork = unitOfWork;
+            _messenger = messenger; // Assign messenger
             _plants = new ObservableCollection<Plant>();
             _difficulties = new ObservableCollection<string> { "All", "Easy", "Medium", "Hard" };
             _lightRequirements = new ObservableCollection<string> { "All", "Low to Bright Indirect", "Bright Indirect" };
@@ -81,6 +85,12 @@ namespace Plantify.ViewModels
             {
                 Plants.Add(plant);
             }
+        }
+
+        [RelayCommand]
+        private void GoToPlantManagement()
+        {
+            _messenger.Send(new NavigateMessage(typeof(PlantManagementViewModel)));
         }
     }
 }
