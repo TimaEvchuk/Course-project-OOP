@@ -25,4 +25,10 @@
     </None>
   </ItemGroup>
 
+  <ItemGroup>
+    <Resource Include="Fonts\Inter-Regular.ttf" />
+    <Resource Include="Fonts\Lora.ttf" />
+    <Resource Include="Images\placeholder.png" />
+  </ItemGroup>
+
 </Project>

@@ -47,6 +47,9 @@ namespace Plantify
                     services.AddTransient<DashboardViewModel>();
                     services.AddTransient<EncyclopediaViewModel>();
                     services.AddTransient<PlantManagementViewModel>();
+                    services.AddTransient<MyGardenViewModel>();
+                    services.AddTransient<ScheduleViewModel>();
+                    services.AddTransient<SettingsViewModel>();
 
                     services.AddSingleton<MainWindow>();
                 });

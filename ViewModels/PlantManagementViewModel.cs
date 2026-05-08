@@ -86,44 +86,39 @@ namespace Plantify.ViewModels
         // Helper method to load image for display
         private BitmapImage? LoadImage(string? imagePath)
         {
-            if (string.IsNullOrEmpty(imagePath)) return null;
+            string? imageToLoad = null;
 
+            if (!string.IsNullOrEmpty(imagePath))
+            {
+                string basePath = AppDomain.CurrentDomain.BaseDirectory;
+                string fullPath = Path.Combine(basePath, imagePath);
+
+                if (File.Exists(fullPath))
+                {
+                    imageToLoad = fullPath;
+                }
+            }
+
+            // If no specific image is found, use the placeholder
+            if (imageToLoad == null)
+            {
+                // Use Pack URI to load the embedded resource
+                imageToLoad = "pack://application:,,,/Images/placeholder.png";
+            }
+            
             try
             {
-                var appDomainBasePath = AppDomain.CurrentDomain.BaseDirectory;
-                var fullPath = Path.Combine(appDomainBasePath, imagePath);
-
-                if (!File.Exists(fullPath))
-                {
-                    // Fallback to project root for development scenario
-                    var projectRootPath = Path.GetFullPath(Path.Combine(appDomainBasePath, "..", "..", ".."));
-                    fullPath = Path.Combine(projectRootPath, imagePath);
-                    
-                    if (!File.Exists(fullPath))
-                    {
-                        // Even check relative to app root (e.g., if Images folder is at the solution level)
-                        // This might be tricky with the current setup where images are copied to bin/Debug
-                        // For now, let's assume images are either in bin/Debug/Images/Plants or projectRoot/Images/Plants
-                        MessageBox.Show($"Image file not found at expected locations: {imagePath}");
-                        return null;
-                    }
-                }
-                
-                // Using a FileStream to avoid file locking issues
                 var bitmap = new BitmapImage();
                 bitmap.BeginInit();
-                bitmap.CacheOption = BitmapCacheOption.OnLoad; // Keep image in memory after loading
-                using (var stream = new FileStream(fullPath, FileMode.Open, FileAccess.Read))
-                {
-                    bitmap.StreamSource = stream;
-                    bitmap.EndInit();
-                    bitmap.Freeze(); // Freeze the BitmapImage to make it thread-safe and optimize memory
-                }
+                bitmap.UriSource = new Uri(imageToLoad, UriKind.RelativeOrAbsolute);
+                bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                bitmap.EndInit();
+                bitmap.Freeze();
                 return bitmap;
             }
             catch (Exception ex)
             {
-                MessageBox.Show($"Error loading image from {imagePath}: {ex.Message}");
+                MessageBox.Show($"Error loading image from {imageToLoad}: {ex.Message}");
                 return null;
             }
         }
@@ -254,12 +249,6 @@ namespace Plantify.ViewModels
             _unitOfWork.Plants.Remove(SelectedPlant);
             await _unitOfWork.CompleteAsync();
             await LoadPlants(); // Refresh list
-        }
-
-        [RelayCommand]
-        private void GoToEncyclopedia()
-        {
-            _messenger.Send(new NavigateMessage(typeof(EncyclopediaViewModel)));
         }
     }
 }

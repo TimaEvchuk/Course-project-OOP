@@ -5,20 +5,37 @@
              xmlns:views="clr-namespace:Plantify.Views"
              xmlns:vm="clr-namespace:Plantify.ViewModels">
     <Application.Resources>
-        <DataTemplate DataType="{x:Type vm:LoginViewModel}">
-            <views:LoginView/>
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:RegisterViewModel}">
-            <views:RegisterView/>
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:DashboardViewModel}">
-            <views:DashboardView/>
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:EncyclopediaViewModel}">
-            <views:EncyclopediaView/>
-        </DataTemplate>
-        <DataTemplate DataType="{x:Type vm:PlantManagementViewModel}">
-            <views:PlantManagementView/>
-        </DataTemplate>
-    </Application.Resources>
+        <ResourceDictionary>
+            <ResourceDictionary.MergedDictionaries>
+                <ResourceDictionary Source="Styles/Colors.xaml"/>
+                <ResourceDictionary Source="Styles/Typography.xaml"/>
+                <ResourceDictionary Source="Styles/Buttons.xaml"/>
+                <ResourceDictionary Source="Styles/ScrollBar.xaml"/>
+            </ResourceDictionary.MergedDictionaries>
+
+            <DataTemplate DataType="{x:Type vm:LoginViewModel}">
+                <views:LoginView/>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:RegisterViewModel}">
+                <views:RegisterView/>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:DashboardViewModel}">
+                <views:DashboardView/>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:EncyclopediaViewModel}">
+                <views:EncyclopediaView/>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:PlantManagementViewModel}">
+                <views:PlantManagementView/>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:MyGardenViewModel}">
+                <views:MyGardenView/>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:ScheduleViewModel}">
+                <views:ScheduleView/>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:SettingsViewModel}">
+                <views:SettingsView/>
+            </DataTemplate>
+            </ResourceDictionary>    </Application.Resources>
 </Application>
