@@ -8,11 +8,11 @@ namespace Plantify.Models
     {
         public int Id { get; set; }
         public string Name { get; set; } = null!;
-        public string Description { get; set; } = null!;
-        public int WateringInterval { get; set; } // In days
         public string LightRequirement { get; set; } = null!;
-        public string Difficulty { get; set; } = null!;
+        public string Variety { get; set; } = null!;
+        public int WateringInterval { get; set; }
         public string? ImagePath { get; set; }
+        public virtual List<PlantSection> Sections { get; set; } = new();
 
         // New property for displaying image in UI
         public BitmapImage? DisplayImageSource

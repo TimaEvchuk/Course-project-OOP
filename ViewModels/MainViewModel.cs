@@ -7,7 +7,10 @@ using System;
 
 namespace Plantify.ViewModels
 {
-    public partial class MainViewModel : BaseViewModel, IRecipient<NavigateMessage>
+    public partial class MainViewModel : BaseViewModel, 
+        IRecipient<NavigateMessage>, 
+        IRecipient<ShowPlantDetailMessage>, 
+        IRecipient<CloseOverlayMessage>
     {
         [ObservableProperty]
         private BaseViewModel _currentViewModel = null!;
@@ -15,14 +18,19 @@ namespace Plantify.ViewModels
         [ObservableProperty]
         private string _currentPageTitle = "";
 
+        [ObservableProperty]
+        private BaseViewModel? _overlayViewModel;
+
         private readonly IServiceProvider _serviceProvider;
+        private readonly IMessenger _messenger;
 
         public MainViewModel(IServiceProvider serviceProvider, IMessenger messenger)
         {
             _serviceProvider = serviceProvider;
+            _messenger = messenger;
             
-            // Register to receive navigation messages
-            messenger.RegisterAll(this);
+            // Register to receive all messages
+            _messenger.RegisterAll(this);
 
             // Set the initial view model
             Navigate(typeof(EncyclopediaViewModel), "Энциклопедия");
@@ -45,6 +53,16 @@ namespace Plantify.ViewModels
                 Navigate(typeof(PlantManagementViewModel), "Управление каталогом");
             }
             // Add other cases as needed
+        }
+
+        public void Receive(ShowPlantDetailMessage message)
+        {
+            OverlayViewModel = new PlantDetailViewModel(message.Value, _messenger);
+        }
+
+        public void Receive(CloseOverlayMessage message)
+        {
+            OverlayViewModel = null;
         }
 
         [RelayCommand]

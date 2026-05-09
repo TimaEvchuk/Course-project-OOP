@@ -12,8 +12,10 @@ namespace Plantify.ViewModels
         public BitmapImage? DisplayImageSource { get; }
 
         public string Name => Plant.Name;
-        public string Description => Plant.Description;
-        public string Difficulty => Plant.Difficulty;
+        public string Variety => Plant.Variety;
+        public int WateringInterval => Plant.WateringInterval;
+        public List<PlantSection> Sections => Plant.Sections;
+        public string ShortDescription => Plant.Sections.FirstOrDefault()?.Content ?? "";
         public string ImagePath => Plant.ImagePath ?? "";
 
         public PlantViewModel(Plant plant)

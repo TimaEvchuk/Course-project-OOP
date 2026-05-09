@@ -26,7 +26,7 @@
                     <ColumnDefinition Width="*"/>
                 </Grid.ColumnDefinitions>
                 <TextBlock Grid.Column="0" Text="🔍" VerticalAlignment="Center" Margin="5,0"/>
-                <TextBlock Grid.Column="1" Text="Найдите растение, болезнь или симптом..." IsHitTestVisible="False" VerticalAlignment="Center" Foreground="Gray" Margin="5,0,0,0">
+                <TextBlock Grid.Column="1" Text="Найдите растение..." IsHitTestVisible="False" VerticalAlignment="Center" Foreground="Gray" Margin="5,0,0,0">
                     <TextBlock.Style>
                         <Style TargetType="TextBlock">
                             <Setter Property="Visibility" Value="Collapsed"/>
@@ -46,9 +46,12 @@
         <!-- Filter Pills -->
         <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,20,0,10">
             <RadioButton Content="Все" IsChecked="True" Command="{Binding SelectFilterCommand}" CommandParameter="Все" Style="{StaticResource FilterPillRadioButtonStyle}"/>
-            <RadioButton Content="Для новичков" Command="{Binding SelectFilterCommand}" CommandParameter="Для новичков" Style="{StaticResource FilterPillRadioButtonStyle}"/>
+            <RadioButton Content="Лиственные" Command="{Binding SelectFilterCommand}" CommandParameter="Лиственные" Style="{StaticResource FilterPillRadioButtonStyle}"/>
+            <RadioButton Content="Суккуленты" Command="{Binding SelectFilterCommand}" CommandParameter="Суккуленты" Style="{StaticResource FilterPillRadioButtonStyle}"/>
+            <RadioButton Content="Лианы" Command="{Binding SelectFilterCommand}" CommandParameter="Лианы" Style="{StaticResource FilterPillRadioButtonStyle}"/>
             <RadioButton Content="Тенелюбивые" Command="{Binding SelectFilterCommand}" CommandParameter="Тенелюбивые" Style="{StaticResource FilterPillRadioButtonStyle}"/>
-            <RadioButton Content="Болезни и вредители" Command="{Binding SelectFilterCommand}" CommandParameter="Болезни и вредители" Style="{StaticResource FilterPillRadioButtonStyle}"/>
+            <RadioButton Content="Светолюбивые" Command="{Binding SelectFilterCommand}" CommandParameter="Светолюбивые" Style="{StaticResource FilterPillRadioButtonStyle}"/>
+            <RadioButton Content="Теневыносливые" Command="{Binding SelectFilterCommand}" CommandParameter="Теневыносливые" Style="{StaticResource FilterPillRadioButtonStyle}"/>
         </StackPanel>
         
         <!-- Plant List -->
@@ -91,12 +94,34 @@
                                 </Grid.RowDefinitions>
                                 
                                 <TextBlock Grid.Row="0" Text="{Binding Name}" Style="{StaticResource H2}" TextWrapping="Wrap" Margin="0,0,80,0"/>
-                                <TextBlock Grid.Row="1" Text="{Binding Description}" Style="{StaticResource Body}" TextWrapping="Wrap" Margin="0,5,0,0" VerticalAlignment="Top"/>
-                                <TextBlock Grid.Row="2" Text="Читать →" Style="{StaticResource Caption}" Foreground="{StaticResource BrushForestGreen}" VerticalAlignment="Bottom" HorizontalAlignment="Right"/>
+                                <TextBlock Grid.Row="1" Text="{Binding ShortDescription}" Style="{StaticResource Body}" TextWrapping="Wrap" Margin="0,5,0,0" VerticalAlignment="Top"/>
+                                <Button Grid.Row="2" Content="Читать →" Command="{Binding DataContext.ShowPlantDetailCommand, RelativeSource={RelativeSource AncestorType=ListBox}}" CommandParameter="{Binding}"
+                                        VerticalAlignment="Bottom" HorizontalAlignment="Right" FontSize="16" FontWeight="Bold">
+                                    <Button.Style>
+                                        <Style TargetType="Button">
+                                            <Setter Property="Background" Value="Transparent"/>
+                                            <Setter Property="BorderBrush" Value="Transparent"/>
+                                            <Setter Property="Foreground" Value="{StaticResource BrushForestGreen}"/>
+                                            <Setter Property="Cursor" Value="Hand"/>
+                                            <Setter Property="Template">
+                                                <Setter.Value>
+                                                    <ControlTemplate TargetType="Button">
+                                                        <ContentPresenter/>
+                                                    </ControlTemplate>
+                                                </Setter.Value>
+                                            </Setter>
+                                            <Style.Triggers>
+                                                <Trigger Property="IsMouseOver" Value="True">
+                                                    <Setter Property="Foreground" Value="{StaticResource BrushDarkGreen}"/>
+                                                </Trigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </Button.Style>
+                                </Button>
                             </Grid>
                             
-                            <Border Grid.ColumnSpan="2" Background="{StaticResource BrushSand}" CornerRadius="10" Padding="8,4" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="15">
-                                <TextBlock Text="{Binding Difficulty}" Foreground="{StaticResource BrushDarkGreen}" FontSize="12"/>
+                            <Border Grid.ColumnSpan="2" Background="{StaticResource BrushForestGreen20Transparent}" CornerRadius="10" Padding="8,4" VerticalAlignment="Top" HorizontalAlignment="Right" Margin="15">
+                                <TextBlock Text="{Binding Variety}" Foreground="{StaticResource BrushForestGreen}" FontSize="12"/>
                             </Border>
                         </Grid>
                     </Border>

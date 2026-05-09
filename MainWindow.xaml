@@ -43,5 +43,20 @@
             <!-- Workspace -->
             <ContentControl Grid.Row="1" Content="{Binding CurrentViewModel}" Margin="5"/>
         </Grid>
+        
+        <!-- Overlay for Modal Dialogs -->
+        <Grid Grid.ColumnSpan="2" Background="#80000000">
+            <Grid.Style>
+                <Style TargetType="Grid">
+                    <Setter Property="Visibility" Value="Visible"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding OverlayViewModel}" Value="{x:Null}">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
+            <ContentControl Content="{Binding OverlayViewModel}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+        </Grid>
     </Grid>
 </Window>

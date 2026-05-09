@@ -165,6 +165,7 @@ D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\V
 D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Views\EncyclopediaView.g.cs
 D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Views\LoginView.g.cs
 D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Views\MyGardenView.g.cs
+D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Views\PlantDetailView.g.cs
 D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Views\PlantManagementView.g.cs
 D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Views\RegisterView.g.cs
 D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Views\ScheduleView.g.cs
@@ -179,6 +180,7 @@ D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\S
 D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Views\DashboardView.baml
 D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Views\EncyclopediaView.baml
 D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Views\LoginView.baml
+D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Views\PlantDetailView.baml
 D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Views\PlantManagementView.baml
 D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Views\RegisterView.baml
 D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Plantify.g.resources

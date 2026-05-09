@@ -7,7 +7,7 @@ namespace Plantify.Data
     {
         private readonly AppDbContext _context;
         public IRepository<User> Users { get; private set; }
-        public IRepository<Plant> Plants { get; private set; }
+        public IPlantRepository Plants { get; private set; }
         public IRepository<Role> Roles { get; private set; }
         public IRepository<UserPlant> UserPlants { get; private set; }
 
@@ -15,7 +15,7 @@ namespace Plantify.Data
         {
             _context = context;
             Users = new Repository<User>(_context);
-            Plants = new Repository<Plant>(_context);
+            Plants = new PlantRepository(_context);
             Roles = new Repository<Role>(_context);
             UserPlants = new Repository<UserPlant>(_context);
         }

@@ -1,23 +1,24 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using CommunityToolkit.Mvvm.Messaging; // Added for IMessenger
+using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Win32;
 using Plantify.Data;
-using Plantify.Messages; // Added for NavigateMessage
+using Plantify.Messages;
 using Plantify.Models;
 using System;
 using System.Collections.ObjectModel;
 using System.IO;
+using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
-using System.Windows.Media.Imaging; // Added for BitmapImage
+using System.Windows.Media.Imaging;
 
 namespace Plantify.ViewModels
 {
     public partial class PlantManagementViewModel : BaseViewModel
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IMessenger _messenger; // Injected messenger
+        private readonly IMessenger _messenger;
 
         [ObservableProperty]
         private ObservableCollection<Plant> _plants;
@@ -31,25 +32,26 @@ namespace Plantify.ViewModels
         [ObservableProperty]
         private string _plantName = "";
         [ObservableProperty]
-        private string _plantDescription = "";
-        [ObservableProperty]
         private int _plantWateringInterval;
         [ObservableProperty]
         private string _plantLightRequirement = "";
         [ObservableProperty]
-        private string _plantDifficulty = "";
+        private string _plantVariety = "";
         [ObservableProperty]
         private string? _plantImagePath;
-
         [ObservableProperty]
         private BitmapImage? _displayImageSource;
 
+        public ObservableCollection<string> Varieties { get; }
+        public ObservableCollection<string> LightRequirements { get; }
 
-        public PlantManagementViewModel(IUnitOfWork unitOfWork, IMessenger messenger) // Messenger injected
+        public PlantManagementViewModel(IUnitOfWork unitOfWork, IMessenger messenger)
         {
             _unitOfWork = unitOfWork;
-            _messenger = messenger; // Assign messenger
+            _messenger = messenger;
             _plants = new ObservableCollection<Plant>();
+            Varieties = new ObservableCollection<string> { "Лиственные", "Суккуленты", "Лианы" };
+            LightRequirements = new ObservableCollection<string> { "Тенелюбивые", "Светолюбивые", "Теневыносливые" };
             LoadPlantsCommand.Execute(null);
         }
 
@@ -58,15 +60,22 @@ namespace Plantify.ViewModels
             if (value != null)
             {
                 PlantName = value.Name;
-                PlantDescription = value.Description;
                 PlantWateringInterval = value.WateringInterval;
                 PlantLightRequirement = value.LightRequirement;
-                PlantDifficulty = value.Difficulty;
+                PlantVariety = value.Variety;
                 PlantImagePath = value.ImagePath;
+            }
+            else
+            {
+                PlantName = "";
+                PlantWateringInterval = 0;
+                PlantLightRequirement = LightRequirements.FirstOrDefault() ?? "";
+                PlantVariety = Varieties.FirstOrDefault() ?? "";
+                PlantImagePath = null;
             }
             DisplayImageSource = LoadImage(PlantImagePath);
         }
-
+        
         partial void OnPlantImagePathChanged(string? value)
         {
             DisplayImageSource = LoadImage(value);
@@ -75,7 +84,7 @@ namespace Plantify.ViewModels
         [RelayCommand]
         private async Task LoadPlants()
         {
-            var plantList = await _unitOfWork.Plants.GetAllAsync();
+            var plantList = await _unitOfWork.Plants.GetAllWithSectionsAsync();
             Plants.Clear();
             foreach (var plant in plantList)
             {
@@ -83,29 +92,22 @@ namespace Plantify.ViewModels
             }
         }
 
-        // Helper method to load image for display
         private BitmapImage? LoadImage(string? imagePath)
         {
             string? imageToLoad = null;
-
             if (!string.IsNullOrEmpty(imagePath))
             {
                 string basePath = AppDomain.CurrentDomain.BaseDirectory;
                 string fullPath = Path.Combine(basePath, imagePath);
-
                 if (File.Exists(fullPath))
                 {
                     imageToLoad = fullPath;
                 }
             }
-
-            // If no specific image is found, use the placeholder
             if (imageToLoad == null)
             {
-                // Use Pack URI to load the embedded resource
                 imageToLoad = "pack://application:,,,/Images/placeholder.png";
             }
-            
             try
             {
                 var bitmap = new BitmapImage();
@@ -130,10 +132,8 @@ namespace Plantify.ViewModels
                 MessageBox.Show("Invalid image file selected or file does not exist.");
                 return;
             }
-
             var fileName = Guid.NewGuid() + Path.GetExtension(sourcePath);
             var targetDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Images", "Plants");
-            
             try
             {
                 Directory.CreateDirectory(targetDirectory);
@@ -143,16 +143,11 @@ namespace Plantify.ViewModels
                 MessageBox.Show($"Error creating directory {targetDirectory}: {ex.Message}");
                 return;
             }
-            
             var destinationPath = Path.Combine(targetDirectory, fileName);
-            
             try
             {
                 File.Copy(sourcePath, destinationPath, true);
                 PlantImagePath = Path.Combine("Images/Plants", fileName).Replace('\\', '/');
-                DisplayImageSource = LoadImage(PlantImagePath); // Update display image
-                // Temporarily keep the MessageBox for debugging, will remove later
-                MessageBox.Show($"Image selected and copied.\nSource: {sourcePath}\nDestination: {destinationPath}\nStored Path: {PlantImagePath}");
             }
             catch (Exception ex)
             {
@@ -163,12 +158,7 @@ namespace Plantify.ViewModels
         [RelayCommand]
         private void SelectImage()
         {
-            var dialog = new OpenFileDialog
-            {
-                Filter = "Image files (*.png;*.jpeg;*.jpg)|*.png;*.jpeg;*.jpg|All files (*.*)|*.*",
-                InitialDirectory = Environment.GetFolderPath(Environment.SpecialFolder.MyPictures)
-            };
-
+            var dialog = new OpenFileDialog { Filter = "Image files (*.png;*.jpeg;*.jpg)|*.png;*.jpeg;*.jpg|All files (*.*)|*.*" };
             if (dialog.ShowDialog() == true)
             {
                 ProcessImageFile(dialog.FileName);
@@ -181,30 +171,21 @@ namespace Plantify.ViewModels
             var newPlant = new Plant
             {
                 Name = PlantName,
-                Description = PlantDescription,
                 WateringInterval = PlantWateringInterval,
                 LightRequirement = PlantLightRequirement,
-                Difficulty = PlantDifficulty,
+                Variety = PlantVariety,
                 ImagePath = PlantImagePath
             };
             await _unitOfWork.Plants.AddAsync(newPlant);
             try
             {
-                var changes = await _unitOfWork.CompleteAsync();
-                if (changes > 0)
-                {
-                    MessageBox.Show("Plant added successfully!");
-                }
-                else
-                {
-                    MessageBox.Show("Plant added, but no changes were saved to the database.");
-                }
+                await _unitOfWork.CompleteAsync();
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Error adding plant: {ex.Message}");
             }
-            await LoadPlants(); // Refresh list
+            await LoadPlants();
         }
 
         private bool CanUpdateOrDelete() => SelectedPlant != null;
@@ -213,42 +194,30 @@ namespace Plantify.ViewModels
         private async Task UpdatePlant()
         {
             if (SelectedPlant == null) return;
-
             SelectedPlant.Name = PlantName;
-            SelectedPlant.Description = PlantDescription;
             SelectedPlant.WateringInterval = PlantWateringInterval;
             SelectedPlant.LightRequirement = PlantLightRequirement;
-            SelectedPlant.Difficulty = PlantDifficulty;
+            SelectedPlant.Variety = PlantVariety;
             SelectedPlant.ImagePath = PlantImagePath;
-
             _unitOfWork.Plants.Update(SelectedPlant);
             try
             {
-                var changes = await _unitOfWork.CompleteAsync();
-                if (changes > 0)
-                {
-                    MessageBox.Show("Plant updated successfully!");
-                }
-                else
-                {
-                    MessageBox.Show("Plant updated, but no changes were saved to the database.");
-                }
+                await _unitOfWork.CompleteAsync();
             }
             catch (Exception ex)
             {
                 MessageBox.Show($"Error updating plant: {ex.Message}");
             }
-            await LoadPlants(); // Refresh list
+            await LoadPlants();
         }
 
         [RelayCommand(CanExecute = nameof(CanUpdateOrDelete))]
         private async Task DeletePlant()
         {
             if (SelectedPlant == null) return;
-
             _unitOfWork.Plants.Remove(SelectedPlant);
             await _unitOfWork.CompleteAsync();
-            await LoadPlants(); // Refresh list
+            await LoadPlants();
         }
     }
 }

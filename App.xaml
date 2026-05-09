@@ -37,5 +37,8 @@
             <DataTemplate DataType="{x:Type vm:SettingsViewModel}">
                 <views:SettingsView/>
             </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:PlantDetailViewModel}">
+                <views:PlantDetailView/>
+            </DataTemplate>
             </ResourceDictionary>    </Application.Resources>
 </Application>

@@ -6,7 +6,7 @@ namespace Plantify.Data
     public interface IUnitOfWork : IDisposable
     {
         IRepository<User> Users { get; }
-        IRepository<Plant> Plants { get; }
+        IPlantRepository Plants { get; }
         IRepository<Role> Roles { get; }
         IRepository<UserPlant> UserPlants { get; }
         Task<int> CompleteAsync();

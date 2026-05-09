@@ -15,7 +15,7 @@ namespace Plantify.ViewModels
     public partial class EncyclopediaViewModel : BaseViewModel
     {
         private readonly IUnitOfWork _unitOfWork;
-        private readonly IMessenger _messenger; // Injected messenger
+        private readonly IMessenger _messenger;
         private List<PlantViewModel> _allPlants = new List<PlantViewModel>();
 
         [ObservableProperty]
@@ -30,18 +30,25 @@ namespace Plantify.ViewModels
         partial void OnSearchTextChanged(string value) => PerformFilter();
         partial void OnSelectedFilterChanged(string value) => PerformFilter();
 
-        public EncyclopediaViewModel(IUnitOfWork unitOfWork, IMessenger messenger) // Messenger injected
+        public EncyclopediaViewModel(IUnitOfWork unitOfWork, IMessenger messenger)
         {
             _unitOfWork = unitOfWork;
-            _messenger = messenger; // Assign messenger
+            _messenger = messenger;
             _plants = new ObservableCollection<PlantViewModel>();
             LoadPlantsCommand.Execute(null);
         }
 
         [RelayCommand]
+        private void ShowPlantDetail(PlantViewModel plant)
+        {
+            if (plant == null) return;
+            _messenger.Send(new ShowPlantDetailMessage(plant));
+        }
+        
+        [RelayCommand]
         private async Task LoadPlants()
         {
-            var plantList = await _unitOfWork.Plants.GetAllAsync();
+            var plantList = await _unitOfWork.Plants.GetAllWithSectionsAsync();
             _allPlants = plantList.Select(p => new PlantViewModel(p)).ToList();
             PerformFilter();
         }
@@ -59,14 +66,27 @@ namespace Plantify.ViewModels
             // Filter by selected category pill
             switch (SelectedFilter)
             {
-                case "Для новичков":
-                    filteredPlants = filteredPlants.Where(p => p.Difficulty == "Easy");
+                case "Лиственные":
+                    filteredPlants = filteredPlants.Where(p => p.Plant.Variety == "Лиственные");
+                    break;
+                case "Суккуленты":
+                    filteredPlants = filteredPlants.Where(p => p.Plant.Variety == "Суккуленты");
+                    break;
+                case "Лианы":
+                    filteredPlants = filteredPlants.Where(p => p.Plant.Variety == "Лианы");
                     break;
                 case "Тенелюбивые":
-                    filteredPlants = filteredPlants.Where(p => p.Plant.LightRequirement.Contains("Low", StringComparison.OrdinalIgnoreCase));
+                    filteredPlants = filteredPlants.Where(p => p.Plant.LightRequirement == "Тенелюбивые");
                     break;
-                // "Все" and other unimplemented filters will show all (or all from search)
+                case "Светолюбивые":
+                    filteredPlants = filteredPlants.Where(p => p.Plant.LightRequirement == "Светолюбивые");
+                    break;
+                case "Теневыносливые":
+                    filteredPlants = filteredPlants.Where(p => p.Plant.LightRequirement == "Теневыносливые");
+                    break;
+                case "Все":
                 default:
+                    // No additional filtering needed
                     break;
             }
 
