@@ -70,17 +70,17 @@
             </ListBox.ItemContainerStyle>
             <ListBox.ItemTemplate>
                 <DataTemplate>
-                    <Border CornerRadius="12" Background="{StaticResource BrushPureWhite}" Margin="0,0,24,24" MinHeight="150">
+                    <Border CornerRadius="12" Background="{StaticResource BrushPureWhite}" Margin="0,0,24,24" Height="140">
                         <Border.Effect>
                             <DropShadowEffect ShadowDepth="8" BlurRadius="24" Color="{StaticResource ColorForestGreen}" Opacity="0.1"/>
                         </Border.Effect>
                         <Grid>
                             <Grid.ColumnDefinitions>
-                                <ColumnDefinition Width="160"/>
+                                <ColumnDefinition Width="Auto"/>
                                 <ColumnDefinition Width="*"/>
                             </Grid.ColumnDefinitions>
                             
-                            <Border CornerRadius="12" Margin="10">
+                            <Border CornerRadius="12" Margin="10" Width="120" Height="120">
                                 <Border.Background>
                                     <ImageBrush ImageSource="{Binding DisplayImageSource}" Stretch="UniformToFill"/>
                                 </Border.Background>
@@ -94,7 +94,7 @@
                                 </Grid.RowDefinitions>
                                 
                                 <TextBlock Grid.Row="0" Text="{Binding Name}" Style="{StaticResource H2}" TextWrapping="Wrap" Margin="0,0,80,0"/>
-                                <TextBlock Grid.Row="1" Text="{Binding ShortDescription}" Style="{StaticResource Body}" TextWrapping="Wrap" Margin="0,5,0,0" VerticalAlignment="Top"/>
+                                <TextBlock Grid.Row="1" Text="{Binding ShortDescription}" Style="{StaticResource Body}" TextWrapping="Wrap" TextTrimming="CharacterEllipsis" MaxHeight="72" Margin="0,5,120,0" VerticalAlignment="Top"/>
                                 <Button Grid.Row="2" Content="Читать →" Command="{Binding DataContext.ShowPlantDetailCommand, RelativeSource={RelativeSource AncestorType=ListBox}}" CommandParameter="{Binding}"
                                         VerticalAlignment="Bottom" HorizontalAlignment="Right" FontSize="16" FontWeight="Bold">
                                     <Button.Style>
