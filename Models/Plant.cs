@@ -52,7 +52,7 @@ namespace Plantify.Models
                     }
                     return bitmap;
                 }
-                catch (Exception ex)
+                catch (Exception)
                 {
                     // Log error or show message box
                     // MessageBox.Show($"Error loading image from {ImagePath}: {ex.Message}");

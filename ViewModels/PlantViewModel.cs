@@ -8,19 +8,20 @@ namespace Plantify.ViewModels
 {
     public class PlantViewModel : BaseViewModel
     {
-        public Plant Plant { get; }
+        public Plant PlantModel { get; }
         public BitmapImage? DisplayImageSource { get; }
 
-        public string Name => Plant.Name;
-        public string Variety => Plant.Variety;
-        public int WateringInterval => Plant.WateringInterval;
-        public List<PlantSection> Sections => Plant.Sections;
-        public string ShortDescription => Plant.Sections.FirstOrDefault()?.Content ?? "";
-        public string ImagePath => Plant.ImagePath ?? "";
+        public string Name => PlantModel.Name;
+        public string Variety => PlantModel.Variety;
+        public int WateringInterval => PlantModel.WateringInterval;
+        public int FertilizingInterval => PlantModel.FertilizingInterval;
+        public List<PlantSection> Sections => PlantModel.Sections;
+        public string ShortDescription => PlantModel.Sections.FirstOrDefault()?.Content ?? "";
+        public string ImagePath => PlantModel.ImagePath ?? "";
 
         public PlantViewModel(Plant plant)
         {
-            Plant = plant;
+            PlantModel = plant;
             DisplayImageSource = LoadImage(plant.ImagePath);
         }
 

@@ -61,31 +61,38 @@ namespace Plantify.ViewModels
             _authenticationService = authenticationService;
         }
 
-        public void Initialize(UserPlant? userPlant)
+        public void Initialize(ShowAddUserPlantOverlayMessage message)
         {
-            OriginalUserPlant = userPlant;
-            IsEditMode = userPlant != null;
-
-            if (IsEditMode && OriginalUserPlant != null)
+            if (message.UserPlantToEdit != null)
             {
+                // EDIT MODE
+                OriginalUserPlant = message.UserPlantToEdit;
+                IsEditMode = true;
+
                 CustomName = OriginalUserPlant.CustomName;
                 Location = OriginalUserPlant.Location;
                 CustomImagePath = OriginalUserPlant.CustomImagePath;
                 DaysSinceLastWatering = (DateTime.Today - OriginalUserPlant.LastUserWateringDate).Days;
                 DaysSinceLastFertilizing = (DateTime.Today - OriginalUserPlant.LastFertilizedDate).Days;
+                
+                DisplayImageSource = LoadImage(CustomImagePath ?? OriginalUserPlant.Plant?.ImagePath);
             }
             else
             {
+                // ADD MODE
+                OriginalUserPlant = null;
+                IsEditMode = false;
+                
                 // Reset fields for 'Add' mode
-                CustomName = "";
+                CustomName = message.PlantToPreFill?.Name ?? "";
                 Location = "";
-                CustomImagePath = null;
-                SelectedPlant = null;
+                CustomImagePath = message.PlantToPreFill?.ImagePath;
+                SelectedPlant = message.PlantToPreFill;
                 DaysSinceLastWatering = 0;
                 DaysSinceLastFertilizing = 0;
+                
+                DisplayImageSource = LoadImage(CustomImagePath);
             }
-            // Load image initially
-            DisplayImageSource = LoadImage(CustomImagePath ?? OriginalUserPlant?.Plant?.ImagePath);
         }
 
         partial void OnCustomImagePathChanged(string? value)

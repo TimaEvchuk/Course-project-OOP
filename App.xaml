@@ -3,7 +3,9 @@
              xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
              xmlns:local="clr-namespace:Plantify"
              xmlns:views="clr-namespace:Plantify.Views"
-             xmlns:vm="clr-namespace:Plantify.ViewModels">
+             xmlns:viewmodels="clr-namespace:Plantify.ViewModels"
+             xmlns:vm="clr-namespace:Plantify.ViewModels"
+             xmlns:converters="clr-namespace:Plantify.Converters">
     <Application.Resources>
         <ResourceDictionary>
             <ResourceDictionary.MergedDictionaries>
@@ -13,7 +15,10 @@
                 <ResourceDictionary Source="Styles/ScrollBar.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
-            <DataTemplate DataType="{x:Type vm:LoginViewModel}">
+            <converters:NextCareActionToBrushConverter x:Key="NextCareActionToBrushConverter"/>
+
+            <!-- DataTemplates for MainViewModel -->
+            <DataTemplate DataType="{x:Type viewmodels:LoginViewModel}">
                 <views:LoginView/>
             </DataTemplate>
             <DataTemplate DataType="{x:Type vm:RegisterViewModel}">
@@ -45,6 +50,6 @@
             </DataTemplate>
 
             <BitmapImage x:Key="ImgPlaceholder" UriSource="pack://application:,,,/Images/placeholder.png" />
-            </ResourceDictionary>
-            </Application.Resources>
-            </Application>
+        </ResourceDictionary>
+    </Application.Resources>
+</Application>

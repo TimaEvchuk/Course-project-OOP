@@ -38,7 +38,7 @@ namespace Plantify.ViewModels
         [RelayCommand]
         private void AddPlant()
         {
-            _messenger.Send(new ShowAddUserPlantOverlayMessage(null));
+            _messenger.Send(new ShowAddUserPlantOverlayMessage((Plant?)null));
         }
 
         [RelayCommand]

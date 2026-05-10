@@ -43,7 +43,7 @@ namespace Plantify.Views
             {
                 string[]? files = e.Data.GetData(DataFormats.FileDrop) as string[];
                 if (files == null || files.Length == 0) return;
-                string filePath = files.FirstOrDefault();
+                string? filePath = files.FirstOrDefault();
 
                 if (!string.IsNullOrEmpty(filePath) && DataContext is ViewModels.PlantManagementViewModel viewModel)
                 {

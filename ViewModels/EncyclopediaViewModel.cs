@@ -67,22 +67,22 @@ namespace Plantify.ViewModels
             switch (SelectedFilter)
             {
                 case "Лиственные":
-                    filteredPlants = filteredPlants.Where(p => p.Plant.Variety == "Лиственные");
+                    filteredPlants = filteredPlants.Where(p => p.PlantModel.Variety == "Лиственные");
                     break;
                 case "Суккуленты":
-                    filteredPlants = filteredPlants.Where(p => p.Plant.Variety == "Суккуленты");
+                    filteredPlants = filteredPlants.Where(p => p.PlantModel.Variety == "Суккуленты");
                     break;
                 case "Лианы":
-                    filteredPlants = filteredPlants.Where(p => p.Plant.Variety == "Лианы");
+                    filteredPlants = filteredPlants.Where(p => p.PlantModel.Variety == "Лианы");
                     break;
                 case "Тенелюбивые":
-                    filteredPlants = filteredPlants.Where(p => p.Plant.LightRequirement == "Тенелюбивые");
+                    filteredPlants = filteredPlants.Where(p => p.PlantModel.LightRequirement == "Тенелюбивые");
                     break;
                 case "Светолюбивые":
-                    filteredPlants = filteredPlants.Where(p => p.Plant.LightRequirement == "Светолюбивые");
+                    filteredPlants = filteredPlants.Where(p => p.PlantModel.LightRequirement == "Светолюбивые");
                     break;
                 case "Теневыносливые":
-                    filteredPlants = filteredPlants.Where(p => p.Plant.LightRequirement == "Теневыносливые");
+                    filteredPlants = filteredPlants.Where(p => p.PlantModel.LightRequirement == "Теневыносливые");
                     break;
                 case "Все":
                 default:

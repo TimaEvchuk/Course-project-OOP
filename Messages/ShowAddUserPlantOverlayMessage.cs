@@ -4,11 +4,19 @@ namespace Plantify.Messages
 {
     public class ShowAddUserPlantOverlayMessage
     {
-        public UserPlant? InitialUserPlant { get; }
+        public UserPlant? UserPlantToEdit { get; }
+        public Plant? PlantToPreFill { get; }
 
-        public ShowAddUserPlantOverlayMessage(UserPlant? initialUserPlant)
+        public ShowAddUserPlantOverlayMessage(UserPlant? userPlantToEdit)
         {
-            InitialUserPlant = initialUserPlant;
+            UserPlantToEdit = userPlantToEdit;
+            PlantToPreFill = null;
+        }
+
+        public ShowAddUserPlantOverlayMessage(Plant? plantToPreFill)
+        {
+            UserPlantToEdit = null;
+            PlantToPreFill = plantToPreFill;
         }
     }
 }

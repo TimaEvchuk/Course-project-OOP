@@ -21,5 +21,11 @@ namespace Plantify.ViewModels
         {
             _messenger.Send(new CloseOverlayMessage());
         }
+
+        [RelayCommand]
+        private void AddPlantToGarden()
+        {
+            _messenger.Send(new ShowAddUserPlantOverlayMessage(Plant.PlantModel));
+        }
     }
 }

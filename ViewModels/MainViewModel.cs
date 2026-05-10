@@ -92,7 +92,7 @@ namespace Plantify.ViewModels
         public void Receive(ShowAddUserPlantOverlayMessage message)
         {
             var addUserPlantVM = _serviceProvider.GetRequiredService<AddUserPlantViewModel>();
-            addUserPlantVM.Initialize(message.InitialUserPlant);
+            addUserPlantVM.Initialize(message);
             
             OverlayViewModel = addUserPlantVM;
             
@@ -103,7 +103,7 @@ namespace Plantify.ViewModels
         [RelayCommand]
         private void ShowAddPlantOverlay()
         {
-            _messenger.Send(new ShowAddUserPlantOverlayMessage(null));
+            _messenger.Send(new ShowAddUserPlantOverlayMessage((Models.Plant?)null));
         }
 
         [RelayCommand]

@@ -33,7 +33,7 @@
                     <TextBlock Text="{Binding Plant.Variety}" Foreground="{StaticResource BrushForestGreen}" FontSize="12"/>
                 </Border>
                 <TextBlock Text="{Binding Plant.WateringInterval, StringFormat='Полив: раз в {0} дней'}" Style="{StaticResource Body}" Margin="0,20,0,5"/>
-                <TextBlock Text="Удобрение: раз в 14 дней" Style="{StaticResource Body}"/>
+                <TextBlock Text="{Binding Plant.FertilizingInterval, StringFormat='Удобрение: раз в {0} дней'}" Style="{StaticResource Body}"/>
             </StackPanel>
 
             <!-- Description Sections -->
@@ -53,6 +53,7 @@
             <!-- Add to Garden Button -->
             <Button Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="2" 
                     Content="Добавить в сад" 
+                    Command="{Binding AddPlantToGardenCommand}"
                     HorizontalAlignment="Right" 
                     Margin="0,0,20,20"
                     Background="{StaticResource BrushForestGreen}"

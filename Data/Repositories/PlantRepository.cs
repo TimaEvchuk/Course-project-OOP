@@ -16,6 +16,6 @@ namespace Plantify.Data.Repositories
             return await _appDbContext.Plants.Include(p => p.Sections).ToListAsync();
         }
 
-        private AppDbContext _appDbContext => _context as AppDbContext;
+        private AppDbContext _appDbContext => (AppDbContext)_context;
     }
 }
