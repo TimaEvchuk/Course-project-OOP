@@ -1,17 +1,22 @@
+using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.EntityFrameworkCore;
+using Plantify.Data;
+using Plantify.Messages;
+using Plantify.Models;
+using Plantify.Services;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
-using CommunityToolkit.Mvvm.ComponentModel;
-using CommunityToolkit.Mvvm.Input;
-using Plantify.Data;
-using Plantify.Models;
-using Microsoft.EntityFrameworkCore;
 
 namespace Plantify.ViewModels
 {
     public partial class MyGardenViewModel : BaseViewModel
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMessenger _messenger;
+        private readonly AuthenticationService _authenticationService;
 
         [ObservableProperty]
         private ObservableCollection<UserPlantViewModel> _userPlants = new();
@@ -22,17 +27,66 @@ namespace Plantify.ViewModels
         [ObservableProperty]
         private bool _showEmptyState;
 
-        public MyGardenViewModel(IUnitOfWork unitOfWork)
+        public MyGardenViewModel(IUnitOfWork unitOfWork, IMessenger messenger, AuthenticationService authenticationService)
         {
             _unitOfWork = unitOfWork;
+            _messenger = messenger;
+            _authenticationService = authenticationService;
             LoadUserPlantsCommand.Execute(null);
+        }
+
+        [RelayCommand]
+        private void AddPlant()
+        {
+            _messenger.Send(new ShowAddUserPlantOverlayMessage(null));
+        }
+
+        [RelayCommand]
+        private async Task DeletePlant(UserPlantViewModel? plantVM)
+        {
+            if (plantVM == null) return;
+
+            // Find the entity in the database to delete it.
+            // We need to fetch the original entity to remove it from the context.
+            var plantToDelete = await _unitOfWork.UserPlants.GetByIdAsync(plantVM.UserPlantId);
+            if (plantToDelete != null)
+            {
+                _unitOfWork.UserPlants.Delete(plantToDelete);
+                await _unitOfWork.CompleteAsync();
+
+                // Remove from the collection to update UI
+                UserPlants.Remove(plantVM);
+                UpdateTasksSummary();
+            }
+        }
+
+        [RelayCommand]
+        private async Task EditPlant(UserPlantViewModel? plantVM)
+        {
+            if (plantVM == null) return;
+            
+            // Re-fetch the full UserPlant entity to ensure all navigation properties are loaded
+            // This is important because the plantVM might not have the full Plant object loaded
+            var userPlantToEdit = await _unitOfWork.UserPlants.GetAllAsync(
+                filter: up => up.Id == plantVM.UserPlantId,
+                include: i => i.Include(up => up.Plant).ThenInclude(p => p.Sections)
+            );
+            
+            _messenger.Send(new ShowAddUserPlantOverlayMessage(userPlantToEdit.FirstOrDefault()));
         }
 
         [RelayCommand]
         private async Task LoadUserPlants()
         {
-            // Assuming a logged-in user with Id = 1 for now
-            var userId = 1; 
+            if (_authenticationService.CurrentUser == null)
+            {
+                ShowEmptyState = true;
+                UserPlants.Clear();
+                UpdateTasksSummary();
+                return;
+            }
+            
+            var userId = _authenticationService.CurrentUser.Id; 
 
             var plants = await _unitOfWork.UserPlants.GetAllAsync(
                 filter: up => up.UserId == userId,

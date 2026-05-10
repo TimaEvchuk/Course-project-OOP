@@ -1,16 +1,15 @@
-using System;
-using System.Collections.ObjectModel;
-using System.Linq;
-using System.Threading.Tasks;
-using System.Windows;
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Plantify.Data;
 using Plantify.Messages;
 using Plantify.Models;
-using Microsoft.EntityFrameworkCore; // For .Include()
-
+using Plantify.Services;
+using System;
+using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading.Tasks;
+using System.Windows;
 
 namespace Plantify.ViewModels
 {
@@ -18,6 +17,7 @@ namespace Plantify.ViewModels
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMessenger _messenger;
+        private readonly AuthenticationService _authenticationService;
 
         [ObservableProperty]
         private ObservableCollection<Plant> _allPlants = new();
@@ -30,12 +30,39 @@ namespace Plantify.ViewModels
         
         [ObservableProperty]
         private string? _location;
-        
-        public AddUserPlantViewModel(IUnitOfWork unitOfWork, IMessenger messenger)
+
+        [ObservableProperty]
+        private UserPlant? _originalUserPlant;
+
+        [ObservableProperty]
+        private bool _isEditMode;
+
+        public string Title => IsEditMode ? "Редактировать растение" : "Добавить растение в сад";
+
+        public AddUserPlantViewModel(IUnitOfWork unitOfWork, IMessenger messenger, AuthenticationService authenticationService)
         {
             _unitOfWork = unitOfWork;
             _messenger = messenger;
-            LoadAllPlantsCommand.Execute(null);
+            _authenticationService = authenticationService;
+        }
+
+        public void Initialize(UserPlant? userPlant)
+        {
+            OriginalUserPlant = userPlant;
+            IsEditMode = userPlant != null;
+
+            if (IsEditMode && OriginalUserPlant != null)
+            {
+                CustomName = OriginalUserPlant.CustomName;
+                Location = OriginalUserPlant.Location;
+            }
+            else
+            {
+                // Reset fields for 'Add' mode
+                CustomName = "";
+                Location = "";
+                SelectedPlant = null;
+            }
         }
 
         [RelayCommand]
@@ -47,6 +74,11 @@ namespace Plantify.ViewModels
             {
                 AllPlants.Add(plant);
             }
+
+            if (IsEditMode && OriginalUserPlant != null)
+            {
+                SelectedPlant = AllPlants.FirstOrDefault(p => p.Id == OriginalUserPlant.PlantId);
+            }
         }
         
         [RelayCommand]
@@ -54,24 +86,43 @@ namespace Plantify.ViewModels
         {
             if (SelectedPlant == null)
             {
-                MessageBox.Show("Please select a plant.");
+                MessageBox.Show("Пожалуйста, выберите растение.");
                 return;
             }
 
-            var newUserPlant = new UserPlant
+            if (_authenticationService.CurrentUser == null)
             {
-                PlantId = SelectedPlant.Id,
-                UserId = 1, // Hardcoded for now
-                CustomName = CustomName,
-                Location = Location,
-                LastUserWateringDate = DateTime.Today // Corrected property name
-            };
+                MessageBox.Show("Ошибка: пользователь не авторизован.");
+                return;
+            }
 
-            await _unitOfWork.UserPlants.AddAsync(newUserPlant);
+            if (IsEditMode && OriginalUserPlant != null)
+            {
+                // Update existing plant
+                OriginalUserPlant.PlantId = SelectedPlant.Id;
+                OriginalUserPlant.CustomName = CustomName;
+                OriginalUserPlant.Location = Location;
+                
+                _unitOfWork.UserPlants.Update(OriginalUserPlant);
+            }
+            else
+            {
+                // Create new plant
+                var newUserPlant = new UserPlant
+                {
+                    PlantId = SelectedPlant.Id,
+                    UserId = _authenticationService.CurrentUser.Id,
+                    CustomName = CustomName,
+                    Location = Location,
+                    LastUserWateringDate = DateTime.Today
+                };
+                await _unitOfWork.UserPlants.AddAsync(newUserPlant);
+            }
+            
             await _unitOfWork.CompleteAsync();
 
             _messenger.Send(new CloseOverlayMessage());
-            _messenger.Send(new NavigateMessage(typeof(MyGardenViewModel)));
+            _messenger.Send(new NavigateMessage(typeof(MyGardenViewModel))); // Refresh MyGarden view
         }
 
         [RelayCommand]

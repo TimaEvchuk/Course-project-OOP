@@ -4,6 +4,9 @@ using CommunityToolkit.Mvvm.Messaging;
 using Plantify.Messages;
 using Microsoft.Extensions.DependencyInjection;
 using System;
+using Plantify.Models;
+using Plantify.Data;
+using Plantify.Services;
 
 namespace Plantify.ViewModels
 {
@@ -11,7 +14,8 @@ namespace Plantify.ViewModels
         IRecipient<NavigateMessage>, 
         IRecipient<ShowPlantDetailMessage>, 
         IRecipient<CloseOverlayMessage>,
-        IRecipient<UserLoggedInMessage>
+        IRecipient<UserLoggedInMessage>,
+        IRecipient<ShowAddUserPlantOverlayMessage>
     {
         [ObservableProperty]
         private BaseViewModel _currentViewModel = null!;
@@ -63,6 +67,10 @@ namespace Plantify.ViewModels
                 IsLoggedIn = false;
                 Navigate(typeof(LoginViewModel), "Вход");
             }
+            else if (message.Value == typeof(MyGardenViewModel))
+            {
+                Navigate(typeof(MyGardenViewModel), "Мой сад");
+            }
         }
 
         public void Receive(ShowPlantDetailMessage message)
@@ -79,6 +87,23 @@ namespace Plantify.ViewModels
         {
             IsLoggedIn = true;
             Navigate(typeof(MyGardenViewModel), "Мой сад");
+        }
+        
+        public void Receive(ShowAddUserPlantOverlayMessage message)
+        {
+            var addUserPlantVM = _serviceProvider.GetRequiredService<AddUserPlantViewModel>();
+            addUserPlantVM.Initialize(message.InitialUserPlant);
+            
+            OverlayViewModel = addUserPlantVM;
+            
+            // Load data *after* the overlay is set
+            addUserPlantVM.LoadAllPlantsCommand.Execute(null);
+        }
+
+        [RelayCommand]
+        private void ShowAddPlantOverlay()
+        {
+            _messenger.Send(new ShowAddUserPlantOverlayMessage(null));
         }
 
         [RelayCommand]

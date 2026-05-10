@@ -8,6 +8,7 @@ namespace Plantify.ViewModels
     {
         private readonly UserPlant _userPlant;
 
+        public int UserPlantId => _userPlant.Id;
         public PlantViewModel PlantViewModel { get; }
 
         public string Name => _userPlant.CustomName ?? PlantViewModel.Name;
