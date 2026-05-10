@@ -39,6 +39,9 @@
                 <TextBlock Text="Watering Interval (days)" Margin="0,10,0,0"/>
                 <TextBox Text="{Binding PlantWateringInterval, UpdateSourceTrigger=PropertyChanged}"/>
 
+                <TextBlock Text="Fertilizing Interval (days)" Margin="0,10,0,0"/>
+                <TextBox Text="{Binding PlantFertilizingInterval, UpdateSourceTrigger=PropertyChanged}"/>
+
                 <TextBlock Text="Light Requirement" Margin="0,10,0,0"/>
                 <ComboBox ItemsSource="{Binding LightRequirements}" SelectedItem="{Binding PlantLightRequirement}"/>
 
@@ -88,7 +91,8 @@
                 </Border>
                 <Button Content="Выбрать изображение" Command="{Binding SelectImageCommand}" Width="150" HorizontalAlignment="Left" Margin="0,5,0,0"/>
 
-                <StackPanel Orientation="Horizontal" Margin="0,20,0,0">                    <Button Content="Add New" Command="{Binding AddPlantCommand}" Width="100"/>
+                <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
+                    <Button Content="Add New" Command="{Binding AddPlantCommand}" Width="100"/>
                     <Button Content="Update Selected" Command="{Binding UpdatePlantCommand}" Width="120" Margin="10,0,0,0"/>
                     <Button Content="Delete Selected" Command="{Binding DeletePlantCommand}" Width="120" Margin="10,0,0,0" Background="IndianRed"/>
                 </StackPanel>

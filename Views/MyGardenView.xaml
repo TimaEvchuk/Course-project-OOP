@@ -109,11 +109,11 @@
                                         </Grid.ColumnDefinitions>
                                         <StackPanel Grid.Column="0">
                                             <TextBlock Text="💧 Полив" Foreground="Gray" FontSize="12"/>
-                                            <TextBlock Text="Сегодня" FontWeight="Bold" Margin="0,2,0,0"/>
+                                            <TextBlock Text="{Binding NextWateringDue}" FontWeight="Bold" Margin="0,2,0,0"/>
                                         </StackPanel>
                                         <StackPanel Grid.Column="1">
                                             <TextBlock Text="🌱 Удобрение" Foreground="Gray" FontSize="12"/>
-                                            <TextBlock Text="5 дней" FontWeight="Bold" Margin="0,2,0,0"/>
+                                            <TextBlock Text="{Binding NextFertilizingDue}" FontWeight="Bold" Margin="0,2,0,0"/>
                                         </StackPanel>
                                     </Grid>
 

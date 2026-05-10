@@ -35,6 +35,22 @@ namespace Plantify.ViewModels
             }
         }
 
+        public string NextFertilizingDue
+        {
+            get
+            {
+                if (_userPlant.Plant.FertilizingInterval <= 0) return "-"; // Don't show if interval is 0
+
+                var daysSinceFertilized = (DateTime.Today - _userPlant.LastFertilizedDate).Days;
+                var fertilizingInterval = _userPlant.Plant.FertilizingInterval;
+                var daysLeft = fertilizingInterval - daysSinceFertilized;
+
+                if (daysLeft <= 0) return "Сегодня";
+                if (daysLeft == 1) return "Завтра";
+                return $"{daysLeft} дней";
+            }
+        }
+
         [ObservableProperty]
         private bool _isTaskCompletedToday;
 

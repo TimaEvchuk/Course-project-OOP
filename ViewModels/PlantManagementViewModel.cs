@@ -3,7 +3,6 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.Win32;
 using Plantify.Data;
-using Plantify.Messages;
 using Plantify.Models;
 using System;
 using System.Collections.ObjectModel;
@@ -34,6 +33,8 @@ namespace Plantify.ViewModels
         [ObservableProperty]
         private int _plantWateringInterval;
         [ObservableProperty]
+        private int _plantFertilizingInterval;
+        [ObservableProperty]
         private string _plantLightRequirement = "";
         [ObservableProperty]
         private string _plantVariety = "";
@@ -61,6 +62,7 @@ namespace Plantify.ViewModels
             {
                 PlantName = value.Name;
                 PlantWateringInterval = value.WateringInterval;
+                PlantFertilizingInterval = value.FertilizingInterval;
                 PlantLightRequirement = value.LightRequirement;
                 PlantVariety = value.Variety;
                 PlantImagePath = value.ImagePath;
@@ -69,6 +71,7 @@ namespace Plantify.ViewModels
             {
                 PlantName = "";
                 PlantWateringInterval = 0;
+                PlantFertilizingInterval = 0;
                 PlantLightRequirement = LightRequirements.FirstOrDefault() ?? "";
                 PlantVariety = Varieties.FirstOrDefault() ?? "";
                 PlantImagePath = null;
@@ -172,6 +175,7 @@ namespace Plantify.ViewModels
             {
                 Name = PlantName,
                 WateringInterval = PlantWateringInterval,
+                FertilizingInterval = PlantFertilizingInterval,
                 LightRequirement = PlantLightRequirement,
                 Variety = PlantVariety,
                 ImagePath = PlantImagePath
@@ -196,6 +200,7 @@ namespace Plantify.ViewModels
             if (SelectedPlant == null) return;
             SelectedPlant.Name = PlantName;
             SelectedPlant.WateringInterval = PlantWateringInterval;
+            SelectedPlant.FertilizingInterval = PlantFertilizingInterval;
             SelectedPlant.LightRequirement = PlantLightRequirement;
             SelectedPlant.Variety = PlantVariety;
             SelectedPlant.ImagePath = PlantImagePath;

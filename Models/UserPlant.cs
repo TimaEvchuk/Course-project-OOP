@@ -13,5 +13,6 @@ namespace Plantify.Models
         public string? Location { get; set; }
         public string? CustomImagePath { get; set; }
         public DateTime LastUserWateringDate { get; set; }
+        public DateTime LastFertilizedDate { get; set; }
     }
 }

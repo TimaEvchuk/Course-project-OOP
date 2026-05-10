@@ -35,6 +35,12 @@ namespace Plantify.ViewModels
         private string? _location;
 
         [ObservableProperty]
+        private int _daysSinceLastWatering;
+
+        [ObservableProperty]
+        private int _daysSinceLastFertilizing;
+
+        [ObservableProperty]
         private UserPlant? _originalUserPlant;
 
         [ObservableProperty]
@@ -65,13 +71,18 @@ namespace Plantify.ViewModels
                 CustomName = OriginalUserPlant.CustomName;
                 Location = OriginalUserPlant.Location;
                 CustomImagePath = OriginalUserPlant.CustomImagePath;
+                DaysSinceLastWatering = (DateTime.Today - OriginalUserPlant.LastUserWateringDate).Days;
+                DaysSinceLastFertilizing = (DateTime.Today - OriginalUserPlant.LastFertilizedDate).Days;
             }
             else
             {
+                // Reset fields for 'Add' mode
                 CustomName = "";
                 Location = "";
                 CustomImagePath = null;
                 SelectedPlant = null;
+                DaysSinceLastWatering = 0;
+                DaysSinceLastFertilizing = 0;
             }
             // Load image initially
             DisplayImageSource = LoadImage(CustomImagePath ?? OriginalUserPlant?.Plant?.ImagePath);
@@ -101,8 +112,8 @@ namespace Plantify.ViewModels
         [RelayCommand]
         private async Task Save()
         {
-            if (SelectedPlant == null) { /*...*/ return; }
-            if (_authenticationService.CurrentUser == null) { /*...*/ return; }
+            if (SelectedPlant == null) { MessageBox.Show("Пожалуйста, выберите растение."); return; }
+            if (_authenticationService.CurrentUser == null) { MessageBox.Show("Ошибка: пользователь не авторизован."); return; }
 
             if (IsEditMode && OriginalUserPlant != null)
             {
@@ -110,6 +121,8 @@ namespace Plantify.ViewModels
                 OriginalUserPlant.CustomName = CustomName;
                 OriginalUserPlant.Location = Location;
                 OriginalUserPlant.CustomImagePath = CustomImagePath;
+                OriginalUserPlant.LastUserWateringDate = DateTime.Today.AddDays(-DaysSinceLastWatering);
+                OriginalUserPlant.LastFertilizedDate = DateTime.Today.AddDays(-DaysSinceLastFertilizing);
                 
                 _unitOfWork.UserPlants.Update(OriginalUserPlant);
             }
@@ -121,7 +134,8 @@ namespace Plantify.ViewModels
                     UserId = _authenticationService.CurrentUser.Id,
                     CustomName = CustomName,
                     Location = Location,
-                    LastUserWateringDate = DateTime.Today,
+                    LastUserWateringDate = DateTime.Today.AddDays(-DaysSinceLastWatering),
+                    LastFertilizedDate = DateTime.Today.AddDays(-DaysSinceLastFertilizing),
                     CustomImagePath = CustomImagePath
                 };
                 await _unitOfWork.UserPlants.AddAsync(newUserPlant);

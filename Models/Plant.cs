@@ -11,6 +11,7 @@ namespace Plantify.Models
         public string LightRequirement { get; set; } = null!;
         public string Variety { get; set; } = null!;
         public int WateringInterval { get; set; }
+        public int FertilizingInterval { get; set; }
         public string? ImagePath { get; set; }
         public virtual List<PlantSection> Sections { get; set; } = new();
 
