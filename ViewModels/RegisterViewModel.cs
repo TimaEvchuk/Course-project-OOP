@@ -3,7 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Plantify.Data;
 using Plantify.Messages;
-using Plantify.Models;
+using Plantify.Services;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
@@ -12,8 +12,8 @@ namespace Plantify.ViewModels
 {
     public partial class RegisterViewModel : BaseViewModel
     {
-        private readonly IUnitOfWork _unitOfWork;
         private readonly IMessenger _messenger;
+        private readonly AuthenticationService _authenticationService;
 
         [ObservableProperty]
         [NotifyDataErrorInfo]
@@ -46,10 +46,10 @@ namespace Plantify.ViewModels
         [ObservableProperty]
         private string _errorMessage = "";
 
-        public RegisterViewModel(IUnitOfWork unitOfWork, IMessenger messenger)
+        public RegisterViewModel(IMessenger messenger, AuthenticationService authenticationService)
         {
-            _unitOfWork = unitOfWork;
             _messenger = messenger;
+            _authenticationService = authenticationService;
         }
 
         [RelayCommand]
@@ -63,41 +63,16 @@ namespace Plantify.ViewModels
             }
             ErrorMessage = "";
 
-            var existingUserByLogin = (await _unitOfWork.Users.FindAsync(u => u.Login == Login)).FirstOrDefault();
-            if (existingUserByLogin != null)
+            bool success = await _authenticationService.Register(Login, Email, Password);
+
+            if (!success)
             {
-                ErrorMessage = "This login is already taken.";
+                ErrorMessage = "Ошибка регистрации. Возможно, логин или почта уже заняты.";
                 return;
             }
-
-            var existingUserByEmail = (await _unitOfWork.Users.FindAsync(u => u.Email == Email)).FirstOrDefault();
-            if (existingUserByEmail != null)
-            {
-                ErrorMessage = "This email is already registered.";
-                return;
-            }
-
-            var passwordHash = BCrypt.Net.BCrypt.HashPassword(Password);
-
-            var newUser = new User
-            {
-                Login = Login,
-                Email = Email,
-                PasswordHash = passwordHash,
-                IsBlocked = false
-            };
-
-            var clientRole = (await _unitOfWork.Roles.FindAsync(r => r.Name == "Клиент")).FirstOrDefault();
-            if (clientRole != null)
-            {
-                newUser.Roles.Add(clientRole);
-            }
-            // else: handle case where default role is not found, maybe log an error.
-
-            await _unitOfWork.Users.AddAsync(newUser);
-            await _unitOfWork.CompleteAsync();
-
-            GoToLogin();
+            
+            // Successful registration and auto-login
+            _messenger.Send(new UserLoggedInMessage());
         }
 
         [RelayCommand]

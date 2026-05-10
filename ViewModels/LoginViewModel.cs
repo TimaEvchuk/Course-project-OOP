@@ -3,6 +3,7 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Plantify.Data;
 using Plantify.Messages;
+using Plantify.Services;
 using System.ComponentModel.DataAnnotations;
 using System.Linq;
 using System.Threading.Tasks;
@@ -14,32 +15,30 @@ namespace Plantify.ViewModels
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMessenger _messenger;
+        private readonly AuthenticationService _authenticationService;
 
         [ObservableProperty]
         [NotifyDataErrorInfo]
-        [Required(ErrorMessage = "Email is required.")]
-        [EmailAddress(ErrorMessage = "Invalid email format.")]
-        private string _email;
+        [Required(ErrorMessage = "Login is required.")]
+        private string _login = "";
 
         [ObservableProperty]
         [NotifyDataErrorInfo]
         [Required(ErrorMessage = "Password is required.")]
-        private string _password;
+        private string _password = "";
 
         [ObservableProperty]
-        private string _errorMessage;
+        private string _errorMessage = "";
 
-        public LoginViewModel(IUnitOfWork unitOfWork, IMessenger messenger)
+        public LoginViewModel(IUnitOfWork unitOfWork, IMessenger messenger, AuthenticationService authenticationService)
         {
             _unitOfWork = unitOfWork;
             _messenger = messenger;
-            _email = string.Empty;
-            _password = string.Empty;
-            _errorMessage = string.Empty;
+            _authenticationService = authenticationService;
         }
 
         [RelayCommand]
-        private async Task Login()
+        private async Task SignIn()
         {
             ValidateAllProperties();
             if (HasErrors)
@@ -47,25 +46,25 @@ namespace Plantify.ViewModels
                 ErrorMessage = string.Join("\n", GetErrors().Select(e => e.ErrorMessage));
                 return;
             }
-            ErrorMessage = string.Empty;
+            ErrorMessage = "";
 
-            var users = await _unitOfWork.Users.FindAsync(u => u.Email == Email);
-            var user = users.FirstOrDefault();
+            bool success = await _authenticationService.SignIn(Login, Password);
 
-            if (user == null || !BCrypt.Net.BCrypt.Verify(Password, user.PasswordHash))
+            if (!success)
             {
-                ErrorMessage = "Invalid email or password.";
+                ErrorMessage = "Неверный логин или пароль.";
+                return;
+            }
+            
+            if (_authenticationService.CurrentUser != null && _authenticationService.CurrentUser.IsBlocked)
+            {
+                ErrorMessage = "Данный аккаунт заблокирован.";
+                _authenticationService.SignOut(); // Sign out the blocked user
                 return;
             }
 
-            if (user.IsBlocked)
-            {
-                ErrorMessage = "This account has been blocked.";
-                return;
-            }
-
-            // Successful login: Navigate to the dashboard.
-            _messenger.Send(new NavigateMessage(typeof(DashboardViewModel)));
+            // Successful login: Send a message to update the main view
+            _messenger.Send(new UserLoggedInMessage());
         }
 
         [RelayCommand]

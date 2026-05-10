@@ -6,6 +6,9 @@
         xmlns:local="clr-namespace:Plantify"
         mc:Ignorable="d"
         Title="Plantify" Height="720" Width="1280" WindowStartupLocation="CenterScreen">
+    <Window.Resources>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+    </Window.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="240"/>
@@ -13,12 +16,13 @@
         </Grid.ColumnDefinitions>
 
         <!-- Sidebar -->
-        <Border Grid.Column="0" BorderBrush="{StaticResource BrushBorderGray}" BorderThickness="0,0,1,0">
+        <Border Grid.Column="0" BorderBrush="{StaticResource BrushBorderGray}" BorderThickness="0,0,1,0"
+                Visibility="{Binding IsLoggedIn, Converter={StaticResource BooleanToVisibilityConverter}}">
             <StackPanel>
                 <TextBlock Text="Plantify" Style="{StaticResource H1}" Margin="20"/>
                 <StackPanel Margin="0,20,0,0">
-                    <RadioButton Content="Мой сад" Command="{Binding GoToMyGardenCommand}" Style="{StaticResource SidebarRadioButtonStyle}"/>
-                    <RadioButton Content="Энциклопедия" Command="{Binding GoToEncyclopediaCommand}" IsChecked="True" Style="{StaticResource SidebarRadioButtonStyle}"/>
+                    <RadioButton Content="Мой сад" Command="{Binding GoToMyGardenCommand}" IsChecked="True" Style="{StaticResource SidebarRadioButtonStyle}"/>
+                    <RadioButton Content="Энциклопедия" Command="{Binding GoToEncyclopediaCommand}" Style="{StaticResource SidebarRadioButtonStyle}"/>
                     <RadioButton Content="Расписание" Command="{Binding GoToScheduleCommand}" Style="{StaticResource SidebarRadioButtonStyle}"/>
                     <RadioButton Content="Настройки" Command="{Binding GoToSettingsCommand}" Style="{StaticResource SidebarRadioButtonStyle}"/>
                 </StackPanel>
@@ -26,14 +30,26 @@
         </Border>
 
         <!-- Main Content -->
-        <Grid Grid.Column="1">
+        <Grid>
+            <Grid.Style>
+                <Style TargetType="Grid">
+                    <Setter Property="Grid.Column" Value="1"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsLoggedIn}" Value="False">
+                            <Setter Property="Grid.ColumnSpan" Value="2"/>
+                            <Setter Property="Grid.Column" Value="0"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
             <Grid.RowDefinitions>
                 <RowDefinition Height="80"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
             <!-- Header -->
-            <Border Grid.Row="0" BorderBrush="{StaticResource BrushBorderGray}" BorderThickness="0,0,0,1">
+            <Border Grid.Row="0" BorderBrush="{StaticResource BrushBorderGray}" BorderThickness="0,0,0,1"
+                    Visibility="{Binding IsLoggedIn, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <Grid>
                     <TextBlock Text="{Binding CurrentPageTitle}" Style="{StaticResource H1}" VerticalAlignment="Center" Margin="30,0,0,0"/>
                     <Ellipse Fill="{StaticResource BrushForestGreen}" Width="40" Height="40" HorizontalAlignment="Right" Margin="0,0,30,0"/>
@@ -43,7 +59,7 @@
             <!-- Workspace -->
             <ContentControl Grid.Row="1" Content="{Binding CurrentViewModel}" Margin="5"/>
         </Grid>
-        
+
         <!-- Overlay for Modal Dialogs -->
         <Grid Grid.ColumnSpan="2" Background="#80000000">
             <Grid.Style>

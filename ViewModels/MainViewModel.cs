@@ -10,7 +10,8 @@ namespace Plantify.ViewModels
     public partial class MainViewModel : BaseViewModel, 
         IRecipient<NavigateMessage>, 
         IRecipient<ShowPlantDetailMessage>, 
-        IRecipient<CloseOverlayMessage>
+        IRecipient<CloseOverlayMessage>,
+        IRecipient<UserLoggedInMessage>
     {
         [ObservableProperty]
         private BaseViewModel _currentViewModel = null!;
@@ -21,6 +22,9 @@ namespace Plantify.ViewModels
         [ObservableProperty]
         private BaseViewModel? _overlayViewModel;
 
+        [ObservableProperty]
+        private bool _isLoggedIn = false;
+
         private readonly IServiceProvider _serviceProvider;
         private readonly IMessenger _messenger;
 
@@ -29,11 +33,9 @@ namespace Plantify.ViewModels
             _serviceProvider = serviceProvider;
             _messenger = messenger;
             
-            // Register to receive all messages
             _messenger.RegisterAll(this);
 
-            // Set the initial view model
-            Navigate(typeof(MyGardenViewModel), "Мой сад");
+            Navigate(typeof(LoginViewModel), "Вход");
         }
 
         private void Navigate(Type viewModelType, string pageTitle)
@@ -52,7 +54,15 @@ namespace Plantify.ViewModels
             {
                 Navigate(typeof(PlantManagementViewModel), "Управление каталогом");
             }
-            // Add other cases as needed
+            else if (message.Value == typeof(RegisterViewModel))
+            {
+                Navigate(typeof(RegisterViewModel), "Регистрация");
+            }
+            else if (message.Value == typeof(LoginViewModel))
+            {
+                IsLoggedIn = false;
+                Navigate(typeof(LoginViewModel), "Вход");
+            }
         }
 
         public void Receive(ShowPlantDetailMessage message)
@@ -63,6 +73,12 @@ namespace Plantify.ViewModels
         public void Receive(CloseOverlayMessage message)
         {
             OverlayViewModel = null;
+        }
+
+        public void Receive(UserLoggedInMessage message)
+        {
+            IsLoggedIn = true;
+            Navigate(typeof(MyGardenViewModel), "Мой сад");
         }
 
         [RelayCommand]

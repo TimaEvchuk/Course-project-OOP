@@ -5,6 +5,7 @@ using Microsoft.Extensions.Hosting;
 using Plantify.Data;
 using Plantify.Data.Repositories;
 using Plantify.ViewModels;
+using Plantify.Services;
 using CommunityToolkit.Mvvm.Messaging;
 using System.IO;
 using System.Windows;
@@ -41,6 +42,7 @@ namespace Plantify
                     services.AddScoped<IUnitOfWork, UnitOfWork>();
 
                     services.AddSingleton<IMessenger>(WeakReferenceMessenger.Default);
+                    services.AddSingleton<AuthenticationService>();
                     
                     services.AddSingleton<MainViewModel>();
                     services.AddTransient<LoginViewModel>();
