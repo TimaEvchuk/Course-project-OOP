@@ -33,6 +33,7 @@ namespace Plantify.ViewModels
         {
             _userPlant = userPlant;
             PlantViewModel = new PlantViewModel(userPlant.Plant);
+               
         }
     }
 }
