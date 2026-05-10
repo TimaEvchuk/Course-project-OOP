@@ -215,7 +215,7 @@ namespace Plantify.ViewModels
         private async Task DeletePlant()
         {
             if (SelectedPlant == null) return;
-            _unitOfWork.Plants.Remove(SelectedPlant);
+            _unitOfWork.Plants.Delete(SelectedPlant);
             await _unitOfWork.CompleteAsync();
             await LoadPlants();
         }

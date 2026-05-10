@@ -9,6 +9,10 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Images\MyGardenPlaceholder.png" />
+  </ItemGroup>
+
+  <ItemGroup>
     <PackageReference Include="BCrypt.Net-Next" Version="4.1.0" />
     <PackageReference Include="CommunityToolkit.Mvvm" Version="8.4.2" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.SqlServer" Version="9.0.3" />
@@ -28,6 +32,7 @@
   <ItemGroup>
     <Resource Include="Fonts\Inter-Regular.ttf" />
     <Resource Include="Fonts\Lora.ttf" />
+    <Resource Include="Images\MyGardenPlaceholder.png" />
     <Resource Include="Images\placeholder.png" />
   </ItemGroup>
 

@@ -13,9 +13,9 @@ namespace Plantify.Data.Repositories
 
         public async Task<IEnumerable<Plant>> GetAllWithSectionsAsync()
         {
-            return await _context.Plants.Include(p => p.Sections).ToListAsync();
+            return await _appDbContext.Plants.Include(p => p.Sections).ToListAsync();
         }
 
-        private AppDbContext _context => Context as AppDbContext;
+        private AppDbContext _appDbContext => _context as AppDbContext;
     }
 }

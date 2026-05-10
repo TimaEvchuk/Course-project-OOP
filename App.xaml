@@ -40,5 +40,8 @@
             <DataTemplate DataType="{x:Type vm:PlantDetailViewModel}">
                 <views:PlantDetailView/>
             </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:AddUserPlantViewModel}">
+                <views:AddUserPlantView/>
+            </DataTemplate>
             </ResourceDictionary>    </Application.Resources>
 </Application>

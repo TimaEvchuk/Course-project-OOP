@@ -33,7 +33,7 @@ namespace Plantify.ViewModels
             _messenger.RegisterAll(this);
 
             // Set the initial view model
-            Navigate(typeof(EncyclopediaViewModel), "Энциклопедия");
+            Navigate(typeof(MyGardenViewModel), "Мой сад");
         }
 
         private void Navigate(Type viewModelType, string pageTitle)
