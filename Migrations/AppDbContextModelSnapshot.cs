@@ -30,14 +30,6 @@ namespace Plantify.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("Description")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
-                    b.Property<string>("Difficulty")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
-
                     b.Property<string>("ImagePath")
                         .HasColumnType("nvarchar(max)");
 
@@ -49,12 +41,42 @@ namespace Plantify.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
+                    b.Property<string>("Variety")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<int>("WateringInterval")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
                     b.ToTable("Plants");
+                });
+
+            modelBuilder.Entity("Plantify.Models.PlantSection", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Content")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("PlantId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Title")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PlantId");
+
+                    b.ToTable("PlantSections");
                 });
 
             modelBuilder.Entity("Plantify.Models.Role", b =>
@@ -110,6 +132,9 @@ namespace Plantify.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
+                    b.Property<string>("CustomImagePath")
+                        .HasColumnType("nvarchar(max)");
+
                     b.Property<string>("CustomName")
                         .HasColumnType("nvarchar(max)");
 
@@ -149,6 +174,17 @@ namespace Plantify.Migrations
                     b.ToTable("UserRoles", (string)null);
                 });
 
+            modelBuilder.Entity("Plantify.Models.PlantSection", b =>
+                {
+                    b.HasOne("Plantify.Models.Plant", "Plant")
+                        .WithMany("Sections")
+                        .HasForeignKey("PlantId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("Plant");
+                });
+
             modelBuilder.Entity("Plantify.Models.UserPlant", b =>
                 {
                     b.HasOne("Plantify.Models.Plant", "Plant")
@@ -181,6 +217,11 @@ namespace Plantify.Migrations
                         .HasForeignKey("UsersId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
+                });
+
+            modelBuilder.Entity("Plantify.Models.Plant", b =>
+                {
+                    b.Navigation("Sections");
                 });
 
             modelBuilder.Entity("Plantify.Models.User", b =>

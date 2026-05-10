@@ -6,7 +6,8 @@
              xmlns:local="clr-namespace:Plantify.Views"
              xmlns:vm="clr-namespace:Plantify.ViewModels"
              mc:Ignorable="d" 
-             d:DataContext="{d:DesignInstance Type=vm:MyGardenViewModel, IsDesignTimeCreatable=False}">
+             d:DataContext="{d:DesignInstance Type=vm:MyGardenViewModel, IsDesignTimeCreatable=False}"
+             Background="{StaticResource BrushMilkWhite}">
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
@@ -50,9 +51,33 @@
                             <StackPanel>
                                 <!-- Image -->
                                 <Grid Width="170" Height="130" Margin="15,15,15,0">
-                                    <Grid.Background>
-                                        <ImageBrush ImageSource="{Binding PlantViewModel.DisplayImageSource}" Stretch="UniformToFill"/>
-                                    </Grid.Background>
+                                    <Border CornerRadius="8" ClipToBounds="True">
+                                        <Border.Background>
+                                            <ImageBrush ImageSource="{Binding DisplayImageSource}" Stretch="UniformToFill"/>
+                                        </Border.Background>
+                                    </Border>
+                                    
+                                    <!-- Location Pill -->
+                                    <Border HorizontalAlignment="Left" VerticalAlignment="Top" Margin="8" Padding="8,4" CornerRadius="12"
+                                            Background="{StaticResource BrushPureWhite80Transparent}">
+                                        <Border.Style>
+                                            <Style TargetType="Border">
+                                                <Setter Property="Visibility" Value="Visible"/>
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding Location}" Value="{x:Null}">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding Location}" Value="">
+                                                        <Setter Property="Visibility" Value="Collapsed"/>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </Border.Style>
+                                        <TextBlock Text="{Binding Location}" Foreground="{StaticResource BrushDarkGreen}" FontSize="12" FontWeight="SemiBold"/>
+                                    </Border>
+
+                                    <!-- Task Completion CheckBox -->
+                                    <CheckBox HorizontalAlignment="Right" VerticalAlignment="Top" Margin="8" Style="{StaticResource TaskCompletionCheckBoxStyle}"/>
                                 </Grid>
                                 
                                 <!-- Info Section -->
@@ -61,14 +86,14 @@
                                     <TextBlock Text="{Binding Species}" Foreground="Gray" FontSize="12" Margin="0,2,0,10"/>
 
                                     <!-- Characteristics (Example) -->
-                                    <StackPanel Orientation="Horizontal" Margin="0,0,0,15">
-                                        <Border Background="{StaticResource BrushLightGray}" CornerRadius="12" Padding="8,4" Margin="0,0,10,0">
+                                    <StackPanel Orientation="Vertical" Margin="0,0,0,15">
+                                        <Border Background="{StaticResource BrushLightGray}" CornerRadius="12" Padding="8,4" Margin="0,0,0,5" HorizontalAlignment="Left">
                                             <StackPanel Orientation="Horizontal">
                                                 <TextBlock Text="☀️" VerticalAlignment="Center"/>
                                                 <TextBlock Text="{Binding LightRequirement}" FontSize="12" Margin="4,0,0,0" VerticalAlignment="Center"/>
                                             </StackPanel>
                                         </Border>
-                                        <Border Background="{StaticResource BrushLightGray}" CornerRadius="12" Padding="8,4">
+                                        <Border Background="{StaticResource BrushLightGray}" CornerRadius="12" Padding="8,4" HorizontalAlignment="Left">
                                             <StackPanel Orientation="Horizontal">
                                                 <TextBlock Text="🌡️" VerticalAlignment="Center"/>
                                                 <TextBlock Text="20-25°C" FontSize="12" Margin="4,0,0,0" VerticalAlignment="Center"/>

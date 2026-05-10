@@ -70,10 +70,6 @@ namespace Plantify
                 try
                 {
                     var context = services.GetRequiredService<AppDbContext>();
-                    
-                    // Ensure the database is created.
-                    // Note: This is an alternative to `dotnet ef database update`
-                    context.Database.EnsureCreated();
 
                     // Seed roles if they don't exist
                     if (!context.Roles.Any())

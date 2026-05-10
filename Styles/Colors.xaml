@@ -13,6 +13,7 @@
     <Color x:Key="ColorBorderGray">#E0E0E0</Color>
     <Color x:Key="ColorForestGreen20Transparent">#333A6A4D</Color>
     <Color x:Key="ColorLightForestGreen">#578F6B</Color>
+    <Color x:Key="ColorPureWhite80Transparent">#CCFFFFFF</Color>
 
     <!-- Brushes -->
     <SolidColorBrush x:Key="BrushForestGreen" Color="{StaticResource ColorForestGreen}"/>
@@ -26,5 +27,6 @@
     <SolidColorBrush x:Key="BrushLightGray" Color="{StaticResource ColorLightGray}"/>
     <SolidColorBrush x:Key="BrushBorderGray" Color="{StaticResource ColorBorderGray}"/>
     <SolidColorBrush x:Key="BrushForestGreen20Transparent" Color="{StaticResource ColorForestGreen20Transparent}"/>
+    <SolidColorBrush x:Key="BrushPureWhite80Transparent" Color="{StaticResource ColorPureWhite80Transparent}"/>
 
 </ResourceDictionary>

@@ -43,6 +43,8 @@
             <DataTemplate DataType="{x:Type vm:AddUserPlantViewModel}">
                 <views:AddUserPlantView/>
             </DataTemplate>
+
+            <BitmapImage x:Key="ImgPlaceholder" UriSource="pack://application:,,,/Images/placeholder.png" />
             </ResourceDictionary>
             </Application.Resources>
             </Application>

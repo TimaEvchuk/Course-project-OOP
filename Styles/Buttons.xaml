@@ -102,4 +102,37 @@
         </Setter>
     </Style>
 
+    <!-- Style for the task completion CheckBox -->
+    <Style x:Key="TaskCompletionCheckBoxStyle" TargetType="CheckBox">
+        <Setter Property="Width" Value="24"/>
+        <Setter Property="Height" Value="24"/>
+        <Setter Property="Template">
+            <Setter.Value>
+                <ControlTemplate TargetType="CheckBox">
+                    <Grid>
+                        <Border x:Name="CheckBoxBorder"
+                                Background="{StaticResource BrushPureWhite}"
+                                BorderBrush="{StaticResource BrushBaseGray}"
+                                BorderThickness="1"
+                                CornerRadius="4">
+                            <Grid x:Name="CheckMark" Visibility="Collapsed">
+                                <Path Width="10" Height="10" Stretch="Fill"
+                                      Fill="{StaticResource BrushDarkGreen}"
+                                      Data="M9.74,0.012L4.363,5.389L2.247,3.273L0,5.52L4.363,9.883L12,2.247L9.74,0.012z"/>
+                            </Grid>
+                        </Border>
+                    </Grid>
+                    <ControlTemplate.Triggers>
+                        <Trigger Property="IsChecked" Value="True">
+                            <Setter TargetName="CheckMark" Property="Visibility" Value="Visible"/>
+                        </Trigger>
+                        <Trigger Property="IsMouseOver" Value="True">
+                            <Setter TargetName="CheckBoxBorder" Property="BorderBrush" Value="{StaticResource BrushForestGreen}"/>
+                        </Trigger>
+                    </ControlTemplate.Triggers>
+                </ControlTemplate>
+            </Setter.Value>
+        </Setter>
+    </Style>
+
 </ResourceDictionary>

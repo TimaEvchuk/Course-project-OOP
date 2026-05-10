@@ -1,15 +1,18 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.Win32;
 using Plantify.Data;
 using Plantify.Messages;
 using Plantify.Models;
 using Plantify.Services;
 using System;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
+using System.Windows.Media.Imaging;
 
 namespace Plantify.ViewModels
 {
@@ -37,6 +40,12 @@ namespace Plantify.ViewModels
         [ObservableProperty]
         private bool _isEditMode;
 
+        [ObservableProperty]
+        private string? _customImagePath;
+
+        [ObservableProperty]
+        private BitmapImage? _displayImageSource;
+
         public string Title => IsEditMode ? "Редактировать растение" : "Добавить растение в сад";
 
         public AddUserPlantViewModel(IUnitOfWork unitOfWork, IMessenger messenger, AuthenticationService authenticationService)
@@ -55,14 +64,22 @@ namespace Plantify.ViewModels
             {
                 CustomName = OriginalUserPlant.CustomName;
                 Location = OriginalUserPlant.Location;
+                CustomImagePath = OriginalUserPlant.CustomImagePath;
             }
             else
             {
-                // Reset fields for 'Add' mode
                 CustomName = "";
                 Location = "";
+                CustomImagePath = null;
                 SelectedPlant = null;
             }
+            // Load image initially
+            DisplayImageSource = LoadImage(CustomImagePath ?? OriginalUserPlant?.Plant?.ImagePath);
+        }
+
+        partial void OnCustomImagePathChanged(string? value)
+        {
+            DisplayImageSource = LoadImage(value);
         }
 
         [RelayCommand]
@@ -84,37 +101,28 @@ namespace Plantify.ViewModels
         [RelayCommand]
         private async Task Save()
         {
-            if (SelectedPlant == null)
-            {
-                MessageBox.Show("Пожалуйста, выберите растение.");
-                return;
-            }
-
-            if (_authenticationService.CurrentUser == null)
-            {
-                MessageBox.Show("Ошибка: пользователь не авторизован.");
-                return;
-            }
+            if (SelectedPlant == null) { /*...*/ return; }
+            if (_authenticationService.CurrentUser == null) { /*...*/ return; }
 
             if (IsEditMode && OriginalUserPlant != null)
             {
-                // Update existing plant
                 OriginalUserPlant.PlantId = SelectedPlant.Id;
                 OriginalUserPlant.CustomName = CustomName;
                 OriginalUserPlant.Location = Location;
+                OriginalUserPlant.CustomImagePath = CustomImagePath;
                 
                 _unitOfWork.UserPlants.Update(OriginalUserPlant);
             }
             else
             {
-                // Create new plant
                 var newUserPlant = new UserPlant
                 {
                     PlantId = SelectedPlant.Id,
                     UserId = _authenticationService.CurrentUser.Id,
                     CustomName = CustomName,
                     Location = Location,
-                    LastUserWateringDate = DateTime.Today
+                    LastUserWateringDate = DateTime.Today,
+                    CustomImagePath = CustomImagePath
                 };
                 await _unitOfWork.UserPlants.AddAsync(newUserPlant);
             }
@@ -122,13 +130,69 @@ namespace Plantify.ViewModels
             await _unitOfWork.CompleteAsync();
 
             _messenger.Send(new CloseOverlayMessage());
-            _messenger.Send(new NavigateMessage(typeof(MyGardenViewModel))); // Refresh MyGarden view
+            _messenger.Send(new NavigateMessage(typeof(MyGardenViewModel)));
         }
 
         [RelayCommand]
         private void Cancel()
         {
             _messenger.Send(new CloseOverlayMessage());
+        }
+
+        public void ProcessImageFile(string sourcePath)
+        {
+            if (string.IsNullOrEmpty(sourcePath) || !File.Exists(sourcePath)) return;
+            
+            var fileName = Guid.NewGuid() + Path.GetExtension(sourcePath);
+            var targetDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Images", "Plants");
+            
+            Directory.CreateDirectory(targetDirectory);
+            
+            var destinationPath = Path.Combine(targetDirectory, fileName);
+            
+            File.Copy(sourcePath, destinationPath, true);
+            CustomImagePath = Path.Combine("Images/Plants", fileName).Replace('\\', '/');
+        }
+
+        [RelayCommand]
+        private void SelectImage()
+        {
+            var dialog = new OpenFileDialog { Filter = "Image files (*.png;*.jpeg;*.jpg)|*.png;*.jpeg;*.jpg" };
+            if (dialog.ShowDialog() == true)
+            {
+                ProcessImageFile(dialog.FileName);
+            }
+        }
+
+        private BitmapImage? LoadImage(string? imagePath)
+        {
+            string? imageToLoad = null;
+            if (!string.IsNullOrEmpty(imagePath))
+            {
+                string basePath = AppDomain.CurrentDomain.BaseDirectory;
+                string fullPath = Path.Combine(basePath, imagePath);
+                if (File.Exists(fullPath))
+                {
+                    imageToLoad = fullPath;
+                }
+            }
+            
+            if (imageToLoad == null)
+            {
+                imageToLoad = "pack://application:,,,/Images/placeholder.png";
+            }
+
+            try
+            {
+                var bitmap = new BitmapImage();
+                bitmap.BeginInit();
+                bitmap.UriSource = new Uri(imageToLoad, UriKind.RelativeOrAbsolute);
+                bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                bitmap.EndInit();
+                bitmap.Freeze();
+                return bitmap;
+            }
+            catch { return null; }
         }
     }
 }
