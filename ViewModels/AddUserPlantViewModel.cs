@@ -35,10 +35,10 @@ namespace Plantify.ViewModels
         private string? _location;
 
         [ObservableProperty]
-        private int _daysSinceLastWatering;
+        private DateTime _lastWateringDate;
 
         [ObservableProperty]
-        private int _daysSinceLastFertilizing;
+        private DateTime _lastFertilizingDate;
 
         [ObservableProperty]
         private UserPlant? _originalUserPlant;
@@ -72,8 +72,8 @@ namespace Plantify.ViewModels
                 CustomName = OriginalUserPlant.CustomName;
                 Location = OriginalUserPlant.Location;
                 CustomImagePath = OriginalUserPlant.CustomImagePath;
-                DaysSinceLastWatering = (DateTime.Today - OriginalUserPlant.LastUserWateringDate).Days;
-                DaysSinceLastFertilizing = (DateTime.Today - OriginalUserPlant.LastFertilizedDate).Days;
+                LastWateringDate = OriginalUserPlant.LastUserWateringDate;
+                LastFertilizingDate = OriginalUserPlant.LastFertilizedDate;
                 
                 DisplayImageSource = LoadImage(CustomImagePath ?? OriginalUserPlant.Plant?.ImagePath);
             }
@@ -88,8 +88,8 @@ namespace Plantify.ViewModels
                 Location = "";
                 CustomImagePath = message.PlantToPreFill?.ImagePath;
                 SelectedPlant = message.PlantToPreFill;
-                DaysSinceLastWatering = 0;
-                DaysSinceLastFertilizing = 0;
+                LastWateringDate = DateTime.Today;
+                LastFertilizingDate = DateTime.Today;
                 
                 DisplayImageSource = LoadImage(CustomImagePath);
             }
@@ -128,8 +128,8 @@ namespace Plantify.ViewModels
                 OriginalUserPlant.CustomName = CustomName;
                 OriginalUserPlant.Location = Location;
                 OriginalUserPlant.CustomImagePath = CustomImagePath;
-                OriginalUserPlant.LastUserWateringDate = DateTime.Today.AddDays(-DaysSinceLastWatering);
-                OriginalUserPlant.LastFertilizedDate = DateTime.Today.AddDays(-DaysSinceLastFertilizing);
+                OriginalUserPlant.LastUserWateringDate = LastWateringDate; // Corrected from DaysSinceLastWatering
+                OriginalUserPlant.LastFertilizedDate = LastFertilizingDate; // Corrected from DaysSinceLastFertilizing
                 
                 _unitOfWork.UserPlants.Update(OriginalUserPlant);
             }
@@ -141,8 +141,8 @@ namespace Plantify.ViewModels
                     UserId = _authenticationService.CurrentUser.Id,
                     CustomName = CustomName,
                     Location = Location,
-                    LastUserWateringDate = DateTime.Today.AddDays(-DaysSinceLastWatering),
-                    LastFertilizedDate = DateTime.Today.AddDays(-DaysSinceLastFertilizing),
+                    LastUserWateringDate = LastWateringDate, // Corrected from DaysSinceLastWatering
+                    LastFertilizedDate = LastFertilizingDate, // Corrected from DaysSinceLastFertilizing
                     CustomImagePath = CustomImagePath
                 };
                 await _unitOfWork.UserPlants.AddAsync(newUserPlant);

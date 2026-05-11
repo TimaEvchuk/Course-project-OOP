@@ -1,8 +1,8 @@
 using System;
 using System.Globalization;
+using System.Windows;
 using System.Windows.Data;
 using System.Windows.Media;
-using System.Windows;
 
 namespace Plantify.Converters
 {
@@ -10,7 +10,7 @@ namespace Plantify.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            if (value is not string careText)
+            if (value is not int daysLeft)
             {
                 return Brushes.Black; // Default or fallback color
             }
@@ -19,24 +19,15 @@ namespace Plantify.Converters
             var forestGreen = (SolidColorBrush)Application.Current.FindResource("BrushForestGreen");
             var baseGray = (SolidColorBrush)Application.Current.FindResource("BrushBaseGray");
 
-            if (careText.Equals("Сегодня", StringComparison.OrdinalIgnoreCase))
+            if (daysLeft <= 0)
             {
                 return terracotta;
             }
-
-            if (careText.Equals("Завтра", StringComparison.OrdinalIgnoreCase))
+            if (daysLeft >= 1 && daysLeft <= 5)
             {
                 return forestGreen;
             }
             
-            if (careText.EndsWith("дней") && int.TryParse(careText.Split(' ')[0], out int days))
-            {
-                if (days >= 2 && days <= 5)
-                {
-                    return forestGreen;
-                }
-            }
-
             return baseGray;
         }
 

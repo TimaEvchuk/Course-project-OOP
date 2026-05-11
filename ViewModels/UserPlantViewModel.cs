@@ -2,7 +2,6 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using Plantify.Models;
 using System;
 using System.IO;
-using System.Windows;
 using System.Windows.Media.Imaging;
 
 namespace Plantify.ViewModels
@@ -13,7 +12,6 @@ namespace Plantify.ViewModels
 
         public int UserPlantId => _userPlant.Id;
         
-        // Properties directly from UserPlant or its Plant
         public string Name => _userPlant.CustomName ?? _userPlant.Plant.Name;
         public string Species => _userPlant.Plant.Variety;
         public string Location => _userPlant.Location ?? "Не указано";
@@ -21,34 +19,33 @@ namespace Plantify.ViewModels
 
         public BitmapImage? DisplayImageSource { get; private set; }
 
-        public string NextWateringDue
+        public int DaysToNextWatering
         {
             get
             {
-                var daysSinceWatered = (DateTime.Today - _userPlant.LastUserWateringDate).Days;
-                var wateringInterval = _userPlant.Plant.WateringInterval;
-                var daysLeft = wateringInterval - daysSinceWatered;
-
-                if (daysLeft <= 0) return "Сегодня";
-                if (daysLeft == 1) return "Завтра";
-                return $"{daysLeft} дней";
+                var nextWateringDate = _userPlant.LastUserWateringDate.AddDays(_userPlant.Plant.WateringInterval);
+                return (nextWateringDate - DateTime.Today).Days;
+            }
+        }
+        
+        public int DaysToNextFertilizing
+        {
+            get
+            {
+                if (_userPlant.Plant.FertilizingInterval <= 0) return int.MaxValue;
+                var nextFertilizingDate = _userPlant.LastFertilizedDate.AddDays(_userPlant.Plant.FertilizingInterval);
+                return (nextFertilizingDate - DateTime.Today).Days;
             }
         }
 
-        public string NextFertilizingDue
+        public string NextWateringDue => GetFormattedDueDate(DaysToNextWatering, _userPlant.LastUserWateringDate.AddDays(_userPlant.Plant.WateringInterval));
+        public string NextFertilizingDue => _userPlant.Plant.FertilizingInterval <= 0 ? "-" : GetFormattedDueDate(DaysToNextFertilizing, _userPlant.LastFertilizedDate.AddDays(_userPlant.Plant.FertilizingInterval));
+        
+        private string GetFormattedDueDate(int daysLeft, DateTime nextDate)
         {
-            get
-            {
-                if (_userPlant.Plant.FertilizingInterval <= 0) return "-"; // Don't show if interval is 0
-
-                var daysSinceFertilized = (DateTime.Today - _userPlant.LastFertilizedDate).Days;
-                var fertilizingInterval = _userPlant.Plant.FertilizingInterval;
-                var daysLeft = fertilizingInterval - daysSinceFertilized;
-
-                if (daysLeft <= 0) return "Сегодня";
-                if (daysLeft == 1) return "Завтра";
-                return $"{daysLeft} дней";
-            }
+            if (daysLeft <= 0) return "Сегодня";
+            if (daysLeft == 1) return "Завтра";
+            return nextDate.ToString("dd MMMM");
         }
 
         [ObservableProperty]
@@ -78,7 +75,6 @@ namespace Plantify.ViewModels
             
             if (imageToLoad == null)
             {
-                // Fallback to a placeholder if no image is found
                 imageToLoad = "pack://application:,,,/Images/placeholder.png";
             }
 
@@ -89,12 +85,11 @@ namespace Plantify.ViewModels
                 bitmap.UriSource = new Uri(imageToLoad, UriKind.RelativeOrAbsolute);
                 bitmap.CacheOption = BitmapCacheOption.OnLoad;
                 bitmap.EndInit();
-                bitmap.Freeze(); // Important for use in data templates and on different threads
+                bitmap.Freeze(); 
                 return bitmap;
             }
             catch (Exception)
             {
-                // In case of any error, return null or a default placeholder
                 return null; 
             }
         }
