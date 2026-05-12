@@ -81,6 +81,63 @@ namespace Plantify.ViewModels
         }
 
         [RelayCommand]
+        private async Task ConfirmCareAction()
+        {
+            var selectedPlantVMs = UserPlants.Where(p => p.IsTaskCompletedToday).ToList();
+            if (!selectedPlantVMs.Any()) return;
+
+            var notDuePlants = selectedPlantVMs
+                .Where(p => p.DaysToNextWatering > 0 && p.DaysToNextFertilizing > 0)
+                .ToList();
+
+            if (notDuePlants.Any())
+            {
+                var plantNames = string.Join(", ", notDuePlants.Select(p => p.Name).Take(3));
+                if (notDuePlants.Count > 3) plantNames += ", ...";
+                
+                var result = System.Windows.MessageBox.Show(
+                    $"Растениям ({plantNames}) сегодня не требуется уход. Вы действительно хотите отметить их?",
+                    "Предупреждение",
+                    System.Windows.MessageBoxButton.YesNo,
+                    System.Windows.MessageBoxImage.Warning);
+
+                if (result == System.Windows.MessageBoxResult.No)
+                {
+                    return; // User cancelled
+                }
+            }
+
+            var plantIdsToUpdate = selectedPlantVMs.Select(p => p.UserPlantId).ToList();
+            var plantsToUpdate = await _unitOfWork.UserPlants.GetAllAsync(filter: p => plantIdsToUpdate.Contains(p.Id));
+
+            foreach (var plantVM in selectedPlantVMs)
+            {
+                var plantToUpdate = plantsToUpdate.FirstOrDefault(p => p.Id == plantVM.UserPlantId);
+                if (plantToUpdate != null)
+                {
+                    // Update if the task was due OR if the user confirmed the early action
+                    if (plantVM.DaysToNextWatering <= 0 || notDuePlants.Contains(plantVM))
+                    {
+                        plantToUpdate.LastUserWateringDate = DateTime.Today;
+                    }
+                    if (plantVM.DaysToNextFertilizing <= 0 || notDuePlants.Contains(plantVM))
+                    {
+                        plantToUpdate.LastFertilizedDate = DateTime.Today;
+                    }
+                    _unitOfWork.UserPlants.Update(plantToUpdate);
+                }
+            }
+
+            await _unitOfWork.CompleteAsync();
+
+            // Reset UI
+            CancelMassSelection();
+            
+            // Reload plants to show updated dates
+            await LoadUserPlants();
+        }
+
+        [RelayCommand]
         private async Task DeletePlant(UserPlantViewModel? plantVM)
         {
             if (plantVM == null) return;
