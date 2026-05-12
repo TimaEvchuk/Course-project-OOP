@@ -44,6 +44,7 @@ namespace Plantify
 
                     services.AddSingleton<IMessenger>(WeakReferenceMessenger.Default);
                     services.AddSingleton<AuthenticationService>();
+                    services.AddTransient<IDialogService, DialogService>();
                     
                     services.AddSingleton<MainViewModel>();
                     services.AddTransient<LoginViewModel>();

@@ -3,9 +3,12 @@ using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.EntityFrameworkCore;
 using Plantify.Data;
+using Plantify.Dialogs;
 using Plantify.Messages;
 using Plantify.Models;
 using Plantify.Services;
+using System;
+using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
@@ -17,6 +20,7 @@ namespace Plantify.ViewModels
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMessenger _messenger;
         private readonly AuthenticationService _authenticationService;
+        private readonly IDialogService _dialogService;
 
         [ObservableProperty]
         private ObservableCollection<UserPlantViewModel> _userPlants = new();
@@ -30,11 +34,12 @@ namespace Plantify.ViewModels
         [ObservableProperty]
         private bool _isInMassSelectionMode;
 
-        public MyGardenViewModel(IUnitOfWork unitOfWork, IMessenger messenger, AuthenticationService authenticationService)
+        public MyGardenViewModel(IUnitOfWork unitOfWork, IMessenger messenger, AuthenticationService authenticationService, IDialogService dialogService)
         {
             _unitOfWork = unitOfWork;
             _messenger = messenger;
             _authenticationService = authenticationService;
+            _dialogService = dialogService;
             _messenger.Register(this);
             LoadUserPlantsCommand.Execute(null);
         }
@@ -86,68 +91,81 @@ namespace Plantify.ViewModels
             var selectedPlantVMs = UserPlants.Where(p => p.IsTaskCompletedToday).ToList();
             if (!selectedPlantVMs.Any()) return;
 
-            var notDuePlants = selectedPlantVMs
-                .Where(p => p.DaysToNextWatering > 0 && p.DaysToNextFertilizing > 0)
-                .ToList();
+            var dueTodayVMs = selectedPlantVMs.Where(p => p.DaysToNextWatering <= 0 || p.DaysToNextFertilizing <= 0).ToList();
+            var notDueVMs = selectedPlantVMs.Except(dueTodayVMs).ToList();
+            
+            var confirmedForUpdateVMs = new List<UserPlantViewModel>(dueTodayVMs);
+            
+            bool? applyToAllDecision = null;
 
-            if (notDuePlants.Any())
+            foreach (var plantVM in notDueVMs)
             {
-                var plantNames = string.Join(", ", notDuePlants.Select(p => p.Name).Take(3));
-                if (notDuePlants.Count > 3) plantNames += ", ...";
-                
-                var result = System.Windows.MessageBox.Show(
-                    $"Растениям ({plantNames}) сегодня не требуется уход. Вы действительно хотите отметить их?",
-                    "Предупреждение",
-                    System.Windows.MessageBoxButton.YesNo,
-                    System.Windows.MessageBoxImage.Warning);
-
-                if (result == System.Windows.MessageBoxResult.No)
+                bool confirm = false;
+                if (applyToAllDecision.HasValue)
                 {
-                    return; // User cancelled
+                    confirm = applyToAllDecision.Value;
+                }
+                else
+                {
+                    var message = $"Растению '{plantVM.Name}' сегодня не требуется уход. Вы действительно хотите отметить его?";
+                    var result = _dialogService.ShowConfirmationDialog(message);
+                    
+                    confirm = result.Confirmed;
+                    if (result.ApplyToAll)
+                    {
+                        applyToAllDecision = result.Confirmed;
+                    }
+                }
+
+                if (confirm)
+                {
+                    confirmedForUpdateVMs.Add(plantVM);
                 }
             }
-
-            var plantIdsToUpdate = selectedPlantVMs.Select(p => p.UserPlantId).ToList();
-            var plantsToUpdate = await _unitOfWork.UserPlants.GetAllAsync(filter: p => plantIdsToUpdate.Contains(p.Id));
-
-            foreach (var plantVM in selectedPlantVMs)
+            
+            if (confirmedForUpdateVMs.Any())
             {
-                var plantToUpdate = plantsToUpdate.FirstOrDefault(p => p.Id == plantVM.UserPlantId);
-                if (plantToUpdate != null)
-                {
-                    // Update if the task was due OR if the user confirmed the early action
-                    if (plantVM.DaysToNextWatering <= 0 || notDuePlants.Contains(plantVM))
-                    {
-                        plantToUpdate.LastUserWateringDate = DateTime.Today;
-                    }
-                    if (plantVM.DaysToNextFertilizing <= 0 || notDuePlants.Contains(plantVM))
-                    {
-                        plantToUpdate.LastFertilizedDate = DateTime.Today;
-                    }
-                    _unitOfWork.UserPlants.Update(plantToUpdate);
-                }
-            }
+                 var plantIdsToUpdate = confirmedForUpdateVMs.Select(p => p.UserPlantId).ToList();
+                 var plantsToUpdate = await _unitOfWork.UserPlants.GetAllAsync(filter: p => plantIdsToUpdate.Contains(p.Id));
 
-            await _unitOfWork.CompleteAsync();
+                 foreach (var plantVM in confirmedForUpdateVMs)
+                 {
+                     var plantToUpdate = plantsToUpdate.FirstOrDefault(p => p.Id == plantVM.UserPlantId);
+                     if (plantToUpdate != null)
+                     {
+                         if (plantVM.DaysToNextWatering <= 0 || notDueVMs.Contains(plantVM))
+                         {
+                             plantToUpdate.LastUserWateringDate = DateTime.Today;
+                         }
+                         if (plantVM.DaysToNextFertilizing <= 0 || notDueVMs.Contains(plantVM))
+                         {
+                             plantToUpdate.LastFertilizedDate = DateTime.Today;
+                         }
+                         _unitOfWork.UserPlants.Update(plantToUpdate);
+                     }
+                 }
+                 await _unitOfWork.CompleteAsync();
+            }
 
             // Reset UI
             CancelMassSelection();
             
             // Reload plants to show updated dates
-            await LoadUserPlants();
+            if (confirmedForUpdateVMs.Any())
+            {
+                await LoadUserPlants();
+            }
         }
 
         [RelayCommand]
         private async Task DeletePlant(UserPlantViewModel? plantVM)
         {
             if (plantVM == null) return;
-
             var plantToDelete = await _unitOfWork.UserPlants.GetByIdAsync(plantVM.UserPlantId);
             if (plantToDelete != null)
             {
                 _unitOfWork.UserPlants.Delete(plantToDelete);
                 await _unitOfWork.CompleteAsync();
-
                 UserPlants.Remove(plantVM);
                 UpdateTasksSummary();
             }
@@ -157,12 +175,10 @@ namespace Plantify.ViewModels
         private async Task EditPlant(UserPlantViewModel? plantVM)
         {
             if (plantVM == null) return;
-            
             var userPlantToEdit = await _unitOfWork.UserPlants.GetAllAsync(
                 filter: up => up.Id == plantVM.UserPlantId,
                 include: i => i.Include(up => up.Plant).ThenInclude(p => p.Sections)
             );
-            
             _messenger.Send(new ShowAddUserPlantOverlayMessage(userPlantToEdit.FirstOrDefault()));
         }
 
@@ -178,7 +194,6 @@ namespace Plantify.ViewModels
             }
             
             var userId = _authenticationService.CurrentUser.Id; 
-
             var plants = await _unitOfWork.UserPlants.GetAllAsync(
                 filter: up => up.UserId == userId,
                 include: i => i.Include(up => up.Plant).ThenInclude(p => p.Sections)
@@ -187,9 +202,8 @@ namespace Plantify.ViewModels
             UserPlants.Clear();
             foreach (var userPlant in plants.OrderBy(p => p.LastUserWateringDate))
             {
-                UserPlants.Add(new UserPlantViewModel(userPlant, _messenger)); // Pass messenger
+                UserPlants.Add(new UserPlantViewModel(userPlant, _messenger));
             }
-
             UpdateTasksSummary();
         }
 
@@ -209,7 +223,6 @@ namespace Plantify.ViewModels
 
         public void Receive(UserPlantSelectionChangedMessage message)
         {
-            // Recalculate properties that depend on selection
             OnPropertyChanged(nameof(SelectedPlantsCount));
             OnPropertyChanged(nameof(IsAnyPlantSelected));
             UpdateTasksSummary();
