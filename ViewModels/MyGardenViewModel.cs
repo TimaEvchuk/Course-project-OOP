@@ -12,7 +12,7 @@ using System.Threading.Tasks;
 
 namespace Plantify.ViewModels
 {
-    public partial class MyGardenViewModel : BaseViewModel
+    public partial class MyGardenViewModel : BaseViewModel, IRecipient<UserPlantSelectionChangedMessage>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMessenger _messenger;
@@ -27,13 +27,27 @@ namespace Plantify.ViewModels
         [ObservableProperty]
         private bool _showEmptyState;
 
+        [ObservableProperty]
+        private bool _isInMassSelectionMode;
+
         public MyGardenViewModel(IUnitOfWork unitOfWork, IMessenger messenger, AuthenticationService authenticationService)
         {
             _unitOfWork = unitOfWork;
             _messenger = messenger;
             _authenticationService = authenticationService;
+            _messenger.Register(this);
             LoadUserPlantsCommand.Execute(null);
         }
+
+        partial void OnIsInMassSelectionModeChanged(bool value)
+        {
+            UpdateTasksSummary();
+            OnPropertyChanged(nameof(SelectedPlantsCount));
+            OnPropertyChanged(nameof(IsAnyPlantSelected));
+        }
+
+        public int SelectedPlantsCount => UserPlants.Count(p => p.IsTaskCompletedToday);
+        public bool IsAnyPlantSelected => SelectedPlantsCount > 0;
 
         [RelayCommand]
         private void AddPlant()
@@ -42,19 +56,41 @@ namespace Plantify.ViewModels
         }
 
         [RelayCommand]
+        private void MarkAllTasksAsCompleted()
+        {
+            IsInMassSelectionMode = true;
+            foreach (var plantVM in UserPlants)
+            {
+                if (plantVM.DaysToNextWatering <= 0 || plantVM.DaysToNextFertilizing <= 0)
+                {
+                    plantVM.IsTaskCompletedToday = true;
+                }
+            }
+            UpdateTasksSummary();
+        }
+
+        [RelayCommand]
+        private void CancelMassSelection()
+        {
+            IsInMassSelectionMode = false;
+            foreach (var plantVM in UserPlants)
+            {
+                plantVM.IsTaskCompletedToday = false;
+            }
+            UpdateTasksSummary();
+        }
+
+        [RelayCommand]
         private async Task DeletePlant(UserPlantViewModel? plantVM)
         {
             if (plantVM == null) return;
 
-            // Find the entity in the database to delete it.
-            // We need to fetch the original entity to remove it from the context.
             var plantToDelete = await _unitOfWork.UserPlants.GetByIdAsync(plantVM.UserPlantId);
             if (plantToDelete != null)
             {
                 _unitOfWork.UserPlants.Delete(plantToDelete);
                 await _unitOfWork.CompleteAsync();
 
-                // Remove from the collection to update UI
                 UserPlants.Remove(plantVM);
                 UpdateTasksSummary();
             }
@@ -65,8 +101,6 @@ namespace Plantify.ViewModels
         {
             if (plantVM == null) return;
             
-            // Re-fetch the full UserPlant entity to ensure all navigation properties are loaded
-            // This is important because the plantVM might not have the full Plant object loaded
             var userPlantToEdit = await _unitOfWork.UserPlants.GetAllAsync(
                 filter: up => up.Id == plantVM.UserPlantId,
                 include: i => i.Include(up => up.Plant).ThenInclude(p => p.Sections)
@@ -96,7 +130,7 @@ namespace Plantify.ViewModels
             UserPlants.Clear();
             foreach (var userPlant in plants.OrderBy(p => p.LastUserWateringDate))
             {
-                UserPlants.Add(new UserPlantViewModel(userPlant));
+                UserPlants.Add(new UserPlantViewModel(userPlant, _messenger)); // Pass messenger
             }
 
             UpdateTasksSummary();
@@ -104,9 +138,25 @@ namespace Plantify.ViewModels
 
         private void UpdateTasksSummary()
         {
-            int plantsToWater = UserPlants.Count(p => p.NextWateringDue == "Сегодня");
-            TasksSummary = $"Задачи на сегодня: {plantsToWater} растений ждут полива";
+            if (IsInMassSelectionMode)
+            {
+                TasksSummary = $"Выбрано растений: {SelectedPlantsCount}";
+            }
+            else
+            {
+                int plantsToCareToday = UserPlants.Count(p => p.DaysToNextWatering <= 0 || p.DaysToNextFertilizing <= 0);
+                TasksSummary = $"Задачи на сегодня: {plantsToCareToday} растений ждут ухода";
+            }
             ShowEmptyState = !UserPlants.Any();
+        }
+
+        public void Receive(UserPlantSelectionChangedMessage message)
+        {
+            // Recalculate properties that depend on selection
+            OnPropertyChanged(nameof(SelectedPlantsCount));
+            OnPropertyChanged(nameof(IsAnyPlantSelected));
+            UpdateTasksSummary();
+            IsInMassSelectionMode = SelectedPlantsCount > 0;
         }
     }
 }

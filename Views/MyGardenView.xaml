@@ -15,13 +15,64 @@
         </Grid.RowDefinitions>
 
         <!-- Tasks Summary Bar -->
-        <Border Grid.Row="0" Background="{StaticResource BrushPureWhite}" CornerRadius="0" 
-                Padding="10,10,10,10" 
+        <Border Grid.Row="0" 
+                Background="{StaticResource BrushSand}" 
+                BorderBrush="{StaticResource BrushTerracotta}"
+                BorderThickness="0,0,0,1"
+                Padding="20,10" 
                 Margin="0,0,0,20">
-            <Border.Effect>
-                <DropShadowEffect ShadowDepth="2" BlurRadius="10" Color="{StaticResource ColorBaseGray}" Opacity="0.1"/>
-            </Border.Effect>
-            <TextBlock Text="Задачи на сегодня: 0 растений ждут полива" Style="{StaticResource H2}" HorizontalAlignment="Center"/>
+            <Grid>
+                <Grid.ColumnDefinitions>
+                    <ColumnDefinition Width="*"/>
+                    <ColumnDefinition Width="Auto"/>
+                </Grid.ColumnDefinitions>
+
+                <TextBlock Grid.Column="0"
+                           HorizontalAlignment="Left" VerticalAlignment="Center">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock" BasedOn="{StaticResource H2}">
+                            <Setter Property="Text" Value="{Binding TasksSummary}"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsInMassSelectionMode}" Value="True">
+                                    <Setter Property="Text" Value="{Binding TasksSummary}"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+                
+                <Button Grid.Column="1" 
+                        HorizontalAlignment="Right" VerticalAlignment="Center"
+                        Command="{Binding MarkAllTasksAsCompletedCommand}">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource SecondaryButtonStyle}">
+                            <Setter Property="Content" Value="Отметить все"/>
+                            <Setter Property="Visibility" Value="Visible"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsInMassSelectionMode}" Value="True">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+
+                <Button Grid.Column="1" 
+                        HorizontalAlignment="Right" VerticalAlignment="Center"
+                        Command="{Binding CancelMassSelectionCommand}">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource SecondaryButtonStyle}">
+                            <Setter Property="Content" Value="Отменить"/>
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsInMassSelectionMode}" Value="True">
+                                    <Setter Property="Visibility" Value="Visible"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+            </Grid>
         </Border>
 
         <!-- Plant Grid -->
@@ -77,7 +128,9 @@
                                     </Border>
 
                                     <!-- Task Completion CheckBox -->
-                                    <CheckBox HorizontalAlignment="Right" VerticalAlignment="Top" Margin="8" Style="{StaticResource TaskCompletionCheckBoxStyle}"/>
+                                    <CheckBox HorizontalAlignment="Right" VerticalAlignment="Top" Margin="8" 
+                                              Style="{StaticResource TaskCompletionCheckBoxStyle}"
+                                              IsChecked="{Binding IsTaskCompletedToday, Mode=TwoWay}"/>
                                 </Grid>
                                 
                                 <!-- Info Section -->

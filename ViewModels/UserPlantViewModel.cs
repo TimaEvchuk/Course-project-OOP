@@ -1,4 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Messaging;
+using Plantify.Messages;
 using Plantify.Models;
 using System;
 using System.IO;
@@ -51,13 +53,21 @@ namespace Plantify.ViewModels
         [ObservableProperty]
         private bool _isTaskCompletedToday;
 
-        public UserPlantViewModel(UserPlant userPlant)
+        private readonly IMessenger _messenger;
+
+        public UserPlantViewModel(UserPlant userPlant, IMessenger messenger)
         {
             _userPlant = userPlant ?? throw new ArgumentNullException(nameof(userPlant));
+            _messenger = messenger;
             if (userPlant.Plant == null) throw new ArgumentNullException(nameof(userPlant.Plant));
 
             var imagePath = _userPlant.CustomImagePath ?? _userPlant.Plant.ImagePath;
             DisplayImageSource = LoadImage(imagePath);
+        }
+
+        partial void OnIsTaskCompletedTodayChanged(bool value)
+        {
+            _messenger.Send(new UserPlantSelectionChangedMessage(value ? 1 : -1)); // Send message for change
         }
 
         private BitmapImage? LoadImage(string? imagePath)
