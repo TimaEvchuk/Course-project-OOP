@@ -11,6 +11,7 @@
   <ItemGroup>
     <None Remove="Images\icons\bell-active.png" />
     <None Remove="Images\icons\bell-default.png" />
+    <None Remove="Images\icons\calendar.png" />
     <None Remove="Images\MyGardenPlaceholder.png" />
   </ItemGroup>
 
@@ -36,6 +37,7 @@
     <Resource Include="Fonts\Lora.ttf" />
     <Resource Include="Images\icons\bell-active.png" />
     <Resource Include="Images\icons\bell-default.png" />
+    <Resource Include="Images\icons\calendar.png" />
     <Resource Include="Images\MyGardenPlaceholder.png" />
     <Resource Include="Images\placeholder.png" />
   </ItemGroup>

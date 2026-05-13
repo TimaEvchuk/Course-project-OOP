@@ -1,14 +1,12 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
-using Microsoft.Win32;
 using Plantify.Data;
 using Plantify.Messages;
 using Plantify.Models;
 using Plantify.Services;
 using System;
 using System.Collections.ObjectModel;
-using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
@@ -35,6 +33,9 @@ namespace Plantify.ViewModels
         private string? _location;
 
         [ObservableProperty]
+        private string? _description;
+
+        [ObservableProperty]
         private DateTime _lastWateringDate;
 
         [ObservableProperty]
@@ -45,9 +46,6 @@ namespace Plantify.ViewModels
 
         [ObservableProperty]
         private bool _isEditMode;
-
-        [ObservableProperty]
-        private string? _customImagePath;
 
         [ObservableProperty]
         private BitmapImage? _displayImageSource;
@@ -71,11 +69,11 @@ namespace Plantify.ViewModels
 
                 CustomName = OriginalUserPlant.CustomName;
                 Location = OriginalUserPlant.Location;
-                CustomImagePath = OriginalUserPlant.CustomImagePath;
+                Description = OriginalUserPlant.Description;
                 LastWateringDate = OriginalUserPlant.LastUserWateringDate;
                 LastFertilizingDate = OriginalUserPlant.LastFertilizedDate;
                 
-                DisplayImageSource = LoadImage(CustomImagePath ?? OriginalUserPlant.Plant?.ImagePath);
+                DisplayImageSource = LoadImage(OriginalUserPlant.Plant?.ImagePath);
             }
             else
             {
@@ -83,21 +81,23 @@ namespace Plantify.ViewModels
                 OriginalUserPlant = null;
                 IsEditMode = false;
                 
-                // Reset fields for 'Add' mode
                 CustomName = message.PlantToPreFill?.Name ?? "";
                 Location = "";
-                CustomImagePath = message.PlantToPreFill?.ImagePath;
+                Description = "";
                 SelectedPlant = message.PlantToPreFill;
                 LastWateringDate = DateTime.Today;
                 LastFertilizingDate = DateTime.Today;
                 
-                DisplayImageSource = LoadImage(CustomImagePath);
+                DisplayImageSource = LoadImage(message.PlantToPreFill?.ImagePath);
             }
         }
-
-        partial void OnCustomImagePathChanged(string? value)
+        
+        partial void OnSelectedPlantChanged(Plant? value)
         {
-            DisplayImageSource = LoadImage(value);
+            if (!IsEditMode && value != null)
+            {
+                DisplayImageSource = LoadImage(value.ImagePath);
+            }
         }
 
         [RelayCommand]
@@ -125,11 +125,11 @@ namespace Plantify.ViewModels
             if (IsEditMode && OriginalUserPlant != null)
             {
                 OriginalUserPlant.PlantId = SelectedPlant.Id;
-                OriginalUserPlant.CustomName = CustomName;
+                OriginalUserPlant.CustomName = string.IsNullOrWhiteSpace(CustomName) ? SelectedPlant.Name : CustomName;
                 OriginalUserPlant.Location = Location;
-                OriginalUserPlant.CustomImagePath = CustomImagePath;
-                OriginalUserPlant.LastUserWateringDate = LastWateringDate; // Corrected from DaysSinceLastWatering
-                OriginalUserPlant.LastFertilizedDate = LastFertilizingDate; // Corrected from DaysSinceLastFertilizing
+                OriginalUserPlant.Description = Description;
+                OriginalUserPlant.LastUserWateringDate = LastWateringDate;
+                OriginalUserPlant.LastFertilizedDate = LastFertilizingDate;
                 
                 _unitOfWork.UserPlants.Update(OriginalUserPlant);
             }
@@ -139,11 +139,11 @@ namespace Plantify.ViewModels
                 {
                     PlantId = SelectedPlant.Id,
                     UserId = _authenticationService.CurrentUser.Id,
-                    CustomName = CustomName,
+                    CustomName = string.IsNullOrWhiteSpace(CustomName) ? SelectedPlant.Name : CustomName,
                     Location = Location,
-                    LastUserWateringDate = LastWateringDate, // Corrected from DaysSinceLastWatering
-                    LastFertilizedDate = LastFertilizingDate, // Corrected from DaysSinceLastFertilizing
-                    CustomImagePath = CustomImagePath
+                    Description = Description,
+                    LastUserWateringDate = LastWateringDate,
+                    LastFertilizedDate = LastFertilizingDate,
                 };
                 await _unitOfWork.UserPlants.AddAsync(newUserPlant);
             }
@@ -160,39 +160,14 @@ namespace Plantify.ViewModels
             _messenger.Send(new CloseOverlayMessage());
         }
 
-        public void ProcessImageFile(string sourcePath)
-        {
-            if (string.IsNullOrEmpty(sourcePath) || !File.Exists(sourcePath)) return;
-            
-            var fileName = Guid.NewGuid() + Path.GetExtension(sourcePath);
-            var targetDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Images", "Plants");
-            
-            Directory.CreateDirectory(targetDirectory);
-            
-            var destinationPath = Path.Combine(targetDirectory, fileName);
-            
-            File.Copy(sourcePath, destinationPath, true);
-            CustomImagePath = Path.Combine("Images/Plants", fileName).Replace('\\', '/');
-        }
-
-        [RelayCommand]
-        private void SelectImage()
-        {
-            var dialog = new OpenFileDialog { Filter = "Image files (*.png;*.jpeg;*.jpg)|*.png;*.jpeg;*.jpg" };
-            if (dialog.ShowDialog() == true)
-            {
-                ProcessImageFile(dialog.FileName);
-            }
-        }
-
         private BitmapImage? LoadImage(string? imagePath)
         {
             string? imageToLoad = null;
             if (!string.IsNullOrEmpty(imagePath))
             {
                 string basePath = AppDomain.CurrentDomain.BaseDirectory;
-                string fullPath = Path.Combine(basePath, imagePath);
-                if (File.Exists(fullPath))
+                string fullPath = System.IO.Path.Combine(basePath, imagePath);
+                if (System.IO.File.Exists(fullPath))
                 {
                     imageToLoad = fullPath;
                 }

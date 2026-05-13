@@ -167,10 +167,10 @@ namespace Plantify.Migrations
 
                     SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
 
-                    b.Property<string>("CustomImagePath")
+                    b.Property<string>("CustomName")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("CustomName")
+                    b.Property<string>("Description")
                         .HasColumnType("nvarchar(max)");
 
                     b.Property<DateTime>("LastFertilizedDate")

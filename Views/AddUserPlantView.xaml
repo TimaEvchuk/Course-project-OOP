@@ -7,78 +7,134 @@
              xmlns:vm="clr-namespace:Plantify.ViewModels"
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance Type=vm:AddUserPlantViewModel, IsDesignTimeCreatable=False}">
-    <Border Background="{StaticResource BrushPureWhite}" CornerRadius="12" Padding="30" MinWidth="400">
-        <StackPanel>
-            <TextBlock Text="{Binding Title}" Style="{StaticResource H1}" Margin="0,0,0,20"/>
+    <UserControl.Resources>
+        <Style x:Key="FormTextBoxStyle" TargetType="TextBox">
+            <Setter Property="Background" Value="{StaticResource BrushForestGreen20Transparent}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BrushDarkGreen}"/>
+            <Setter Property="Foreground" Value="{StaticResource BrushDarkGreen}"/>
+            <Setter Property="Padding" Value="10,8"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontFamily" Value="{StaticResource FontInter}"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="MinHeight" Value="38"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="TextBox">
+                        <Border x:Name="border"
+                                Background="{TemplateBinding Background}"
+                                BorderBrush="{TemplateBinding BorderBrush}"
+                                BorderThickness="{TemplateBinding BorderThickness}"
+                                CornerRadius="4">
+                            <ScrollViewer x:Name="PART_ContentHost" Padding="{TemplateBinding Padding}"/>
+                        </Border>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
 
-            <TextBlock Text="Выберите растение" Margin="0,10,0,5"/>
-            <ComboBox ItemsSource="{Binding AllPlants}"
-                      SelectedItem="{Binding SelectedPlant}"
-                      DisplayMemberPath="Name"/>
+        <Style x:Key="FormComboBoxStyle" TargetType="ComboBox">
+            <Setter Property="Background" Value="{StaticResource BrushForestGreen20Transparent}"/>
+            <Setter Property="BorderBrush" Value="{StaticResource BrushDarkGreen}"/>
+            <Setter Property="Foreground" Value="{StaticResource BrushDarkGreen}"/>
+            <Setter Property="Padding" Value="10,8"/>
+            <Setter Property="BorderThickness" Value="1"/>
+            <Setter Property="FontFamily" Value="{StaticResource FontInter}"/>
+            <Setter Property="FontWeight" Value="Medium"/>
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="MinHeight" Value="38"/>
+        </Style>
 
-            <TextBlock Text="Имя (необязательно)" Margin="0,10,0,5"/>
-            <TextBox Text="{Binding CustomName, UpdateSourceTrigger=PropertyChanged}"/>
+        <Style x:Key="FormComboBoxItemStyle" TargetType="ComboBoxItem">
+            <Setter Property="Padding" Value="10,8"/>
+            <Style.Triggers>
+                <Trigger Property="IsHighlighted" Value="True">
+                    <Setter Property="Background" Value="{StaticResource BrushForestGreen20Transparent}"/>
+                </Trigger>
+            </Style.Triggers>
+        </Style>
 
-            <TextBlock Text="Местоположение" Margin="0,10,0,5"/>
-            <TextBox Text="{Binding Location, UpdateSourceTrigger=PropertyChanged}"/>
+        <Style x:Key="FormLabelStyle" TargetType="TextBlock">
+            <Setter Property="FontFamily" Value="{StaticResource FontInter}"/>
+            <Setter Property="FontWeight" Value="Bold"/>
+            <Setter Property="FontSize" Value="16"/>
+            <Setter Property="Foreground" Value="{StaticResource BrushDarkGreen}"/>
+            <Setter Property="Margin" Value="0,15,0,5"/>
+        </Style>
 
-            <TextBlock Text="Изображение" Margin="0,15,0,5"/>
-            <Border BorderBrush="{StaticResource BrushBorderGray}" BorderThickness="1" CornerRadius="8" Height="150"
-                    AllowDrop="True" Drop="Border_Drop" DragEnter="Border_DragEnter">
-                <Border.Background>
-                    <ImageBrush ImageSource="{Binding DisplayImageSource, FallbackValue={StaticResource ImgPlaceholder}}" Stretch="UniformToFill"/>
-                </Border.Background>
-                <TextBlock Text="Перетащите изображение сюда или нажмите, чтобы выбрать"
-                           TextWrapping="Wrap" HorizontalAlignment="Center" VerticalAlignment="Center"
-                           Foreground="Gray" TextAlignment="Center">
-                    <TextBlock.Style>
-                        <Style TargetType="TextBlock">
-                            <Setter Property="Visibility" Value="Collapsed"/>
-                            <Style.Triggers>
-                                <DataTrigger Binding="{Binding DisplayImageSource}" Value="{x:Null}">
-                                    <Setter Property="Visibility" Value="Visible"/>
-                                </DataTrigger>
-                            </Style.Triggers>
-                        </Style>
-                    </TextBlock.Style>
-                </TextBlock>
-            </Border>
-            <Button Content="Выбрать файл" Command="{Binding SelectImageCommand}" Style="{StaticResource SecondaryButtonStyle}" Margin="0,5,0,0" HorizontalAlignment="Left"/>
+        <Style x:Key="CloseButtonStyle" TargetType="Button">
+            <Setter Property="Background" Value="Transparent"/>
+            <Setter Property="BorderThickness" Value="0"/>
+            <Setter Property="Cursor" Value="Hand"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="Button">
+                        <Border Background="{TemplateBinding Background}" CornerRadius="15">
+                            <TextBlock x:Name="CloseButtonText" Text="✕" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="24" FontWeight="Bold"
+                                       Foreground="{DynamicResource BrushGray}"/>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="CloseButtonText" Property="Foreground" Value="IndianRed"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+    
+    <Border Background="{StaticResource BrushMilkWhite}" CornerRadius="12" Padding="30" MaxWidth="500">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+                <RowDefinition Height="Auto"/>
+            </Grid.RowDefinitions>
+            
+            <Grid Grid.Row="0" Margin="0,0,0,20">
+                <TextBlock Text="{Binding Title}" Style="{StaticResource H1}" TextWrapping="Wrap"/>
+                <Button Command="{Binding CancelCommand}" Style="{StaticResource CloseButtonStyle}" 
+                        HorizontalAlignment="Right" VerticalAlignment="Top" Width="35" Height="35" Margin="0,-25,-25,0"/>
+            </Grid>
+            
+            <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,0,-20,0" Padding="0,0,20,0" Style="{StaticResource ScrollBarStyle}">
+                <StackPanel>
+                    <TextBlock Text="Выберите растение" Style="{StaticResource FormLabelStyle}"/>
+                    <ComboBox ItemsSource="{Binding AllPlants}"
+                              SelectedItem="{Binding SelectedPlant}"
+                              DisplayMemberPath="Name"
+                              Style="{StaticResource FormComboBoxStyle}"
+                              ItemContainerStyle="{StaticResource FormComboBoxItemStyle}"/>
 
-            <TextBlock Text="Дата последнего полива" Margin="0,15,0,5"/>
-            <DatePicker SelectedDate="{Binding LastWateringDate, UpdateSourceTrigger=PropertyChanged}"/>
+                    <TextBlock Text="Имя (необязательно)" Style="{StaticResource FormLabelStyle}"/>
+                    <TextBox Text="{Binding CustomName, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" Style="{StaticResource FormTextBoxStyle}"/>
 
-            <TextBlock Text="Дата последнего удобрения" Margin="0,10,0,5"/>
-            <DatePicker SelectedDate="{Binding LastFertilizingDate, UpdateSourceTrigger=PropertyChanged}"/>
+                    <TextBlock Text="Местоположение" Style="{StaticResource FormLabelStyle}"/>
+                    <TextBox Text="{Binding Location, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" Style="{StaticResource FormTextBoxStyle}"/>
 
-            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,30,0,0">
+                    <TextBlock Text="Описание" Style="{StaticResource FormLabelStyle}"/>
+                    <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" 
+                             Height="100" 
+                             AcceptsReturn="True" 
+                             TextWrapping="Wrap"
+                             VerticalScrollBarVisibility="Auto"
+                             HorizontalAlignment="Stretch"
+                             Style="{StaticResource FormTextBoxStyle}"/>
+
+                    <TextBlock Text="Дата последнего полива" Style="{StaticResource FormLabelStyle}"/>
+                    <DatePicker SelectedDate="{Binding LastWateringDate, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" />
+
+                    <TextBlock Text="Дата последнего удобрения" Style="{StaticResource FormLabelStyle}"/>
+                    <DatePicker SelectedDate="{Binding LastFertilizingDate, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" />
+                </StackPanel>
+            </ScrollViewer>
+            
+            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,30,0,0">
                 <Button Content="Отмена" Command="{Binding CancelCommand}" Style="{StaticResource SecondaryButtonStyle}"/>
                 <Button Content="Сохранить" Command="{Binding SaveCommand}" Margin="10,0,0,0"
-                        Background="{StaticResource BrushForestGreen}"
-                        Foreground="{StaticResource BrushPureWhite}"
-                        Padding="20,10"
-                        BorderThickness="0">
-                    <Button.Style>
-                        <Style TargetType="Button">
-                            <Setter Property="Cursor" Value="Hand"/>
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="Button">
-                                        <Border x:Name="ButtonBorder" Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
-                                            <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                        </Border>
-                                        <ControlTemplate.Triggers>
-                                            <Trigger Property="IsMouseOver" Value="True">
-                                                <Setter TargetName="ButtonBorder" Property="Background" Value="{StaticResource BrushLightForestGreen}"/>
-                                            </Trigger>
-                                        </ControlTemplate.Triggers>
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                        </Style>
-                    </Button.Style>
-                </Button>
+                        Style="{StaticResource PrimaryActionButtonStyle}"/>
             </StackPanel>
-        </StackPanel>
+        </Grid>
     </Border>
 </UserControl>

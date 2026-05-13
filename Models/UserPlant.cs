@@ -11,7 +11,7 @@ namespace Plantify.Models
         public virtual Plant Plant { get; set; } = null!;
         public string? CustomName { get; set; }
         public string? Location { get; set; }
-        public string? CustomImagePath { get; set; }
+        public string? Description { get; set; }
         public DateTime LastUserWateringDate { get; set; }
         public DateTime LastFertilizedDate { get; set; }
     }

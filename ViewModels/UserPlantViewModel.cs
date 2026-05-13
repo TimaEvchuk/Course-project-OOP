@@ -61,7 +61,7 @@ namespace Plantify.ViewModels
             _messenger = messenger;
             if (userPlant.Plant == null) throw new ArgumentNullException(nameof(userPlant.Plant));
 
-            var imagePath = _userPlant.CustomImagePath ?? _userPlant.Plant.ImagePath;
+            var imagePath = _userPlant.Plant.ImagePath;
             DisplayImageSource = LoadImage(imagePath);
         }
 
