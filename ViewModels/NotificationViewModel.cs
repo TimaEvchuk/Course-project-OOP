@@ -1,51 +1,72 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using Plantify.Data;
 using Plantify.Messages;
+using Plantify.Models;
+using Plantify.Services;
 using System.Collections.ObjectModel;
+using System.Linq;
+using System.Threading.Tasks;
 
 namespace Plantify.ViewModels
 {
     public partial class NotificationViewModel : BaseViewModel
     {
         private readonly IMessenger _messenger;
+        private readonly IUnitOfWork _unitOfWork;
+        private readonly AuthenticationService _authenticationService;
 
         [ObservableProperty]
         private ObservableCollection<NotificationItemViewModel> _notifications = new();
 
-        public NotificationViewModel(IMessenger messenger)
+        public NotificationViewModel(IMessenger messenger, IUnitOfWork unitOfWork, AuthenticationService authenticationService)
         {
             _messenger = messenger;
+            _unitOfWork = unitOfWork;
+            _authenticationService = authenticationService;
+
+            LoadNotificationsCommand.Execute(null);
         }
 
-        public void UpdateNotifications(int wateringCount, int fertilizingCount)
+        [RelayCommand]
+        private async Task LoadNotifications()
         {
-            // For now, we clear and add. In the future, we might want to avoid duplicates.
+            if (_authenticationService.CurrentUser == null) return;
+
+            var notifications = await _unitOfWork.Notifications.GetAllAsync(
+                filter: n => n.UserId == _authenticationService.CurrentUser.Id && !n.IsDismissed,
+                orderBy: q => q.OrderByDescending(n => n.Timestamp)
+                );
+
             Notifications.Clear();
-            if (wateringCount > 0)
+            foreach (var notification in notifications)
             {
-                Notifications.Add(new NotificationItemViewModel($"Требуется полить {wateringCount} растений", RemoveNotification));
-            }
-            if (fertilizingCount > 0)
-            {
-                Notifications.Add(new NotificationItemViewModel($"Требуется удобрить {fertilizingCount} растений", RemoveNotification));
+                Notifications.Add(new NotificationItemViewModel(notification, DismissNotification));
             }
             OnPropertyChanged(nameof(HasNotifications));
         }
 
-        public void AddActionCompletedNotification(string message)
+        public void AddNewNotification(Notification notification)
         {
-            var notification = new NotificationItemViewModel(message, RemoveNotification);
-            Notifications.Insert(0, notification);
+            var newNotificationVm = new NotificationItemViewModel(notification, DismissNotification);
+            Notifications.Insert(0, newNotificationVm);
             OnPropertyChanged(nameof(HasNotifications));
         }
 
-        private void RemoveNotification(NotificationItemViewModel item)
+        private async void DismissNotification(NotificationItemViewModel item)
         {
             if (Notifications.Contains(item))
             {
-                Notifications.Remove(item);
-                OnPropertyChanged(nameof(HasNotifications));
+                var notificationInDb = await _unitOfWork.Notifications.GetByIdAsync(item.NotificationId);
+                if (notificationInDb != null)
+                {
+                    notificationInDb.IsDismissed = true;
+                    _unitOfWork.Notifications.Update(notificationInDb);
+                    await _unitOfWork.CompleteAsync();
+                    Notifications.Remove(item);
+                    OnPropertyChanged(nameof(HasNotifications));
+                }
             }
         }
 

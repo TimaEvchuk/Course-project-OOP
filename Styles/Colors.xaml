@@ -5,6 +5,7 @@
     <Color x:Key="ColorForestGreen">#3A6A4D</Color>
     <Color x:Key="ColorDarkGreen">#1E392A</Color>
     <Color x:Key="ColorSand">#E0CDB3</Color>
+    <Color x:Key="ColorDarkSand">#C0B090</Color>
     <Color x:Key="ColorTerracotta">#D97D54</Color>
     <Color x:Key="ColorMilkWhite">#FDFCF8</Color>
     <Color x:Key="ColorPureWhite">#FFFFFF</Color>
@@ -20,10 +21,12 @@
     <SolidColorBrush x:Key="BrushDarkGreen" Color="{StaticResource ColorDarkGreen}"/>
     <SolidColorBrush x:Key="BrushLightForestGreen" Color="{StaticResource ColorLightForestGreen}"/>
     <SolidColorBrush x:Key="BrushSand" Color="{StaticResource ColorSand}"/>
+    <SolidColorBrush x:Key="BrushDarkSand" Color="{StaticResource ColorDarkSand}"/>
     <SolidColorBrush x:Key="BrushTerracotta" Color="{StaticResource ColorTerracotta}"/>
     <SolidColorBrush x:Key="BrushMilkWhite" Color="{StaticResource ColorMilkWhite}"/>
     <SolidColorBrush x:Key="BrushPureWhite" Color="{StaticResource ColorPureWhite}"/>
     <SolidColorBrush x:Key="BrushBaseGray" Color="{StaticResource ColorBaseGray}"/>
+    <SolidColorBrush x:Key="BrushGray" Color="{StaticResource ColorBaseGray}"/>
     <SolidColorBrush x:Key="BrushLightGray" Color="{StaticResource ColorLightGray}"/>
     <SolidColorBrush x:Key="BrushBorderGray" Color="{StaticResource ColorBorderGray}"/>
     <SolidColorBrush x:Key="BrushForestGreen20Transparent" Color="{StaticResource ColorForestGreen20Transparent}"/>

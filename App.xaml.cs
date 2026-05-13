@@ -40,6 +40,7 @@ namespace Plantify
 
                     services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
                     services.AddScoped<IPlantRepository, PlantRepository>();
+                    services.AddScoped<INotificationRepository, NotificationRepository>();
                     services.AddScoped<IUnitOfWork, UnitOfWork>();
 
                     services.AddSingleton<IMessenger>(WeakReferenceMessenger.Default);
@@ -57,7 +58,10 @@ namespace Plantify
                     services.AddTransient<ScheduleViewModel>();
                     services.AddTransient<SettingsViewModel>();
                     services.AddTransient<PlantDetailViewModel>();
-                    services.AddTransient(s => new NotificationViewModel(s.GetRequiredService<IMessenger>()));
+                    services.AddSingleton(s => new NotificationViewModel(
+                        s.GetRequiredService<IMessenger>(), 
+                        s.GetRequiredService<IUnitOfWork>(),
+                        s.GetRequiredService<AuthenticationService>()));
 
                     services.AddSingleton<MainWindow>();
                 });

@@ -22,6 +22,38 @@ namespace Plantify.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("Plantify.Models.Notification", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<bool>("IsDismissed")
+                        .HasColumnType("bit");
+
+                    b.Property<string>("Message")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime>("Timestamp")
+                        .HasColumnType("datetime2");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("UserId")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("UserId");
+
+                    b.ToTable("Notifications");
+                });
+
             modelBuilder.Entity("Plantify.Models.Plant", b =>
                 {
                     b.Property<int>("Id")
@@ -180,6 +212,17 @@ namespace Plantify.Migrations
                     b.ToTable("UserRoles", (string)null);
                 });
 
+            modelBuilder.Entity("Plantify.Models.Notification", b =>
+                {
+                    b.HasOne("Plantify.Models.User", "User")
+                        .WithMany("Notifications")
+                        .HasForeignKey("UserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("User");
+                });
+
             modelBuilder.Entity("Plantify.Models.PlantSection", b =>
                 {
                     b.HasOne("Plantify.Models.Plant", "Plant")
@@ -232,6 +275,8 @@ namespace Plantify.Migrations
 
             modelBuilder.Entity("Plantify.Models.User", b =>
                 {
+                    b.Navigation("Notifications");
+
                     b.Navigation("UserPlants");
                 });
 #pragma warning restore 612, 618

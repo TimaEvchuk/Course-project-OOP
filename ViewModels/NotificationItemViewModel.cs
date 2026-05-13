@@ -1,5 +1,6 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using Plantify.Models;
 using System;
 
 namespace Plantify.ViewModels
@@ -7,14 +8,15 @@ namespace Plantify.ViewModels
     public partial class NotificationItemViewModel : BaseViewModel
     {
         private readonly Action<NotificationItemViewModel> _dismissAction;
+        private readonly Notification _notification;
 
-        public string Text { get; }
-        public DateTime Timestamp { get; }
+        public int NotificationId => _notification.Id;
+        public string Text => _notification.Message;
+        public DateTime Timestamp => _notification.Timestamp;
 
-        public NotificationItemViewModel(string text, Action<NotificationItemViewModel> dismissAction)
+        public NotificationItemViewModel(Notification notification, Action<NotificationItemViewModel> dismissAction)
         {
-            Text = text;
-            Timestamp = DateTime.Now;
+            _notification = notification;
             _dismissAction = dismissAction;
         }
 

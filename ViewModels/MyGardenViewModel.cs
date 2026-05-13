@@ -6,6 +6,7 @@ using Plantify.Data;
 using Plantify.Dialogs;
 using Plantify.Messages;
 using Plantify.Models;
+using Plantify.Models.Enums;
 using Plantify.Services;
 using System;
 using System.Collections.Generic;
@@ -101,6 +102,8 @@ namespace Plantify.ViewModels
 
         private async Task ConfirmCareActionAsync(CareActionType actionType)
         {
+            if (_authenticationService.CurrentUser == null) return;
+
             var selectedPlantVMs = UserPlants.Where(p => p.IsTaskCompletedToday).ToList();
             if (!selectedPlantVMs.Any()) return;
 
@@ -167,7 +170,19 @@ namespace Plantify.ViewModels
 
                 var actionText = actionType == CareActionType.Water ? "полито" : "удобрено";
                 var successMessage = $"Успешно {actionText} {confirmedForUpdateVMs.Count} растений.";
-                _messenger.Send(new ActionCompletedMessage(successMessage));
+                
+                var notification = new Notification
+                {
+                    Message = successMessage,
+                    Timestamp = DateTime.Now,
+                    Type = NotificationType.ActionSuccess,
+                    UserId = _authenticationService.CurrentUser.Id,
+                    IsDismissed = false
+                };
+                await _unitOfWork.Notifications.AddAsync(notification);
+                await _unitOfWork.CompleteAsync();
+                
+                _messenger.Send(new NewNotificationMessage(notification));
             }
 
             // Reset UI
@@ -229,9 +244,55 @@ namespace Plantify.ViewModels
             }
             UpdateTasksSummary();
             
+            await GenerateNeedsCareNotifications();
+        }
+
+        private async Task GenerateNeedsCareNotifications()
+        {
+            if (_authenticationService.CurrentUser == null) return;
+            var userId = _authenticationService.CurrentUser.Id;
+
+            var todayStart = DateTime.Today;
+            var existingTodayNotifications = await _unitOfWork.Notifications.GetAllAsync(
+                filter: n => n.UserId == userId && n.Type == NotificationType.NeedsCare && n.Timestamp >= todayStart);
+
+            if (existingTodayNotifications.Any())
+            {
+                // Already generated for today
+                return;
+            }
+
             int wateringCount = UserPlants.Count(p => p.DaysToNextWatering <= 0);
+            if (wateringCount > 0)
+            {
+                var notification = new Notification
+                {
+                    Message = $"Требуется полить {wateringCount} растений",
+                    Timestamp = DateTime.Now,
+                    Type = NotificationType.NeedsCare,
+                    UserId = userId,
+                    IsDismissed = false
+                };
+                await _unitOfWork.Notifications.AddAsync(notification);
+                await _unitOfWork.CompleteAsync();
+                _messenger.Send(new NewNotificationMessage(notification));
+            }
+
             int fertilizingCount = UserPlants.Count(p => p.DaysToNextFertilizing <= 0);
-            _messenger.Send(new NotificationsUpdatedMessage(wateringCount, fertilizingCount));
+            if (fertilizingCount > 0)
+            {
+                var notification = new Notification
+                {
+                    Message = $"Требуется удобрить {fertilizingCount} растений",
+                    Timestamp = DateTime.Now,
+                    Type = NotificationType.NeedsCare,
+                    UserId = userId,
+                    IsDismissed = false
+                };
+                await _unitOfWork.Notifications.AddAsync(notification);
+                await _unitOfWork.CompleteAsync();
+                _messenger.Send(new NewNotificationMessage(notification));
+            }
         }
 
         private void UpdateTasksSummary()

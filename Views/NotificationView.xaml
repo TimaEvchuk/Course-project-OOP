@@ -5,8 +5,8 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:vm="clr-namespace:Plantify.ViewModels"
              mc:Ignorable="d" 
-             d:DataContext="{d:DesignInstance Type=vm:NotificationViewModel, IsDesignTimeCreatable=True}"
-             Width="320" MaxHeight="400">
+             d:DataContext="{d:DesignInstance Type=vm:NotificationViewModel, IsDesignTimeCreatable=False}"
+             Width="320" MaxHeight="390">
     <UserControl.Resources>
         <Style x:Key="NotificationCloseButtonStyle" TargetType="Button">
             <Setter Property="Background" Value="Transparent"/>
@@ -32,10 +32,16 @@
             BorderThickness="1"
             CornerRadius="4">
         <Border.Effect>
-            <DropShadowEffect ShadowDepth="2" BlurRadius="10" Color="{StaticResource ColorForestGreen}" Opacity="0.1"/>
+            <DropShadowEffect ShadowDepth="4" BlurRadius="15" Color="{StaticResource ColorForestGreen}" Opacity="0.1"/>
         </Border.Effect>
-        <StackPanel>
-            <Grid Height="40" Margin="15,5,5,5">
+        <Grid>
+            <Grid.RowDefinitions>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
+                <RowDefinition Height="*"/>
+            </Grid.RowDefinitions>
+
+            <Grid Grid.Row="0" Height="40" Margin="15,5,5,5">
                 <TextBlock Text="Уведомления" Style="{StaticResource H2}" VerticalAlignment="Center" HorizontalAlignment="Left"/>
                 <Button Command="{Binding CloseCommand}"
                         HorizontalAlignment="Right" 
@@ -58,11 +64,11 @@
                 </Button>
             </Grid>
             
-            <Border BorderBrush="{StaticResource BrushBorderGray}" BorderThickness="0,1,0,0"
+            <Border Grid.Row="1" BorderBrush="{StaticResource BrushBorderGray}" BorderThickness="0,1,0,0"
                     Visibility="{Binding HasNotifications, Converter={StaticResource BooleanToVisibilityConverter}, FallbackValue=Collapsed}"/>
 
-            <TextBlock Text="Новых уведомлений нет" 
-                       HorizontalAlignment="Center" 
+            <TextBlock Grid.Row="2" Text="Новых уведомлений нет" 
+                       HorizontalAlignment="Center" VerticalAlignment="Center"
                        Foreground="Gray"
                        Margin="0,50,0,50">
                 <TextBlock.Style>
@@ -77,9 +83,10 @@
                 </TextBlock.Style>
             </TextBlock>
 
-            <ScrollViewer Style="{DynamicResource ScrollBarStyle}" 
-                          VerticalScrollBarVisibility="Auto">
-                <ItemsControl ItemsSource="{Binding Notifications}" Margin="15,0,15,15">
+            <ScrollViewer Grid.Row="2" Style="{DynamicResource ScrollBarStyle}" 
+                          VerticalScrollBarVisibility="Auto"
+                          Visibility="{Binding HasNotifications, Converter={StaticResource BooleanToVisibilityConverter}}">
+                <ItemsControl ItemsSource="{Binding Notifications}" Margin="15,10,15,15">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <Border Background="White" CornerRadius="4" Margin="0,5" Padding="10">
@@ -101,6 +108,6 @@
                     </ItemsControl.ItemTemplate>
                 </ItemsControl>
             </ScrollViewer>
-        </StackPanel>
+        </Grid>
     </Border>
 </UserControl>

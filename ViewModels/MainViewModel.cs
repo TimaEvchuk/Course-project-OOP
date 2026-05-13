@@ -15,9 +15,8 @@ namespace Plantify.ViewModels
         IRecipient<ShowPlantDetailMessage>, 
         IRecipient<CloseOverlayMessage>,
         IRecipient<UserLoggedInMessage>,
-        IRecipient<NotificationsUpdatedMessage>,
+        IRecipient<NewNotificationMessage>,
         IRecipient<CloseNotificationsPanelMessage>,
-        IRecipient<ActionCompletedMessage>,
         IRecipient<ShowAddUserPlantOverlayMessage>
     {
         [ObservableProperty]
@@ -68,6 +67,8 @@ namespace Plantify.ViewModels
             if (value)
             {
                 HasNewNotifications = false;
+                // Reload notifications when panel is opened to show the most recent state
+                NotificationViewModel.LoadNotificationsCommand.Execute(null);
             }
         }
 
@@ -107,7 +108,6 @@ namespace Plantify.ViewModels
             OverlayViewModel = new PlantDetailViewModel(message.Value, _messenger);
         }
 
-
         public void Receive(CloseOverlayMessage message)
         {
             OverlayViewModel = null;
@@ -118,27 +118,20 @@ namespace Plantify.ViewModels
             IsNotificationsPanelOpen = false;
         }
 
-        public void Receive(ActionCompletedMessage message)
+        public void Receive(NewNotificationMessage message)
         {
-            NotificationViewModel.AddActionCompletedNotification(message.Message);
+            NotificationViewModel.AddNewNotification(message.Notification);
             HasNewNotifications = true;
         }
 
         public void Receive(UserLoggedInMessage message)
         {
             IsLoggedIn = true;
+            // Also load notifications on login
+            NotificationViewModel.LoadNotificationsCommand.Execute(null);
             Navigate(typeof(MyGardenViewModel), "Мой сад");
         }
         
-        public void Receive(NotificationsUpdatedMessage message)
-        {
-            NotificationViewModel.UpdateNotifications(message.WateringCount, message.FertilizingCount);
-            if (NotificationViewModel.HasNotifications)
-            {
-                HasNewNotifications = true;
-            }
-        }
-
         public void Receive(ShowAddUserPlantOverlayMessage message)
         {
             var addUserPlantVM = _serviceProvider.GetRequiredService<AddUserPlantViewModel>();
@@ -146,7 +139,6 @@ namespace Plantify.ViewModels
             
             OverlayViewModel = addUserPlantVM;
             
-            // Load data *after* the overlay is set
             addUserPlantVM.LoadAllPlantsCommand.Execute(null);
         }
 

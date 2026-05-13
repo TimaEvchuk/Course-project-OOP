@@ -78,7 +78,7 @@
         <!-- Plant Grid -->
         <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="30,0,0,0">
             <ScrollViewer.Style>
-                <Style TargetType="ScrollViewer">
+                <Style TargetType="ScrollViewer" BasedOn="{StaticResource ScrollBarStyle}">
                     <Setter Property="Visibility" Value="Visible"/>
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding ShowEmptyState}" Value="True">
@@ -179,7 +179,7 @@
                                                 CommandParameter="{Binding}">
                                             <TextBlock Text="✏️" FontSize="14"/>
                                         </Button>
-                                        <Button Style="{StaticResource SecondaryButtonStyle}" Background="{StaticResource BrushTerracotta}" Padding="15,5" Width="60" Height="30"
+                                        <Button Style="{StaticResource DeletePlantButtonStyle}" Padding="15,5" Width="60" Height="30"
                                                 Command="{Binding DataContext.DeletePlantCommand, RelativeSource={RelativeSource AncestorType=ItemsControl}}"
                                                 CommandParameter="{Binding}">
                                             <TextBlock Text="🗑️" FontSize="14"/>

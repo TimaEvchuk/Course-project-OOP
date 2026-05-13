@@ -14,6 +14,7 @@ namespace Plantify.Data
         public DbSet<Plant> Plants { get; set; }
         public DbSet<PlantSection> PlantSections { get; set; } = null!;
         public DbSet<UserPlant> UserPlants { get; set; }
+        public DbSet<Notification> Notifications { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -36,6 +37,10 @@ namespace Plantify.Data
                 .HasMany<UserPlant>()
                 .WithOne(up => up.Plant)
                 .HasForeignKey(up => up.PlantId);
+            
+            modelBuilder.Entity<Notification>()
+                .Property(n => n.Type)
+                .HasConversion<string>();
         }
     }
 }

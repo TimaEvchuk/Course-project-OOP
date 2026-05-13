@@ -9,6 +9,7 @@ namespace Plantify.Data
         IPlantRepository Plants { get; }
         IRepository<Role> Roles { get; }
         IRepository<UserPlant> UserPlants { get; }
+        INotificationRepository Notifications { get; }
         Task<int> CompleteAsync();
     }
 }
