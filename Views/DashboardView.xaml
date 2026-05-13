@@ -4,15 +4,143 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Plantify.Views"
-             xmlns:vm="clr-namespace:Plantify.ViewModels"
+             xmlns:viewmodels="clr-namespace:Plantify.ViewModels"
              mc:Ignorable="d" 
-             d:DataContext="{d:DesignInstance Type=vm:DashboardViewModel, IsDesignTimeCreatable=False}"
-             d:DesignHeight="450" d:DesignWidth="800">
-    <Grid>
-        <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center">
-            <TextBlock Text="{Binding WelcomeMessage}" FontSize="32" FontWeight="Bold" HorizontalAlignment="Center"/>
-            <Button Content="View Plant Encyclopedia" Command="{Binding GoToEncyclopediaCommand}" Margin="0,20,0,0" Width="220" Height="40" FontSize="16"/>
-            <Button Content="Manage Plants" Command="{Binding GoToPlantManagementCommand}" Margin="0,10,0,0" Width="220" Height="40" FontSize="16"/>
-        </StackPanel>
+             d:DataContext="{d:DesignInstance Type=viewmodels:DashboardViewModel}"
+             d:DesignHeight="600" d:DesignWidth="800">
+    <Grid Margin="30">
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
+
+        <!-- Top Widgets -->
+        <Grid Grid.Row="0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="Auto"/>
+                <ColumnDefinition Width="*"/>
+            </Grid.ColumnDefinitions>
+
+            <!-- Garden Health Widget -->
+            <Border Grid.Column="0"
+                    MinWidth="250"
+                    Padding="20"
+                    Background="{StaticResource BrushMilkWhite}"
+                    BorderBrush="{StaticResource BrushBorderGray}"
+                    BorderThickness="1"
+                    CornerRadius="12">
+                <StackPanel>
+                    <TextBlock Text="Здоровье сада" Style="{StaticResource H2}" Margin="0,0,0,15"/>
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        
+                        <TextBlock Grid.Column="0"
+                                   Text="{Binding GardenHealthPercentage, StringFormat={}{0}%}"
+                                   FontSize="48"
+                                   FontWeight="Bold"
+                                   Foreground="{Binding GardenHealthBrush}"
+                                   VerticalAlignment="Center"/>
+                        
+                        <TextBlock Grid.Column="1"
+                                   Text="{Binding GardenHealthStatusText}"
+                                   FontSize="16"
+                                   Foreground="{StaticResource BrushDarkGreen}"
+                                   VerticalAlignment="Center"
+                                   Margin="15,0,0,0"
+                                   TextWrapping="Wrap"/>
+                    </Grid>
+                </StackPanel>
+            </Border>
+
+            <!-- Task View Selector -->
+            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Right">
+                <RadioButton Content="На сегодня" IsChecked="True" Style="{StaticResource FilterPillRadioButtonStyle}" Margin="0,0,8,0"/>
+                <RadioButton Content="На неделю" IsEnabled="False" Style="{StaticResource FilterPillRadioButtonStyle}" Margin="0,0,8,0"/>
+                <RadioButton Content="На месяц" IsEnabled="False" Style="{StaticResource FilterPillRadioButtonStyle}"/>
+            </StackPanel>
+
+        </Grid>
+        
+        <TextBlock Grid.Row="1" Text="Сводка на сегодня" Style="{StaticResource H2}" Margin="0,30,0,10"/>
+
+        <!-- Task List Area -->
+        <Grid Grid.Row="2">
+            <!-- No Tasks Message -->
+            <TextBlock Text="У вас сейчас нету задач" 
+                       FontSize="20" 
+                       HorizontalAlignment="Center" 
+                       VerticalAlignment="Center" 
+                       Foreground="{StaticResource BrushGray}">
+                <TextBlock.Style>
+                    <Style TargetType="TextBlock">
+                        <Setter Property="Visibility" Value="Collapsed"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ShowNoTasksMessage}" Value="True">
+                                <Setter Property="Visibility" Value="Visible"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </TextBlock.Style>
+            </TextBlock>
+
+            <!-- Task List Placeholder -->
+            <ScrollViewer>
+                <ScrollViewer.Style>
+                    <Style TargetType="ScrollViewer" BasedOn="{StaticResource ScrollBarStyle}">
+                        <Setter Property="Visibility" Value="Visible"/>
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding ShowNoTasksMessage}" Value="True">
+                                <Setter Property="Visibility" Value="Collapsed"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </ScrollViewer.Style>
+                <ItemsControl ItemsSource="{Binding TodaysTasks}">
+                    <ItemsControl.ItemTemplate>
+                        <DataTemplate>
+                            <Border BorderBrush="{StaticResource BrushBorderGray}" BorderThickness="0,0,0,1" Padding="0,15">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+                                    <TextBlock Grid.Column="0" FontWeight="Bold" FontSize="16" Margin="0,0,15,0" VerticalAlignment="Center">
+                                        <TextBlock.Style>
+                                            <Style TargetType="TextBlock">
+                                                <Setter Property="Text" Value="[?]"/> <!-- Default -->
+                                                <Style.Triggers>
+                                                    <DataTrigger Binding="{Binding TaskType}" Value="Полив">
+                                                        <Setter Property="Text" Value="[П]"/>
+                                                        <Setter Property="Foreground">
+                                                            <Setter.Value>
+                                                                <SolidColorBrush Color="#4169E1"/>
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </DataTrigger>
+                                                    <DataTrigger Binding="{Binding TaskType}" Value="Удобрение">
+                                                        <Setter Property="Text" Value="[У]"/>
+                                                        <Setter Property="Foreground">
+                                                            <Setter.Value>
+                                                                <SolidColorBrush Color="#8B4513"/>
+                                                            </Setter.Value>
+                                                        </Setter>
+                                                    </DataTrigger>
+                                                </Style.Triggers>
+                                            </Style>
+                                        </TextBlock.Style>
+                                    </TextBlock>
+                                    <TextBlock Grid.Column="1" Text="{Binding TaskDescription}" FontSize="16" VerticalAlignment="Center"/>
+                                </Grid>
+                            </Border>
+                        </DataTemplate>
+                    </ItemsControl.ItemTemplate>
+                </ItemsControl>
+            </ScrollViewer>
+        </Grid>
+
     </Grid>
 </UserControl>

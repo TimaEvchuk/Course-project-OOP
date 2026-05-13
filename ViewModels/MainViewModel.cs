@@ -161,7 +161,7 @@ namespace Plantify.ViewModels
         private void GoToEncyclopedia() => Navigate(typeof(EncyclopediaViewModel), "Энциклопедия");
 
         [RelayCommand]
-        private void GoToSchedule() => Navigate(typeof(ScheduleViewModel), "Расписание");
+        private void GoToDashboard() => Navigate(typeof(DashboardViewModel), "Дэшборд");
         
         [RelayCommand]
         private void GoToSettings() => Navigate(typeof(PlantManagementViewModel), "Управление каталогом");

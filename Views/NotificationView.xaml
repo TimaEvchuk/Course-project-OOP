@@ -89,7 +89,23 @@
                 <ItemsControl ItemsSource="{Binding Notifications}" Margin="15,10,15,15">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
-                            <Border Background="White" CornerRadius="4" Margin="0,5" Padding="10">
+                            <Border CornerRadius="4" Margin="0,5" Padding="10">
+                                <Border.Style>
+                                    <Style TargetType="Border">
+                                        <Setter Property="Background" Value="{StaticResource BrushLightGray}"/>
+                                        <Setter Property="TextBlock.Foreground" Value="{StaticResource BrushDarkGreen}"/>
+                                        <Style.Triggers>
+                                            <DataTrigger Binding="{Binding Type}" Value="ActionSuccess">
+                                                <Setter Property="Background" Value="{StaticResource BrushForestGreen}"/>
+                                                <Setter Property="TextBlock.Foreground" Value="{StaticResource BrushPureWhite}"/>
+                                            </DataTrigger>
+                                            <DataTrigger Binding="{Binding Type}" Value="NeedsCare">
+                                                <Setter Property="Background" Value="{StaticResource BrushTerracotta}"/>
+                                                <Setter Property="TextBlock.Foreground" Value="{StaticResource BrushPureWhite}"/>
+                                            </DataTrigger>
+                                        </Style.Triggers>
+                                    </Style>
+                                </Border.Style>
                                 <Border.Effect>
                                     <DropShadowEffect ShadowDepth="4" BlurRadius="15" Color="{StaticResource ColorForestGreen}" Opacity="0.1"/>
                                 </Border.Effect>
@@ -99,9 +115,8 @@
                                         <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Column="0" Text="{Binding Text}" TextWrapping="Wrap" VerticalAlignment="Center"
-                                               Foreground="{StaticResource BrushTerracotta}" FontWeight="Medium"/>
-                                    <TextBlock Grid.Column="1" Text="{Binding Timestamp, StringFormat='d MMMM'}" Foreground="Gray" VerticalAlignment="Center" Margin="10,0"/>
+                                    <TextBlock Grid.Column="0" Text="{Binding Text}" TextWrapping="Wrap" VerticalAlignment="Center" FontWeight="Medium"/>
+                                    <TextBlock Grid.Column="1" Text="{Binding Timestamp, StringFormat='d MMMM'}" Foreground="LightGray" VerticalAlignment="Center" Margin="10,0"/>
                                     <Button Grid.Column="2" Command="{Binding DismissCommand}" Style="{StaticResource NotificationCloseButtonStyle}" Width="20" Height="20" VerticalAlignment="Center"/>
                                 </Grid>
                             </Border>

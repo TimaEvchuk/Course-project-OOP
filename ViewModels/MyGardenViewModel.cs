@@ -167,6 +167,7 @@ namespace Plantify.ViewModels
                     }
                 }
                 await _unitOfWork.CompleteAsync();
+                _messenger.Send(new GardenStateChangedMessage());
 
                 var icon = actionType == CareActionType.Water ? "💧" : "🌱";
                 var actionText = actionType == CareActionType.Water ? "полито" : "удобрено";

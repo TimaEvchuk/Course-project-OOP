@@ -40,6 +40,7 @@ namespace Plantify
 
                     services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
                     services.AddScoped<IPlantRepository, PlantRepository>();
+                    services.AddScoped<IUserPlantRepository, UserPlantRepository>();
                     services.AddScoped<INotificationRepository, NotificationRepository>();
                     services.AddScoped<IUnitOfWork, UnitOfWork>();
 
