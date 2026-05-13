@@ -16,6 +16,7 @@
             </ResourceDictionary.MergedDictionaries>
 
             <converters:NextCareActionToBrushConverter x:Key="NextCareActionToBrushConverter"/>
+            <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
 
             <!-- DataTemplates for MainViewModel -->
             <DataTemplate DataType="{x:Type viewmodels:LoginViewModel}">

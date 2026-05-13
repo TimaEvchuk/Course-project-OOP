@@ -15,6 +15,9 @@ namespace Plantify.ViewModels
         IRecipient<ShowPlantDetailMessage>, 
         IRecipient<CloseOverlayMessage>,
         IRecipient<UserLoggedInMessage>,
+        IRecipient<NotificationsUpdatedMessage>,
+        IRecipient<CloseNotificationsPanelMessage>,
+        IRecipient<ActionCompletedMessage>,
         IRecipient<ShowAddUserPlantOverlayMessage>
     {
         [ObservableProperty]
@@ -28,18 +31,44 @@ namespace Plantify.ViewModels
 
         [ObservableProperty]
         private bool _isLoggedIn = false;
+        
+        [ObservableProperty]
+        private bool _isNotificationsPanelOpen;
+
+        [ObservableProperty]
+        private bool _hasNewNotifications;
 
         private readonly IServiceProvider _serviceProvider;
         private readonly IMessenger _messenger;
 
-        public MainViewModel(IServiceProvider serviceProvider, IMessenger messenger)
+        public NotificationViewModel NotificationViewModel { get; }
+
+        public string NotificationIconPath => HasNewNotifications 
+            ? "pack://application:,,,/Images/icons/bell-active.png" 
+            : "pack://application:,,,/Images/icons/bell-default.png";
+
+        public MainViewModel(IServiceProvider serviceProvider, IMessenger messenger, NotificationViewModel notificationViewModel)
         {
             _serviceProvider = serviceProvider;
             _messenger = messenger;
-            
+            NotificationViewModel = notificationViewModel;
+
             _messenger.RegisterAll(this);
 
             Navigate(typeof(LoginViewModel), "Вход");
+        }
+
+        partial void OnHasNewNotificationsChanged(bool value)
+        {
+            OnPropertyChanged(nameof(NotificationIconPath));
+        }
+
+        partial void OnIsNotificationsPanelOpenChanged(bool value)
+        {
+            if (value)
+            {
+                HasNewNotifications = false;
+            }
         }
 
         private void Navigate(Type viewModelType, string pageTitle)
@@ -78,9 +107,21 @@ namespace Plantify.ViewModels
             OverlayViewModel = new PlantDetailViewModel(message.Value, _messenger);
         }
 
+
         public void Receive(CloseOverlayMessage message)
         {
             OverlayViewModel = null;
+        }
+        
+        public void Receive(CloseNotificationsPanelMessage message)
+        {
+            IsNotificationsPanelOpen = false;
+        }
+
+        public void Receive(ActionCompletedMessage message)
+        {
+            NotificationViewModel.AddActionCompletedNotification(message.Message);
+            HasNewNotifications = true;
         }
 
         public void Receive(UserLoggedInMessage message)
@@ -89,6 +130,15 @@ namespace Plantify.ViewModels
             Navigate(typeof(MyGardenViewModel), "Мой сад");
         }
         
+        public void Receive(NotificationsUpdatedMessage message)
+        {
+            NotificationViewModel.UpdateNotifications(message.WateringCount, message.FertilizingCount);
+            if (NotificationViewModel.HasNotifications)
+            {
+                HasNewNotifications = true;
+            }
+        }
+
         public void Receive(ShowAddUserPlantOverlayMessage message)
         {
             var addUserPlantVM = _serviceProvider.GetRequiredService<AddUserPlantViewModel>();
@@ -98,6 +148,12 @@ namespace Plantify.ViewModels
             
             // Load data *after* the overlay is set
             addUserPlantVM.LoadAllPlantsCommand.Execute(null);
+        }
+
+        [RelayCommand]
+        private void ToggleNotificationsPanel()
+        {
+            IsNotificationsPanelOpen = !IsNotificationsPanelOpen;
         }
 
         [RelayCommand]

@@ -4,11 +4,9 @@
         xmlns:d="http://schemas.microsoft.com/expression/blend/2008"
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Plantify"
+        xmlns:views="clr-namespace:Plantify.Views"
         mc:Ignorable="d"
         Title="Plantify" Height="720" Width="1280" WindowStartupLocation="CenterScreen">
-    <Window.Resources>
-        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
-    </Window.Resources>
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="240"/>
@@ -52,41 +50,74 @@
                     Visibility="{Binding IsLoggedIn, Converter={StaticResource BooleanToVisibilityConverter}}">
                 <Grid>
                     <TextBlock Text="{Binding CurrentPageTitle}" Style="{StaticResource H1}" VerticalAlignment="Center" Margin="30,0,0,0"/>
-                    <Button Content="+ Добавить растение"
-                            Command="{Binding ShowAddPlantOverlayCommand}"
-                            HorizontalAlignment="Right"
-                            VerticalAlignment="Center"
-                            Margin="0,0,80,0"
-                            Background="{StaticResource BrushForestGreen}"
-                            Foreground="{StaticResource BrushPureWhite}"
-                            Padding="15,8"
-                            BorderThickness="0">
-                        <Button.Style>
-                            <Style TargetType="Button">
-                                <Setter Property="Cursor" Value="Hand"/>
-                                <Setter Property="Template">
-                                    <Setter.Value>
-                                        <ControlTemplate TargetType="Button">
-                                            <Border x:Name="ButtonBorder" Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
-                                                <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
-                                            </Border>
-                                            <ControlTemplate.Triggers>
-                                                <Trigger Property="IsMouseOver" Value="True">
-                                                    <Setter TargetName="ButtonBorder" Property="Background" Value="{StaticResource BrushLightForestGreen}"/>
-                                                </Trigger>
-                                            </ControlTemplate.Triggers>
-                                        </ControlTemplate>
-                                    </Setter.Value>
-                                </Setter>
-                            </Style>
-                        </Button.Style>
-                    </Button>
-                    <Ellipse Fill="{StaticResource BrushForestGreen}" Width="40" Height="40" HorizontalAlignment="Right" Margin="0,0,30,0"/>
+                    <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,30,0">
+                        <Button Content="+ Добавить растение"
+                                Command="{Binding ShowAddPlantOverlayCommand}"
+                                Background="{StaticResource BrushForestGreen}"
+                                Foreground="{StaticResource BrushPureWhite}"
+                                Padding="15,8"
+                                Margin="0,0,15,0"
+                                BorderThickness="0">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Cursor" Value="Hand"/>
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border x:Name="ButtonBorder" Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter TargetName="ButtonBorder" Property="Background" Value="{StaticResource BrushLightForestGreen}"/>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </Button.Style>
+                        </Button>
+                        
+                        <ToggleButton x:Name="notificationButton"
+                                      IsChecked="{Binding IsNotificationsPanelOpen, Mode=TwoWay}"
+                                      ToolTip="Уведомления">
+                            <ToggleButton.Style>
+                                <Style TargetType="ToggleButton">
+                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Setter Property="BorderThickness" Value="0"/>
+                                    <Setter Property="Cursor" Value="Hand"/>
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="ToggleButton">
+                                                <Border Background="{TemplateBinding Background}" Padding="4">
+                                                    <ContentPresenter/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </ToggleButton.Style>
+                            <Image Source="{Binding NotificationIconPath}" Width="24" Height="24"/>
+                        </ToggleButton>
+
+                        <Ellipse Fill="{StaticResource BrushForestGreen}" Width="40" Height="40" Margin="15,0,0,0"/>
+                    </StackPanel>
                 </Grid>
             </Border>
 
             <!-- Workspace -->
             <ContentControl Grid.Row="1" Content="{Binding CurrentViewModel}" Margin="5"/>
+
+            <Popup IsOpen="{Binding IsNotificationsPanelOpen}"
+                   Placement="Left"
+                   PlacementTarget="{Binding ElementName=notificationButton}"
+                   StaysOpen="False"
+                   AllowsTransparency="True"
+                   VerticalOffset="50"
+                   Margin="0,8,0,0">
+                <views:NotificationView DataContext="{Binding NotificationViewModel}"/>
+            </Popup>
         </Grid>
 
         <!-- Overlay for Modal Dialogs -->

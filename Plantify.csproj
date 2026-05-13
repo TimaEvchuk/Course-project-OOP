@@ -9,6 +9,8 @@
   </PropertyGroup>
 
   <ItemGroup>
+    <None Remove="Images\icons\bell-active.png" />
+    <None Remove="Images\icons\bell-default.png" />
     <None Remove="Images\MyGardenPlaceholder.png" />
   </ItemGroup>
 
@@ -32,6 +34,8 @@
   <ItemGroup>
     <Resource Include="Fonts\Inter-Regular.ttf" />
     <Resource Include="Fonts\Lora.ttf" />
+    <Resource Include="Images\icons\bell-active.png" />
+    <Resource Include="Images\icons\bell-default.png" />
     <Resource Include="Images\MyGardenPlaceholder.png" />
     <Resource Include="Images\placeholder.png" />
   </ItemGroup>

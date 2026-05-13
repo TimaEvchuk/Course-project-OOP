@@ -57,6 +57,7 @@ namespace Plantify
                     services.AddTransient<ScheduleViewModel>();
                     services.AddTransient<SettingsViewModel>();
                     services.AddTransient<PlantDetailViewModel>();
+                    services.AddTransient(s => new NotificationViewModel(s.GetRequiredService<IMessenger>()));
 
                     services.AddSingleton<MainWindow>();
                 });

@@ -34,6 +34,8 @@ namespace Plantify.ViewModels
         [ObservableProperty]
         private bool _isInMassSelectionMode;
 
+        private enum CareActionType { Water, Fertilize }
+
         public MyGardenViewModel(IUnitOfWork unitOfWork, IMessenger messenger, AuthenticationService authenticationService, IDialogService dialogService)
         {
             _unitOfWork = unitOfWork;
@@ -86,16 +88,32 @@ namespace Plantify.ViewModels
         }
 
         [RelayCommand]
-        private async Task ConfirmCareAction()
+        private async Task ConfirmWaterAction()
+        {
+            await ConfirmCareActionAsync(CareActionType.Water);
+        }
+
+        [RelayCommand]
+        private async Task ConfirmFertilizeAction()
+        {
+            await ConfirmCareActionAsync(CareActionType.Fertilize);
+        }
+
+        private async Task ConfirmCareActionAsync(CareActionType actionType)
         {
             var selectedPlantVMs = UserPlants.Where(p => p.IsTaskCompletedToday).ToList();
             if (!selectedPlantVMs.Any()) return;
 
-            var dueTodayVMs = selectedPlantVMs.Where(p => p.DaysToNextWatering <= 0 || p.DaysToNextFertilizing <= 0).ToList();
+            Func<UserPlantViewModel, bool> isDueTodayPredicate = vm => 
+                actionType == CareActionType.Water 
+                ? vm.DaysToNextWatering <= 0 
+                : vm.DaysToNextFertilizing <= 0;
+
+            var dueTodayVMs = selectedPlantVMs.Where(isDueTodayPredicate).ToList();
             var notDueVMs = selectedPlantVMs.Except(dueTodayVMs).ToList();
-            
+
             var confirmedForUpdateVMs = new List<UserPlantViewModel>(dueTodayVMs);
-            
+
             bool? applyToAllDecision = null;
 
             foreach (var plantVM in notDueVMs)
@@ -107,9 +125,10 @@ namespace Plantify.ViewModels
                 }
                 else
                 {
-                    var message = $"Растению '{plantVM.Name}' сегодня не требуется уход. Вы действительно хотите отметить его?";
+                    var actionName = actionType == CareActionType.Water ? "полив" : "удобрение";
+                    var message = $"Растению '{plantVM.Name}' сегодня не требуется {actionName}. Вы действительно хотите отметить его?";
                     var result = _dialogService.ShowConfirmationDialog(message);
-                    
+
                     confirm = result.Confirmed;
                     if (result.ApplyToAll)
                     {
@@ -122,34 +141,38 @@ namespace Plantify.ViewModels
                     confirmedForUpdateVMs.Add(plantVM);
                 }
             }
-            
+
             if (confirmedForUpdateVMs.Any())
             {
-                 var plantIdsToUpdate = confirmedForUpdateVMs.Select(p => p.UserPlantId).ToList();
-                 var plantsToUpdate = await _unitOfWork.UserPlants.GetAllAsync(filter: p => plantIdsToUpdate.Contains(p.Id));
+                var plantIdsToUpdate = confirmedForUpdateVMs.Select(p => p.UserPlantId).ToList();
+                var plantsToUpdate = await _unitOfWork.UserPlants.GetAllAsync(filter: p => plantIdsToUpdate.Contains(p.Id));
 
-                 foreach (var plantVM in confirmedForUpdateVMs)
-                 {
-                     var plantToUpdate = plantsToUpdate.FirstOrDefault(p => p.Id == plantVM.UserPlantId);
-                     if (plantToUpdate != null)
-                     {
-                         if (plantVM.DaysToNextWatering <= 0 || notDueVMs.Contains(plantVM))
-                         {
-                             plantToUpdate.LastUserWateringDate = DateTime.Today;
-                         }
-                         if (plantVM.DaysToNextFertilizing <= 0 || notDueVMs.Contains(plantVM))
-                         {
-                             plantToUpdate.LastFertilizedDate = DateTime.Today;
-                         }
-                         _unitOfWork.UserPlants.Update(plantToUpdate);
-                     }
-                 }
-                 await _unitOfWork.CompleteAsync();
+                foreach (var plantVM in confirmedForUpdateVMs)
+                {
+                    var plantToUpdate = plantsToUpdate.FirstOrDefault(p => p.Id == plantVM.UserPlantId);
+                    if (plantToUpdate != null)
+                    {
+                        if (actionType == CareActionType.Water)
+                        {
+                            plantToUpdate.LastUserWateringDate = DateTime.Today;
+                        }
+                        else
+                        {
+                            plantToUpdate.LastFertilizedDate = DateTime.Today;
+                        }
+                        _unitOfWork.UserPlants.Update(plantToUpdate);
+                    }
+                }
+                await _unitOfWork.CompleteAsync();
+
+                var actionText = actionType == CareActionType.Water ? "полито" : "удобрено";
+                var successMessage = $"Успешно {actionText} {confirmedForUpdateVMs.Count} растений.";
+                _messenger.Send(new ActionCompletedMessage(successMessage));
             }
 
             // Reset UI
             CancelMassSelection();
-            
+
             // Reload plants to show updated dates
             if (confirmedForUpdateVMs.Any())
             {
@@ -205,6 +228,10 @@ namespace Plantify.ViewModels
                 UserPlants.Add(new UserPlantViewModel(userPlant, _messenger));
             }
             UpdateTasksSummary();
+            
+            int wateringCount = UserPlants.Count(p => p.DaysToNextWatering <= 0);
+            int fertilizingCount = UserPlants.Count(p => p.DaysToNextFertilizing <= 0);
+            _messenger.Send(new NotificationsUpdatedMessage(wateringCount, fertilizingCount));
         }
 
         private void UpdateTasksSummary()
