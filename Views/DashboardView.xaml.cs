@@ -7,6 +7,16 @@ namespace Plantify.Views
         public DashboardView()
         {
             InitializeComponent();
+            WeekScrollViewer.PreviewMouseWheel += (s, e) =>
+            {
+                if (e.Handled)
+                {
+                    return;
+                }
+
+                WeekScrollViewer.ScrollToHorizontalOffset(WeekScrollViewer.HorizontalOffset - e.Delta);
+                e.Handled = true;
+            };
         }
     }
 }

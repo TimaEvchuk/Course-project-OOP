@@ -17,6 +17,7 @@
 
             <converters:NextCareActionToBrushConverter x:Key="NextCareActionToBrushConverter"/>
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+            <converters:EnumToBooleanConverter x:Key="EnumToBooleanConverter"/>
 
             <!-- DataTemplates for MainViewModel -->
             <DataTemplate DataType="{x:Type viewmodels:LoginViewModel}">

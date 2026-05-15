@@ -22,16 +22,14 @@
         </Setter>
     </Style>
 
-    <!-- Style for the ScrollBar control itself (the visual track and thumb) -->
     <Style x:Key="CustomScrollBarStyle" TargetType="{x:Type ScrollBar}">
         <Setter Property="SnapsToDevicePixels" Value="True"/>
         <Setter Property="OverridesDefaultStyle" Value="true"/>
-        <Setter Property="Width" Value="8"/>
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ScrollBar}">
                     <Grid>
-                        <Track x:Name="PART_Track" IsDirectionReversed="true">
+                        <Track x:Name="PART_Track" IsDirectionReversed="false">
                             <Track.Thumb>
                                 <Thumb Style="{StaticResource ScrollBarThumbStyle}" />
                             </Track.Thumb>
@@ -40,6 +38,14 @@
                 </ControlTemplate>
             </Setter.Value>
         </Setter>
+        <Style.Triggers>
+            <Trigger Property="Orientation" Value="Horizontal">
+                <Setter Property="Height" Value="8"/>
+            </Trigger>
+            <Trigger Property="Orientation" Value="Vertical">
+                <Setter Property="Width" Value="8"/>
+            </Trigger>
+        </Style.Triggers>
     </Style>
 
     <!-- Style for the ScrollViewer container -->
@@ -48,7 +54,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="{x:Type ScrollViewer}">
-                    <Grid>
+                    <Grid Background="Transparent">
                         <Grid.ColumnDefinitions>
                             <ColumnDefinition Width="*"/>
                             <ColumnDefinition Width="Auto"/>
