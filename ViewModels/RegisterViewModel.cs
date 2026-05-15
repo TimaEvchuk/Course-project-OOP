@@ -72,7 +72,7 @@ namespace Plantify.ViewModels
             }
             
             // Successful registration and auto-login
-            _messenger.Send(new UserLoggedInMessage());
+            _messenger.Send(new UserLoggedInMessage(_authenticationService.CurrentUser!));
         }
 
         [RelayCommand]

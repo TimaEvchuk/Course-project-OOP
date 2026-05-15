@@ -13,6 +13,7 @@
                 <ResourceDictionary Source="Styles/Typography.xaml"/>
                 <ResourceDictionary Source="Styles/Buttons.xaml"/>
                 <ResourceDictionary Source="Styles/ScrollBar.xaml"/>
+                <ResourceDictionary Source="Styles/TextBoxes.xaml"/>
             </ResourceDictionary.MergedDictionaries>
 
             <converters:NextCareActionToBrushConverter x:Key="NextCareActionToBrushConverter"/>
@@ -43,6 +44,9 @@
             </DataTemplate>
             <DataTemplate DataType="{x:Type vm:SettingsViewModel}">
                 <views:SettingsView/>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:AdminPanelViewModel}">
+                <views:AdminPanelView/>
             </DataTemplate>
             <DataTemplate DataType="{x:Type vm:PlantDetailViewModel}">
                 <views:PlantDetailView/>

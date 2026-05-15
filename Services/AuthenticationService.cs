@@ -3,6 +3,7 @@ using System.Threading.Tasks;
 using Plantify.Data;
 using Plantify.Models;
 using BCrypt.Net; // For password hashing
+using Microsoft.EntityFrameworkCore;
 using System.Linq; // For .FirstOrDefault() and .Any()
 
 namespace Plantify.Services
@@ -20,7 +21,10 @@ namespace Plantify.Services
 
         public async Task<bool> SignIn(string login, string password)
         {
-            var user = (await _unitOfWork.Users.FindAsync(u => u.Login == login)).FirstOrDefault();
+            var user = (await _unitOfWork.Users.GetAllAsync(
+                filter: u => u.Login == login,
+                include: q => q.Include(u => u.Roles)))
+                .FirstOrDefault();
 
             if (user != null && BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
             {

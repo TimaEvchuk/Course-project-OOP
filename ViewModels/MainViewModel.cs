@@ -7,6 +7,7 @@ using System;
 using Plantify.Models;
 using Plantify.Data;
 using Plantify.Services;
+using System.Linq;
 
 namespace Plantify.ViewModels
 {
@@ -30,6 +31,12 @@ namespace Plantify.ViewModels
 
         [ObservableProperty]
         private bool _isLoggedIn = false;
+
+        [ObservableProperty]
+        private bool _isAdmin = false;
+
+        [ObservableProperty]
+        private bool _isContentManager = false;
         
         [ObservableProperty]
         private bool _isNotificationsPanelOpen;
@@ -39,6 +46,8 @@ namespace Plantify.ViewModels
 
         private readonly IServiceProvider _serviceProvider;
         private readonly IMessenger _messenger;
+        
+        public User? CurrentUser { get; private set; }
 
         public NotificationViewModel NotificationViewModel { get; }
 
@@ -95,6 +104,9 @@ namespace Plantify.ViewModels
             else if (message.Value == typeof(LoginViewModel))
             {
                 IsLoggedIn = false;
+                CurrentUser = null;
+                IsAdmin = false;
+                IsContentManager = false;
                 Navigate(typeof(LoginViewModel), "Вход");
             }
             else if (message.Value == typeof(MyGardenViewModel))
@@ -126,7 +138,11 @@ namespace Plantify.ViewModels
 
         public void Receive(UserLoggedInMessage message)
         {
+            CurrentUser = message.User;
             IsLoggedIn = true;
+            IsAdmin = CurrentUser.Roles.Any(r => r.Name == "Администратор");
+            IsContentManager = CurrentUser.Roles.Any(r => r.Name == "Контент-менеджер");
+            
             // Also load notifications on login
             NotificationViewModel.LoadNotificationsCommand.Execute(null);
             Navigate(typeof(MyGardenViewModel), "Мой сад");
@@ -162,8 +178,14 @@ namespace Plantify.ViewModels
 
         [RelayCommand]
         private void GoToDashboard() => Navigate(typeof(DashboardViewModel), "Дэшборд");
-        
+
         [RelayCommand]
-        private void GoToSettings() => Navigate(typeof(PlantManagementViewModel), "Управление каталогом");
+        private void GoToAdminPanel() => Navigate(typeof(AdminPanelViewModel), "Админ-панель");
+
+        [RelayCommand]
+        private void GoToContentManagerPanel() => Navigate(typeof(PlantManagementViewModel), "Менеджер-панель");
+
+        [RelayCommand]
+        private void GoToSettings() => Navigate(typeof(SettingsViewModel), "Настройки");
     }
 }

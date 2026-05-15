@@ -64,7 +64,7 @@ namespace Plantify.ViewModels
             }
 
             // Successful login: Send a message to update the main view
-            _messenger.Send(new UserLoggedInMessage());
+            _messenger.Send(new UserLoggedInMessage(_authenticationService.CurrentUser!));
         }
 
         [RelayCommand]

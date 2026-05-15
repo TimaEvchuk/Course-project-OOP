@@ -22,6 +22,17 @@
                     <RadioButton Content="Мой сад" Command="{Binding GoToMyGardenCommand}" IsChecked="True" Style="{StaticResource SidebarRadioButtonStyle}"/>
                     <RadioButton Content="Энциклопедия" Command="{Binding GoToEncyclopediaCommand}" Style="{StaticResource SidebarRadioButtonStyle}"/>
                     <RadioButton Content="Дэшборд" Command="{Binding GoToDashboardCommand}" Style="{StaticResource SidebarRadioButtonStyle}"/>
+                    
+                    <!-- Role-specific panels -->
+                    <RadioButton Content="Админ-панель" 
+                                 Command="{Binding GoToAdminPanelCommand}" 
+                                 Style="{StaticResource SidebarRadioButtonStyle}"
+                                 Visibility="{Binding IsAdmin, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                    <RadioButton Content="Менеджер-панель" 
+                                 Command="{Binding GoToContentManagerPanelCommand}" 
+                                 Style="{StaticResource SidebarRadioButtonStyle}"
+                                 Visibility="{Binding IsContentManager, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                    
                     <RadioButton Content="Настройки" Command="{Binding GoToSettingsCommand}" Style="{StaticResource SidebarRadioButtonStyle}"/>
                 </StackPanel>
             </StackPanel>
