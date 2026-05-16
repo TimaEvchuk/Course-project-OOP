@@ -4,6 +4,6 @@ namespace Plantify.Services
 {
     public interface IDialogService
     {
-        ConfirmationDialogResult ShowConfirmationDialog(string message);
+        ConfirmationDialogResult ShowConfirmationDialog(string message, bool showApplyToAll = false);
     }
 }

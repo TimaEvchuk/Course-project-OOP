@@ -9,15 +9,18 @@ using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Linq;
 using System.Threading.Tasks;
+using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.EntityFrameworkCore;
+using Plantify.Messages;
 
 namespace Plantify.ViewModels
 {
-    public partial class AdminPanelViewModel : BaseViewModel
+    public partial class AdminPanelViewModel : BaseViewModel, IRecipient<AdminUserListChangedMessage>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly AuthenticationService _authenticationService;
         private readonly IDialogService _dialogService;
+        private readonly IMessenger _messenger;
         private List<User> _allUsers = new();
 
         [ObservableProperty]
@@ -65,12 +68,19 @@ namespace Plantify.ViewModels
         public ObservableCollection<User> Users { get; } = new();
         public ObservableCollection<Role> AllRoles { get; } = new();
 
-        public AdminPanelViewModel(IUnitOfWork unitOfWork, AuthenticationService authenticationService, IDialogService dialogService)
+        public AdminPanelViewModel(IUnitOfWork unitOfWork, AuthenticationService authenticationService, IDialogService dialogService, IMessenger messenger)
         {
             _unitOfWork = unitOfWork;
             _authenticationService = authenticationService;
             _dialogService = dialogService;
+            _messenger = messenger;
+            _messenger.Register<AdminUserListChangedMessage>(this);
             _ = Initialize();
+        }
+
+        public void Receive(AdminUserListChangedMessage message)
+        {
+            _ = LoadUsers();
         }
 
         partial void OnSearchTextChanged(string value)
@@ -119,6 +129,12 @@ namespace Plantify.ViewModels
             }
         }
 
+        [RelayCommand]
+        private void ShowAddUserOverlay()
+        {
+            _messenger.Send(new ShowAddUserAdminOverlayMessage());
+        }
+
         [RelayCommand(CanExecute = nameof(CanChangeRole))]
         private async Task ChangeUserRole()
         {
@@ -165,10 +181,9 @@ namespace Plantify.ViewModels
             if (SelectedUser is null) return;
 
             var result = _dialogService.ShowConfirmationDialog(
-                "Удаление пользователя",
                 $"Вы уверены, что хотите безвозвратно удалить пользователя '{SelectedUser.Login}'?");
 
-            if (result == ConfirmationDialogResult.Yes)
+            if (result.Confirmed)
             {
                 var userToDelete = await _unitOfWork.Users.GetByIdAsync(SelectedUser.Id);
                 if (userToDelete != null)

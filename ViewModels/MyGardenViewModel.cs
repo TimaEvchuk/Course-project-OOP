@@ -130,7 +130,7 @@ namespace Plantify.ViewModels
                 {
                     var actionName = actionType == CareActionType.Water ? "полив" : "удобрение";
                     var message = $"Растению '{plantVM.Name}' сегодня не требуется {actionName}. Вы действительно хотите отметить его?";
-                    var result = _dialogService.ShowConfirmationDialog(message);
+                    var result = _dialogService.ShowConfirmationDialog(message, true);
 
                     confirm = result.Confirmed;
                     if (result.ApplyToAll)

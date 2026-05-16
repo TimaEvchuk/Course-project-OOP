@@ -143,7 +143,7 @@
                     </Style.Triggers>
                 </Style>
             </Grid.Style>
-            <ContentControl Content="{Binding OverlayViewModel}" HorizontalAlignment="Center" VerticalAlignment="Center"/>
+            <ContentControl Content="{Binding OverlayViewModel}" HorizontalAlignment="Center" VerticalAlignment="Center" Validation.ErrorTemplate="{x:Null}"/>
         </Grid>
     </Grid>
 </Window>

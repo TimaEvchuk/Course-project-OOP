@@ -18,7 +18,8 @@ namespace Plantify.ViewModels
         IRecipient<UserLoggedInMessage>,
         IRecipient<NewNotificationMessage>,
         IRecipient<CloseNotificationsPanelMessage>,
-        IRecipient<ShowAddUserPlantOverlayMessage>
+        IRecipient<ShowAddUserPlantOverlayMessage>,
+        IRecipient<ShowAddUserAdminOverlayMessage>
     {
         [ObservableProperty]
         private BaseViewModel _currentViewModel = null!;
@@ -156,6 +157,11 @@ namespace Plantify.ViewModels
             OverlayViewModel = addUserPlantVM;
             
             addUserPlantVM.LoadAllPlantsCommand.Execute(null);
+        }
+
+        public void Receive(ShowAddUserAdminOverlayMessage message)
+        {
+            OverlayViewModel = _serviceProvider.GetRequiredService<AddUserViewModel>();
         }
 
         [RelayCommand]

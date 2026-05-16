@@ -6,9 +6,9 @@ namespace Plantify.Services
 {
     public class DialogService : IDialogService
     {
-        public ConfirmationDialogResult ShowConfirmationDialog(string message)
+        public ConfirmationDialogResult ShowConfirmationDialog(string message, bool showApplyToAll = false)
         {
-            var viewModel = new ConfirmationDialogViewModel(message);
+            var viewModel = new ConfirmationDialogViewModel(message, showApplyToAll);
             var dialog = new ConfirmationDialogView
             {
                 DataContext = viewModel

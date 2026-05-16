@@ -12,11 +12,14 @@ namespace Plantify.ViewModels
         [ObservableProperty]
         private bool _applyToAll;
 
+        public bool ShowApplyToAll { get; }
+
         public bool? DialogResult { get; private set; }
 
-        public ConfirmationDialogViewModel(string message)
+        public ConfirmationDialogViewModel(string message, bool showApplyToAll)
         {
             _message = message;
+            ShowApplyToAll = showApplyToAll;
         }
 
         [RelayCommand]

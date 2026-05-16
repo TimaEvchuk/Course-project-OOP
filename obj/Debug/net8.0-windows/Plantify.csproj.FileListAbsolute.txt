@@ -158,9 +158,10 @@ D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\S
 D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Styles\Colors.baml
 D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Styles\ScrollBar.baml
 D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Views\ScheduleView.baml
-D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Views\SettingsView.baml
 D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\MainWindow.g.cs
 D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Views\AddUserPlantView.g.cs
+D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Views\AddUserView.g.cs
+D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Views\AdminPanelView.g.cs
 D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Views\ConfirmationDialogView.g.cs
 D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Views\DashboardView.g.cs
 D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Views\EncyclopediaView.g.cs
@@ -180,6 +181,8 @@ D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\A
 D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\MainWindow.baml
 D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Styles\Typography.baml
 D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Views\AddUserPlantView.baml
+D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Views\AddUserView.baml
+D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Views\AdminPanelView.baml
 D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Views\ConfirmationDialogView.baml
 D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Views\DashboardView.baml
 D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Views\EncyclopediaView.baml
@@ -189,6 +192,7 @@ D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\V
 D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Views\PlantDetailView.baml
 D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Views\PlantManagementView.baml
 D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Views\RegisterView.baml
+D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Views\SettingsView.baml
 D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Plantify.g.resources
 D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Plantify.GeneratedMSBuildEditorConfig.editorconfig
 D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Plantify.AssemblyInfoInputs.cache
@@ -201,6 +205,4 @@ D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\r
 D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Plantify.pdb
 D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Plantify.genruntimeconfig.cache
 D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\ref\Plantify.dll
-D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Views\AdminPanelView.g.cs
-D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Views\AdminPanelView.baml
 D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Styles\TextBoxes.baml

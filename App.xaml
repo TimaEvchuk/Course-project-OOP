@@ -19,6 +19,7 @@
             <converters:NextCareActionToBrushConverter x:Key="NextCareActionToBrushConverter"/>
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
             <converters:EnumToBooleanConverter x:Key="EnumToBooleanConverter"/>
+            <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
 
             <!-- DataTemplates for MainViewModel -->
             <DataTemplate DataType="{x:Type viewmodels:LoginViewModel}">
@@ -54,6 +55,14 @@
             <DataTemplate DataType="{x:Type vm:AddUserPlantViewModel}">
                 <views:AddUserPlantView/>
             </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:AddUserViewModel}">
+                <views:AddUserView/>
+            </DataTemplate>
+
+            <!-- Global Effects -->
+            <DropShadowEffect x:Key="Dp16Shadow" 
+                              ShadowDepth="8" BlurRadius="24" 
+                              Color="{StaticResource ColorForestGreen}" Opacity="0.15"/>
 
             <BitmapImage x:Key="ImgPlaceholder" UriSource="pack://application:,,,/Images/placeholder.png" />
         </ResourceDictionary>

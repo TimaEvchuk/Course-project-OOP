@@ -21,13 +21,12 @@
                         <ScrollViewer x:Name="PART_ContentHost" 
                                       Focusable="false" 
                                       HorizontalScrollBarVisibility="Hidden" 
-                                      VerticalScrollBarVisibility="Hidden"
-                                      Margin="{TemplateBinding Padding}"/>
+                                      VerticalScrollBarVisibility="Hidden"/>
                         <TextBlock IsHitTestVisible="False"
                                    Text="{TemplateBinding Tag}"
                                    VerticalAlignment="Center"
                                    HorizontalAlignment="Left"
-                                   Margin="12,0,0,0"
+                                   Margin="{TemplateBinding Padding}"
                                    Foreground="Gray">
                             <TextBlock.Style>
                                 <Style TargetType="TextBlock">
