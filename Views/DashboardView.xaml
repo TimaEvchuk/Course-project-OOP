@@ -60,22 +60,37 @@
             </Border>
 
             <!-- Task View Selector -->
-            <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Right">
-                <Button Content="Купить Премиум"
-                        Style="{StaticResource PrimaryActionButtonStyle}"
-                        Command="{Binding ShowPremiumPurchaseCommand}"
-                        Visibility="{Binding IsNotPremiumUser, Converter={StaticResource BooleanToVisibilityConverter}}"
-                        Margin="0,0,20,0"/>
+            <StackPanel Grid.Column="1" Orientation="Vertical" VerticalAlignment="Bottom" HorizontalAlignment="Right">
+                <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                    <Button Content="Купить Премиум"
+                            Style="{StaticResource PrimaryActionButtonStyle}"
+                            Command="{Binding ShowPremiumPurchaseCommand}"
+                            Visibility="{Binding IsNotPremiumUser, Converter={StaticResource BooleanToVisibilityConverter}}"
+                            Margin="0,0,20,0"/>
 
-                <RadioButton Content="На сегодня" Style="{StaticResource FilterPillRadioButtonStyle}" Margin="0,0,8,0"
-                             Command="{Binding SetPeriodCommand}" CommandParameter="{x:Static vm:TaskPeriod.Day}"
-                             IsChecked="{Binding SelectedPeriod, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static vm:TaskPeriod.Day}}"/>
-                <RadioButton Content="На неделю" Style="{StaticResource FilterPillRadioButtonStyle}" Margin="0,0,8,0"
-                             Command="{Binding SetPeriodCommand}" CommandParameter="{x:Static vm:TaskPeriod.Week}"
-                             IsChecked="{Binding SelectedPeriod, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static vm:TaskPeriod.Week}}"/>
-                <RadioButton Content="На месяц" Style="{StaticResource FilterPillRadioButtonStyle}" IsEnabled="True"
-                             Command="{Binding SetPeriodCommand}" CommandParameter="{x:Static vm:TaskPeriod.Month}"
-                             IsChecked="{Binding SelectedPeriod, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static vm:TaskPeriod.Month}}"/>
+                    <RadioButton Content="На сегодня" Style="{StaticResource FilterPillRadioButtonStyle}" Margin="0,0,8,0"
+                                 Command="{Binding SetPeriodCommand}" CommandParameter="{x:Static vm:TaskPeriod.Day}"
+                                 IsChecked="{Binding SelectedPeriod, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static vm:TaskPeriod.Day}}"/>
+                    <RadioButton Content="На неделю" Style="{StaticResource FilterPillRadioButtonStyle}" Margin="0,0,8,0"
+                                 Command="{Binding SetPeriodCommand}" CommandParameter="{x:Static vm:TaskPeriod.Week}"
+                                 IsChecked="{Binding SelectedPeriod, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static vm:TaskPeriod.Week}}"/>
+                    <RadioButton Content="На месяц" Style="{StaticResource FilterPillRadioButtonStyle}" 
+                                 IsEnabled="{Binding IsPremiumUser}"
+                                 Command="{Binding SetPeriodCommand}" CommandParameter="{x:Static vm:TaskPeriod.Month}"
+                                 IsChecked="{Binding SelectedPeriod, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static vm:TaskPeriod.Month}}">
+                        <RadioButton.ToolTip>
+                            <ToolTip Visibility="{Binding IsNotPremiumUser, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                Доступно с Premium-подпиской
+                            </ToolTip>
+                        </RadioButton.ToolTip>
+                    </RadioButton>
+                </StackPanel>
+                <TextBlock Text="Только для Премиум"
+                           Foreground="{StaticResource BrushGray}"
+                           FontSize="11"
+                           HorizontalAlignment="Right"
+                           Margin="0,4,0,0"
+                           Visibility="{Binding IsNotPremiumUser, Converter={StaticResource BooleanToVisibilityConverter}}"/>
             </StackPanel>
 
         </Grid>

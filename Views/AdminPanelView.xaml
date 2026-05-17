@@ -69,6 +69,7 @@
                            Visibility="{Binding IsPremiumSelectedUser, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                 <DatePicker SelectedDate="{Binding PremiumEndDateSelectedUser, Mode=TwoWay}"
                             Width="120" VerticalAlignment="Center"
+                            DisplayDateStart="{Binding Today, Mode=OneWay}"
                             Visibility="{Binding IsPremiumSelectedUser, Converter={StaticResource BooleanToVisibilityConverter}}"/>
                 <Button Content="Сохранить"
                         Command="{Binding SavePremiumCommand}"

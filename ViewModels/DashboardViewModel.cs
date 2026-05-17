@@ -12,6 +12,7 @@ using System.Diagnostics;
 using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
+using System.Windows;
 using System.Windows.Media;
 
 namespace Plantify.ViewModels
@@ -38,6 +39,8 @@ namespace Plantify.ViewModels
 
         [ObservableProperty]
         private bool _isNotPremiumUser;
+
+        public bool IsPremiumUser => !IsNotPremiumUser;
 
         // Properties for Day View
         [ObservableProperty]
@@ -173,7 +176,14 @@ namespace Plantify.ViewModels
         private void UpdatePremiumStatus()
         {
             IsNotPremiumUser = !_authenticationService.IsCurrentUserPremium();
+            OnPropertyChanged(nameof(IsPremiumUser));
             ShowPremiumPurchaseCommand.NotifyCanExecuteChanged();
+
+            // If user is not premium and is viewing the premium-only month tab, switch them back to the day view.
+            if (IsNotPremiumUser && SelectedPeriod == TaskPeriod.Month)
+            {
+                SetPeriodCommand.Execute(TaskPeriod.Day);
+            }
         }
 
         private async Task LoadTasksAsync()
@@ -342,9 +352,9 @@ namespace Plantify.ViewModels
             var totalPlants = userPlants.Count();
             if (totalPlants == 0)
             {
-                GardenHealthPercentage = 100;
-                GardenHealthBrush = new SolidColorBrush(Color.FromRgb(60, 179, 113)); // MediumSeaGreen
-                GardenHealthStatusText = "Сад в порядке";
+                GardenHealthPercentage = 0;
+                GardenHealthBrush = (SolidColorBrush)Application.Current.FindResource("BrushGray");
+                GardenHealthStatusText = "У вас сейчас нету растений";
                 return;
             }
 

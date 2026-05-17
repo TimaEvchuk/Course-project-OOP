@@ -65,6 +65,11 @@
                         <Trigger Property="IsMouseOver" Value="True">
                              <Setter TargetName="PillBorder" Property="BorderBrush" Value="{StaticResource BrushForestGreen}" />
                         </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter Property="Background" Value="{StaticResource BrushLightGray}"/>
+                            <Setter Property="Foreground" Value="{StaticResource BrushGray}"/>
+                            <Setter Property="Cursor" Value="Arrow"/>
+                        </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>

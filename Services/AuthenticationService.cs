@@ -5,18 +5,22 @@ using Plantify.Models;
 using BCrypt.Net; // For password hashing
 using Microsoft.EntityFrameworkCore;
 using System.Linq; // For .FirstOrDefault() and .Any()
+using CommunityToolkit.Mvvm.Messaging;
+using Plantify.Messages;
 
 namespace Plantify.Services
 {
     public class AuthenticationService
     {
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IMessenger _messenger;
 
         public User? CurrentUser { get; private set; }
 
-        public AuthenticationService(IUnitOfWork unitOfWork)
+        public AuthenticationService(IUnitOfWork unitOfWork, IMessenger messenger)
         {
             _unitOfWork = unitOfWork;
+            _messenger = messenger;
         }
 
         public async Task<bool> SignIn(string login, string password)
@@ -28,6 +32,28 @@ namespace Plantify.Services
 
             if (user != null && BCrypt.Net.BCrypt.Verify(password, user.PasswordHash))
             {
+                // Check for expired subscription
+                if (user.IsPremium && user.PremiumEndDate.HasValue && user.PremiumEndDate.Value.Date < DateTime.Today)
+                {
+                    user.IsPremium = false;
+                    user.PremiumStartDate = null;
+                    user.PremiumEndDate = null;
+                    _unitOfWork.Users.Update(user);
+
+                    var expiredNotification = new Notification
+                    {
+                        UserId = user.Id,
+                        Message = "Подписка на тариф 'Премиум' истекла!",
+                        Timestamp = DateTime.Now,
+                        Type = Models.Enums.NotificationType.NeedsCare
+                    };
+                    await _unitOfWork.Notifications.AddAsync(expiredNotification);
+                    await _unitOfWork.CompleteAsync();
+
+                    // Send message to update UI
+                    _messenger.Send(new NewNotificationMessage(expiredNotification));
+                }
+
                 CurrentUser = user;
                 return true;
             }

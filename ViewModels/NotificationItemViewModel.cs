@@ -13,6 +13,7 @@ namespace Plantify.ViewModels
         public int NotificationId => _notification.Id;
         public string Text => _notification.Message;
         public DateTime Timestamp => _notification.Timestamp;
+        public Models.Enums.NotificationType Type => _notification.Type;
 
         public NotificationItemViewModel(Notification notification, Action<NotificationItemViewModel> dismissAction)
         {

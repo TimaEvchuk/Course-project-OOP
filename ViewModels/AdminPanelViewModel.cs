@@ -129,6 +129,7 @@ namespace Plantify.ViewModels
         public bool CanModifySelectedUser => SelectedUser != null && SelectedUser.Id != _authenticationService.CurrentUser?.Id;
         public bool CanSaveChanges => SelectedUser != null && (IsPremiumSelectedUser != _originalIsPremium || PremiumEndDateSelectedUser != _originalPremiumEndDate);
         public string BlockButtonText => SelectedUser?.IsBlocked == true ? "Разблокировать" : "Заблокировать";
+        public DateTime Today => DateTime.Today;
 
         public ObservableCollection<User> Users { get; } = new();
         public ObservableCollection<Role> AllRoles { get; } = new();
