@@ -1451,6 +1451,22 @@
           }
         }
       },
+      "Microsoft.Xaml.Behaviors.Wpf/1.1.142": {
+        "type": "package",
+        "compile": {
+          "lib/net8.0-windows7.0/Microsoft.Xaml.Behaviors.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "runtime": {
+          "lib/net8.0-windows7.0/Microsoft.Xaml.Behaviors.dll": {
+            "related": ".pdb;.xml"
+          }
+        },
+        "frameworkReferences": [
+          "Microsoft.WindowsDesktop.App.WPF"
+        ]
+      },
       "Mono.TextTemplating/3.0.0": {
         "type": "package",
         "dependencies": {
@@ -4680,6 +4696,28 @@
         "useSharedDesignerContext.txt"
       ]
     },
+    "Microsoft.Xaml.Behaviors.Wpf/1.1.142": {
+      "sha512": "c47wA/8GHiQ9w+O6+mdqrZhZrxHogx2/fSZyRKL9tz0k+ypoTiwOx6fID0X3jr5LnCazJbCk7KiAcL0zVnNgNA==",
+      "type": "package",
+      "path": "microsoft.xaml.behaviors.wpf/1.1.142",
+      "hasTools": true,
+      "files": [
+        ".nupkg.metadata",
+        ".signature.p7s",
+        "lib/net462/Design/Microsoft.Xaml.Behaviors.Design.dll",
+        "lib/net462/Design/Microsoft.Xaml.Behaviors.DesignTools.dll",
+        "lib/net462/Microsoft.Xaml.Behaviors.dll",
+        "lib/net462/Microsoft.Xaml.Behaviors.pdb",
+        "lib/net462/Microsoft.Xaml.Behaviors.xml",
+        "lib/net8.0-windows7.0/Design/Microsoft.Xaml.Behaviors.DesignTools.dll",
+        "lib/net8.0-windows7.0/Microsoft.Xaml.Behaviors.dll",
+        "lib/net8.0-windows7.0/Microsoft.Xaml.Behaviors.pdb",
+        "lib/net8.0-windows7.0/Microsoft.Xaml.Behaviors.xml",
+        "microsoft.xaml.behaviors.wpf.1.1.142.nupkg.sha512",
+        "microsoft.xaml.behaviors.wpf.nuspec",
+        "tools/Install.ps1"
+      ]
+    },
     "Mono.TextTemplating/3.0.0": {
       "sha512": "YqueG52R/Xej4VVbKuRIodjiAhV0HR/XVbLbNrJhCZnzjnSjgMJ/dCdV0akQQxavX6hp/LC6rqLGLcXeQYU7XA==",
       "type": "package",
@@ -5944,7 +5982,8 @@
       "CommunityToolkit.Mvvm >= 8.4.2",
       "Microsoft.EntityFrameworkCore.SqlServer >= 9.0.3",
       "Microsoft.EntityFrameworkCore.Tools >= 9.0.3",
-      "Microsoft.Extensions.Hosting >= 10.0.7"
+      "Microsoft.Extensions.Hosting >= 10.0.7",
+      "Microsoft.Xaml.Behaviors.Wpf >= 1.1.142"
     ]
   },
   "packageFolders": {
@@ -6018,6 +6057,10 @@
           "Microsoft.Extensions.Hosting": {
             "target": "Package",
             "version": "[10.0.7, )"
+          },
+          "Microsoft.Xaml.Behaviors.Wpf": {
+            "target": "Package",
+            "version": "[1.1.142, )"
           }
         },
         "imports": [

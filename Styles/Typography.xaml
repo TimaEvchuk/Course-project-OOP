@@ -19,10 +19,18 @@
         <Setter Property="Foreground" Value="{StaticResource BrushDarkGreen}"/>
     </Style>
 
+    <Style x:Key="H3" TargetType="TextBlock">
+        <Setter Property="FontFamily" Value="{StaticResource FontLora}"/>
+        <Setter Property="FontSize" Value="18"/>
+        <Setter Property="FontWeight" Value="SemiBold"/>
+        <Setter Property="Foreground" Value="{StaticResource BrushDarkGreen}"/>
+    </Style>
+
     <Style x:Key="Body" TargetType="TextBlock">
         <Setter Property="FontFamily" Value="{StaticResource FontInter}"/>
-        <Setter Property="FontSize" Value="16"/>
+        <Setter Property="FontSize" Value="14"/>
         <Setter Property="Foreground" Value="{StaticResource BrushDarkGreen}"/>
+        <Setter Property="FontWeight" Value="Normal"/>
     </Style>
 
     <Style x:Key="Caption" TargetType="TextBlock">

@@ -10,6 +10,7 @@ namespace Plantify.Data
         IRepository<Role> Roles { get; }
         IUserPlantRepository UserPlants { get; }
         INotificationRepository Notifications { get; }
+        IPlantSubmissionRepository PlantSubmissions { get; }
         Task<int> CompleteAsync();
     }
 }

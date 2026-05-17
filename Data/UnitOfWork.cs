@@ -11,6 +11,7 @@ namespace Plantify.Data
         public IRepository<Role> Roles { get; private set; }
         public IUserPlantRepository UserPlants { get; private set; }
         public INotificationRepository Notifications { get; private set; }
+        public IPlantSubmissionRepository PlantSubmissions { get; private set; }
 
         public UnitOfWork(AppDbContext context)
         {
@@ -20,6 +21,7 @@ namespace Plantify.Data
             Roles = new Repository<Role>(_context);
             UserPlants = new UserPlantRepository(_context);
             Notifications = new NotificationRepository(_context);
+            PlantSubmissions = new PlantSubmissionRepository(_context);
         }
 
         public async Task<int> CompleteAsync()

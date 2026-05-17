@@ -15,6 +15,7 @@ namespace Plantify.Data
         public DbSet<PlantSection> PlantSections { get; set; } = null!;
         public DbSet<UserPlant> UserPlants { get; set; }
         public DbSet<Notification> Notifications { get; set; }
+        public DbSet<PlantSubmission> PlantSubmissions { get; set; }
 
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
@@ -31,6 +32,13 @@ namespace Plantify.Data
                 .HasMany(u => u.UserPlants)
                 .WithOne(up => up.User)
                 .HasForeignKey(up => up.UserId);
+
+            // One-to-many relationship between User and PlantSubmission
+            modelBuilder.Entity<User>()
+                .HasMany(u => u.SubmittedPlants)
+                .WithOne(ps => ps.SubmittedByUser)
+                .HasForeignKey(ps => ps.SubmittedByUserId)
+                .OnDelete(DeleteBehavior.Cascade); // If a user is deleted, their submissions are deleted.
 
             // One-to-many relationship between Plant and UserPlant
             modelBuilder.Entity<Plant>()

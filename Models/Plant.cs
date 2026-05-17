@@ -1,6 +1,7 @@
-using System; // Added for Uri
-using System.IO; // Added for FileStream
-using System.Windows.Media.Imaging; // Added for BitmapImage
+using System;
+using System.IO;
+using System.Windows.Media.Imaging;
+using System.Collections.Generic;
 
 namespace Plantify.Models
 {

@@ -36,7 +36,7 @@ namespace Plantify
                     services.AddDbContext<AppDbContext>(options =>
                     {
                         options.UseSqlServer(context.Configuration.GetConnectionString("DefaultConnection"));
-                    });
+                    }, ServiceLifetime.Transient);
 
                     services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
                     services.AddScoped<IPlantRepository, PlantRepository>();
@@ -65,6 +65,8 @@ namespace Plantify
                     services.AddTransient<AddUserViewModel>();
                     services.AddTransient<PremiumPurchaseViewModel>();
                     services.AddTransient<PlantDetailViewModel>();
+                    services.AddTransient<AddPlantSuggestionViewModel>();
+                    services.AddTransient<AddEditPlantViewModel>();
                     services.AddSingleton(s => new NotificationViewModel(
                         s.GetRequiredService<IMessenger>(), 
                         s.GetRequiredService<IUnitOfWork>(),

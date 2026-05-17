@@ -114,6 +114,48 @@ namespace Plantify.Migrations
                     b.ToTable("PlantSections");
                 });
 
+            modelBuilder.Entity("Plantify.Models.PlantSubmission", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Description")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("FertilizingInterval")
+                        .HasColumnType("int");
+
+                    b.Property<string>("ImagePath")
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("LightRequirement")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("SubmittedByUserId")
+                        .HasColumnType("int");
+
+                    b.Property<string>("Variety")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.Property<int>("WateringInterval")
+                        .HasColumnType("int");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("SubmittedByUserId");
+
+                    b.ToTable("PlantSubmissions");
+                });
+
             modelBuilder.Entity("Plantify.Models.Role", b =>
                 {
                     b.Property<int>("Id")
@@ -243,6 +285,17 @@ namespace Plantify.Migrations
                     b.Navigation("Plant");
                 });
 
+            modelBuilder.Entity("Plantify.Models.PlantSubmission", b =>
+                {
+                    b.HasOne("Plantify.Models.User", "SubmittedByUser")
+                        .WithMany("SubmittedPlants")
+                        .HasForeignKey("SubmittedByUserId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("SubmittedByUser");
+                });
+
             modelBuilder.Entity("Plantify.Models.UserPlant", b =>
                 {
                     b.HasOne("Plantify.Models.Plant", "Plant")
@@ -285,6 +338,8 @@ namespace Plantify.Migrations
             modelBuilder.Entity("Plantify.Models.User", b =>
                 {
                     b.Navigation("Notifications");
+
+                    b.Navigation("SubmittedPlants");
 
                     b.Navigation("UserPlants");
                 });

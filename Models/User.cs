@@ -16,5 +16,6 @@ namespace Plantify.Models
         public virtual ICollection<Role> Roles { get; set; } = new List<Role>();
         public virtual ICollection<UserPlant> UserPlants { get; set; } = new List<UserPlant>();
         public virtual ICollection<Notification> Notifications { get; set; } = new List<Notification>();
+        public virtual ICollection<PlantSubmission> SubmittedPlants { get; set; } = new List<PlantSubmission>();
     }
 }

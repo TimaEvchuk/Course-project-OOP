@@ -1,8 +1,8 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
-using CommunityToolkit.Mvvm.Messaging; // Added for IMessenger
+using CommunityToolkit.Mvvm.Messaging;
 using Plantify.Data;
-using Plantify.Messages; // Added for NavigateMessage
+using Plantify.Messages;
 using Plantify.Models;
 using System;
 using System.Collections.Generic;
@@ -107,6 +107,12 @@ namespace Plantify.ViewModels
         private void GoToPlantManagement()
         {
             _messenger.Send(new NavigateMessage(typeof(PlantManagementViewModel)));
+        }
+
+        [RelayCommand]
+        private void SuggestNewPlant()
+        {
+            _messenger.Send(new ShowAddPlantSuggestionOverlayMessage());
         }
     }
 }

@@ -21,6 +21,9 @@
             <converters:EnumToBooleanConverter x:Key="EnumToBooleanConverter"/>
             <converters:StringNullOrEmptyToVisibilityConverter x:Key="StringNullOrEmptyToVisibilityConverter"/>
             <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
+            <converters:NullToFalseConverter x:Key="NullToFalseConverter"/>
+            <converters:NullToVisibilityCollapsedConverter x:Key="NullToVisibilityCollapsedConverter"/>
+            <converters:StringToImageSourceConverter x:Key="StringToImageSourceConverter"/>
 
             <!-- Styles from Widgets.xaml -->
             <Style x:Key="StatWidgetStyle" TargetType="Border">
@@ -89,6 +92,12 @@
             </DataTemplate>
             <DataTemplate DataType="{x:Type vm:PremiumPurchaseViewModel}">
                 <views:PremiumPurchaseView/>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:AddPlantSuggestionViewModel}">
+                <views:AddPlantSuggestionView/>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:AddEditPlantViewModel}">
+                <views:AddEditPlantView/>
             </DataTemplate>
 
             <!-- Global Effects -->

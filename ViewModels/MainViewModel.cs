@@ -20,7 +20,9 @@ namespace Plantify.ViewModels
         IRecipient<CloseNotificationsPanelMessage>,
         IRecipient<ShowAddUserPlantOverlayMessage>,
         IRecipient<ShowAddUserAdminOverlayMessage>,
-        IRecipient<ShowPremiumPurchaseOverlayMessage>
+        IRecipient<ShowPremiumPurchaseOverlayMessage>,
+        IRecipient<ShowAddPlantSuggestionOverlayMessage>,
+        IRecipient<ShowAddEditPlantOverlayMessage>
     {
         [ObservableProperty]
         private BaseViewModel _currentViewModel = null!;
@@ -168,6 +170,18 @@ namespace Plantify.ViewModels
         public void Receive(ShowPremiumPurchaseOverlayMessage message)
         {
             OverlayViewModel = _serviceProvider.GetRequiredService<PremiumPurchaseViewModel>();
+        }
+
+        public void Receive(ShowAddPlantSuggestionOverlayMessage message)
+        {
+            OverlayViewModel = _serviceProvider.GetRequiredService<AddPlantSuggestionViewModel>();
+        }
+
+        public void Receive(ShowAddEditPlantOverlayMessage message)
+        {
+            var vm = _serviceProvider.GetRequiredService<AddEditPlantViewModel>();
+            vm.Initialize(message.Value);
+            OverlayViewModel = vm;
         }
         
         [RelayCommand]

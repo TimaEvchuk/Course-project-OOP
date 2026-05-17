@@ -210,3 +210,8 @@ D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\V
 D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Views\PremiumPurchaseView.baml
 D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Views\StatisticsView.g.cs
 D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Views\StatisticsView.baml
+D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Views\AddPlantSuggestionView.g.cs
+D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Views\AddPlantSuggestionView.baml
+D:\2 курс\ООП\Course-project\Plantify\Plantify\bin\Debug\net8.0-windows\Microsoft.Xaml.Behaviors.dll
+D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Views\AddEditPlantView.g.cs
+D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Views\AddEditPlantView.baml

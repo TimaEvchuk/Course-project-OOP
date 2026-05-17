@@ -5,98 +5,219 @@
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Plantify.Views"
              xmlns:vm="clr-namespace:Plantify.ViewModels"
+             xmlns:i="http://schemas.microsoft.com/xaml/behaviors"
+             xmlns:converters="clr-namespace:Plantify.Converters"
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance Type=vm:PlantManagementViewModel, IsDesignTimeCreatable=False}"
              d:DesignHeight="600" d:DesignWidth="900">
+
+    <i:Interaction.Triggers>
+        <i:EventTrigger EventName="Loaded">
+            <i:InvokeCommandAction Command="{Binding LoadDataCommand}" />
+        </i:EventTrigger>
+    </i:Interaction.Triggers>
+
     <Grid Margin="20">
-        <Grid.ColumnDefinitions>
-            <ColumnDefinition Width="2*"/>
-            <ColumnDefinition Width="Auto"/>
-            <ColumnDefinition Width="*"/>
-        </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
-        <!-- Plant List -->
-        <DataGrid Grid.Column="0" ItemsSource="{Binding Plants}" SelectedItem="{Binding SelectedPlant}"
-                  AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Single">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Name" Binding="{Binding Name}" Width="*"/>
-                <DataGridTextColumn Header="Variety" Binding="{Binding Variety}" Width="100"/>
-                <DataGridTextColumn Header="Light" Binding="{Binding LightRequirement}" Width="150"/>
-            </DataGrid.Columns>
-        </DataGrid>
+        <TextBlock Grid.Row="0" Text="Управление каталогом" Style="{StaticResource H1}" Margin="0,0,0,20"/>
 
-        <!-- Spacer -->
-        <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Center" VerticalAlignment="Stretch"/>
+        <TabControl Grid.Row="1">
+            <TabItem Header="Каталог">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
 
-        <!-- Edit/Add Form -->
-        <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto">
-            <StackPanel Margin="10,0,0,0">
-                <TextBlock Text="Manage Plant" FontSize="20" FontWeight="Bold"/>
+                        <DataGrid Grid.Column="0" ItemsSource="{Binding Plants}" SelectedItem="{Binding SelectedPlant}"
+                                  AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Single">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="*"/>
+                                <DataGridTextColumn Header="Вид" Binding="{Binding Variety}" Width="150"/>
+                                <DataGridTextColumn Header="Освещение" Binding="{Binding LightRequirement}" Width="150"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
 
-                <TextBlock Text="Name" Margin="0,15,0,0"/>
-                <TextBox Text="{Binding PlantName, UpdateSourceTrigger=PropertyChanged}"/>
+                        <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Center" VerticalAlignment="Stretch" Background="LightGray"
+                                      Visibility="{Binding SelectedPlant, Converter={StaticResource NullToVisibilityCollapsedConverter}}"/>
+                        
+                        <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto" Width="400"
+                                      Style="{StaticResource ScrollBarStyle}"
+                                      Visibility="{Binding SelectedPlant, Converter={StaticResource NullToVisibilityCollapsedConverter}}">
+                            <ScrollViewer.Effect>
+                                <DropShadowEffect ShadowDepth="2" Direction="270" BlurRadius="5" Color="{StaticResource ColorBaseGray}" Opacity="0.05" />
+                            </ScrollViewer.Effect>
+                            <StackPanel Margin="10">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
 
-                <TextBlock Text="Watering Interval (days)" Margin="0,10,0,0"/>
-                <TextBox Text="{Binding PlantWateringInterval, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <Image Height="120" Width="120" Grid.Column="0" VerticalAlignment="Top" Margin="0,10,20,0"
+                                           Source="{Binding SelectedPlant.DisplayImageSource, TargetNullValue={StaticResource ImgPlaceholder}}"/>
 
-                <TextBlock Text="Fertilizing Interval (days)" Margin="0,10,0,0"/>
-                <TextBox Text="{Binding PlantFertilizingInterval, UpdateSourceTrigger=PropertyChanged}"/>
+                                    <StackPanel Grid.Column="1">
+                                        <TextBlock Text="{Binding SelectedPlant.Name}" Style="{StaticResource H2}" TextWrapping="Wrap"/>
+                                        
+                                        <Grid Margin="0,10,0,0">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" MinWidth="130"/>
+                                                <ColumnDefinition Width="*" MinWidth="130"/>
+                                            </Grid.ColumnDefinitions>
 
-                <TextBlock Text="Light Requirement" Margin="0,10,0,0"/>
-                <ComboBox ItemsSource="{Binding LightRequirements}" SelectedItem="{Binding PlantLightRequirement}"/>
+                                            <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,10,10">
+                                                <TextBlock Text="Вид" Style="{StaticResource Caption}"/>
+                                                <TextBlock Text="{Binding SelectedPlant.Variety}" Style="{StaticResource Body}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
+                                            </StackPanel>
+                                            
+                                            <StackPanel Grid.Row="0" Grid.Column="1" Margin="0,0,10,10">
+                                                <TextBlock Text="Полив" Style="{StaticResource Caption}"/>
+                                                <TextBlock Text="{Binding SelectedPlant.WateringInterval, StringFormat='Раз в {0} дней'}" Style="{StaticResource Body}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
+                                            </StackPanel>
 
-                <TextBlock Text="Variety" Margin="0,10,0,0"/>
-                <ComboBox ItemsSource="{Binding Varieties}" SelectedItem="{Binding PlantVariety}"/>
+                                            <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,10,10">
+                                                <TextBlock Text="Освещение" Style="{StaticResource Caption}"/>
+                                                <TextBlock Text="{Binding SelectedPlant.LightRequirement}" Style="{StaticResource Body}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
+                                            </StackPanel>
 
-                <TextBlock Text="Image" Margin="0,10,0,0"/>
-                <Border x:Name="ImageDropTarget" BorderBrush="Green" BorderThickness="1" CornerRadius="5" Height="150" Width="200" HorizontalAlignment="Left" 
-                        AllowDrop="True" 
-                        DragEnter="ImageDropTarget_DragEnter" DragLeave="ImageDropTarget_DragLeave" Drop="ImageDropTarget_Drop"
-                        Background="#FFF0F0F0">
-                    <Grid>
-                        <Image Source="{Binding DisplayImageSource}" Stretch="Uniform" HorizontalAlignment="Center" VerticalAlignment="Center">
-                            <Image.Style>
-                                <Style TargetType="Image">
-                                    <Setter Property="Visibility" Value="Visible"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding PlantImagePath}" Value="{x:Null}">
-                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding PlantImagePath}" Value="">
-                                            <Setter Property="Visibility" Value="Collapsed"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </Image.Style>
-                        </Image>
-                        <StackPanel VerticalAlignment="Center" HorizontalAlignment="Center">
-                            <StackPanel.Style>
-                                <Style TargetType="StackPanel">
-                                    <Setter Property="Visibility" Value="Collapsed"/>
-                                    <Style.Triggers>
-                                        <DataTrigger Binding="{Binding PlantImagePath}" Value="{x:Null}">
-                                            <Setter Property="Visibility" Value="Visible"/>
-                                        </DataTrigger>
-                                        <DataTrigger Binding="{Binding PlantImagePath}" Value="">
-                                            <Setter Property="Visibility" Value="Visible"/>
-                                        </DataTrigger>
-                                    </Style.Triggers>
-                                </Style>
-                            </StackPanel.Style>
-                            <TextBlock Text="🖼️" FontSize="40" HorizontalAlignment="Center" Opacity="0.5"/>
-                            <TextBlock Text="Перетащите сюда фото" HorizontalAlignment="Center" Opacity="0.5"/>
-                            <TextBlock Text="PNG, JPG до 5 МБ" HorizontalAlignment="Center" Opacity="0.5" FontSize="10"/>
-                        </StackPanel>
+                                            <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,10,10">
+                                                <TextBlock Text="Удобрение" Style="{StaticResource Caption}"/>
+                                                <TextBlock Text="{Binding SelectedPlant.FertilizingInterval, StringFormat='Раз в {0} дней'}" Style="{StaticResource Body}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </StackPanel>
+                                </Grid>
+                                
+                                <ItemsControl ItemsSource="{Binding SelectedPlant.Sections}" Margin="0,10,0,0">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Margin="0,0,0,15">
+                                                <TextBlock Text="{Binding Title}" Style="{StaticResource H3}"/>
+                                                <TextBlock Text="{Binding Content}" Style="{StaticResource Body}" TextWrapping="Wrap"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
+                            </StackPanel>
+                        </ScrollViewer>
                     </Grid>
-                </Border>
-                <Button Content="Выбрать изображение" Command="{Binding SelectImageCommand}" Width="150" HorizontalAlignment="Left" Margin="0,5,0,0"/>
+                    
+                    <Border Grid.Row="1" Background="#F0F0F0" Padding="10">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <Button Content="Добавить" Command="{Binding AddPlantCommand}" Style="{StaticResource PrimaryActionButtonStyle}"/>
+                            <Button Content="Изменить" Command="{Binding UpdatePlantCommand}" IsEnabled="{Binding SelectedPlant, Converter={StaticResource NullToFalseConverter}}" Margin="10,0,0,0" Style="{StaticResource SecondaryButtonStyle}"/>
+                            <Button Content="Удалить" Command="{Binding DeletePlantCommand}" IsEnabled="{Binding SelectedPlant, Converter={StaticResource NullToFalseConverter}}" Margin="10,0,0,0" Style="{StaticResource DeletePlantButtonStyle}"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Заявки на модерацию">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
 
-                <StackPanel Orientation="Horizontal" Margin="0,20,0,0">
-                    <Button Content="Add New" Command="{Binding AddPlantCommand}" Width="100"/>
-                    <Button Content="Update Selected" Command="{Binding UpdatePlantCommand}" Width="120" Margin="10,0,0,0"/>
-                    <Button Content="Delete Selected" Command="{Binding DeletePlantCommand}" Width="120" Margin="10,0,0,0" Background="IndianRed"/>
-                </StackPanel>
-            </StackPanel>
-        </ScrollViewer>
+                    <Grid Grid.Row="0">
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="*"/>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="Auto"/>
+                        </Grid.ColumnDefinitions>
+
+                        <DataGrid Grid.Column="0" ItemsSource="{Binding PendingSubmissions}" SelectedItem="{Binding SelectedSubmission}"
+                                  AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Single">
+                            <DataGrid.Columns>
+                                <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="*"/>
+                                <DataGridTextColumn Header="Автор" Binding="{Binding SubmittedByUser.Login}" Width="150"/>
+                            </DataGrid.Columns>
+                        </DataGrid>
+                        
+                        <GridSplitter Grid.Column="1" Width="5" HorizontalAlignment="Center" VerticalAlignment="Stretch" Background="LightGray"
+                                      Visibility="{Binding SelectedSubmission, Converter={StaticResource NullToVisibilityCollapsedConverter}}"/>
+
+                        <ScrollViewer Grid.Column="2" VerticalScrollBarVisibility="Auto" Width="400"
+                                      Style="{StaticResource ScrollBarStyle}"
+                                      Visibility="{Binding SelectedSubmission, Converter={StaticResource NullToVisibilityCollapsedConverter}}">
+                            <ScrollViewer.Effect>
+                                <DropShadowEffect ShadowDepth="2" Direction="270" BlurRadius="5" Color="{StaticResource ColorBaseGray}" Opacity="0.05" />
+                            </ScrollViewer.Effect>
+                            <StackPanel Margin="10">
+                                <Grid>
+                                    <Grid.ColumnDefinitions>
+                                        <ColumnDefinition Width="Auto"/>
+                                        <ColumnDefinition Width="*"/>
+                                    </Grid.ColumnDefinitions>
+
+                                    <Image Height="120" Width="120" Grid.Column="0" VerticalAlignment="Top" Margin="0,10,20,0"
+                                           Source="{Binding SelectedSubmission.ImagePath, Converter={StaticResource StringToImageSourceConverter}}"/>
+
+                                    <StackPanel Grid.Column="1">
+                                        <TextBlock Text="{Binding SelectedSubmission.Name}" Style="{StaticResource H2}" TextWrapping="Wrap"/>
+                                        
+                                        <Grid Margin="0,10,0,0">
+                                            <Grid.RowDefinitions>
+                                                <RowDefinition Height="Auto"/>
+                                                <RowDefinition Height="Auto"/>
+                                            </Grid.RowDefinitions>
+                                            <Grid.ColumnDefinitions>
+                                                <ColumnDefinition Width="*" MinWidth="130"/>
+                                                <ColumnDefinition Width="*" MinWidth="130"/>
+                                            </Grid.ColumnDefinitions>
+
+                                            <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,10,10">
+                                                <TextBlock Text="Вид" Style="{StaticResource Caption}"/>
+                                                <TextBlock Text="{Binding SelectedSubmission.Variety}" Style="{StaticResource Body}"/>
+                                            </StackPanel>
+                                            
+                                            <StackPanel Grid.Row="0" Grid.Column="1" Margin="0,0,10,10">
+                                                <TextBlock Text="Полив" Style="{StaticResource Caption}"/>
+                                                <TextBlock Text="{Binding SelectedSubmission.WateringInterval, StringFormat='Раз в {0} дней'}" Style="{StaticResource Body}"/>
+                                            </StackPanel>
+
+                                            <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,10,10">
+                                                <TextBlock Text="Освещение" Style="{StaticResource Caption}"/>
+                                                <TextBlock Text="{Binding SelectedSubmission.LightRequirement}" Style="{StaticResource Body}"/>
+                                            </StackPanel>
+
+                                            <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,10,10">
+                                                <TextBlock Text="Удобрение" Style="{StaticResource Caption}"/>
+                                                <TextBlock Text="{Binding SelectedSubmission.FertilizingInterval, StringFormat='Раз в {0} дней'}" Style="{StaticResource Body}"/>
+                                            </StackPanel>
+                                        </Grid>
+                                    </StackPanel>
+                                </Grid>
+                                
+                                <TextBlock Text="Описание" Style="{StaticResource Caption}" Margin="0,10,0,0"/>
+                                <TextBlock Text="{Binding SelectedSubmission.Description}" Style="{StaticResource Body}" TextWrapping="Wrap"/>
+                            </StackPanel>
+                        </ScrollViewer>
+                    </Grid>
+                    
+                    <Border Grid.Row="1" Background="#F0F0F0" Padding="10">
+                        <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                            <Button Content="Одобрить" Command="{Binding ApproveSubmissionCommand}" IsEnabled="{Binding SelectedSubmission, Converter={StaticResource NullToFalseConverter}}" Style="{StaticResource PrimaryActionButtonStyle}"/>
+                            <Button Content="Отклонить" Command="{Binding RejectSubmissionCommand}" IsEnabled="{Binding SelectedSubmission, Converter={StaticResource NullToFalseConverter}}" Margin="10,0,0,0" Style="{StaticResource DeletePlantButtonStyle}"/>
+                        </StackPanel>
+                    </Border>
+                </Grid>
+            </TabItem>
+        </TabControl>
     </Grid>
 </UserControl>

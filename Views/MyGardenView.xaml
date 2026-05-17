@@ -104,7 +104,7 @@
                                 <Grid Width="170" Height="130" Margin="15,15,15,0">
                                     <Border CornerRadius="8" ClipToBounds="True">
                                         <Border.Background>
-                                            <ImageBrush ImageSource="{Binding DisplayImageSource}" Stretch="UniformToFill"/>
+                                            <ImageBrush ImageSource="{Binding DisplayImageSource, TargetNullValue={StaticResource ImgPlaceholder}}" Stretch="UniformToFill"/>
                                         </Border.Background>
                                     </Border>
                                     
