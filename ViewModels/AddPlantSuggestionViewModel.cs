@@ -8,9 +8,9 @@ using Plantify.Services;
 using System;
 using System.Collections.ObjectModel;
 using System.Linq;
+using System.Text.Json;
 using System.Threading.Tasks;
 using Microsoft.Win32;
-using System.IO;
 
 namespace Plantify.ViewModels
 {
@@ -24,10 +24,10 @@ namespace Plantify.ViewModels
         private string? _plantName;
 
         [ObservableProperty]
-        private string? _lightRequirement;
+        private LightRequirement? _selectedLightRequirement;
 
         [ObservableProperty]
-        private string? _variety;
+        private Variety? _selectedVariety;
 
         private int _wateringInterval;
         public int WateringInterval
@@ -57,13 +57,12 @@ namespace Plantify.ViewModels
         private string? _imagePath;
 
         [ObservableProperty]
-        private string? _description;
-
-        [ObservableProperty]
         private string? _errorMessage;
+        
+        public ObservableCollection<PlantSectionViewModel> Sections { get; set; }
 
-        public ObservableCollection<string> Varieties { get; }
-        public ObservableCollection<string> LightRequirements { get; }
+        public ObservableCollection<Variety> Varieties { get; }
+        public ObservableCollection<LightRequirement> LightRequirements { get; }
 
         public string Title => "Предложить новое растение";
 
@@ -73,34 +72,51 @@ namespace Plantify.ViewModels
             _messenger = messenger;
             _authenticationService = authenticationService;
 
-            Varieties = new ObservableCollection<string>();
-            LightRequirements = new ObservableCollection<string>();
+            Varieties = new ObservableCollection<Variety>();
+            LightRequirements = new ObservableCollection<LightRequirement>();
+            Sections = new ObservableCollection<PlantSectionViewModel>
+            {
+                new PlantSectionViewModel { Title = "Описание", Content = "" }
+            };
         }
 
         [RelayCommand]
-        private async Task LoadDistinctProperties()
+        private async Task LoadCategories()
         {
-            var plants = await _unitOfWork.Plants.GetAllAsync();
-            
-            var distinctVarieties = plants.Select(p => p.Variety).Distinct().OrderBy(v => v);
+            var varieties = await _unitOfWork.Varieties.GetAllAsync();
             Varieties.Clear();
-            foreach (var variety in distinctVarieties)
+            foreach (var variety in varieties.OrderBy(v => v.Name))
             {
                 Varieties.Add(variety);
             }
 
-            var distinctLight = plants.Select(p => p.LightRequirement).Distinct().OrderBy(l => l);
+            var lightRequirements = await _unitOfWork.LightRequirements.GetAllAsync();
             LightRequirements.Clear();
-            foreach (var light in distinctLight)
+            foreach (var light in lightRequirements.OrderBy(l => l.Name))
             {
                 LightRequirements.Add(light);
+            }
+        }
+        
+        [RelayCommand]
+        private void AddSection()
+        {
+            Sections.Add(new PlantSectionViewModel { Title = "", Content = "" });
+        }
+
+        [RelayCommand]
+        private void RemoveSection(PlantSectionViewModel section)
+        {
+            if (section != null)
+            {
+                Sections.Remove(section);
             }
         }
 
         [RelayCommand]
         private async Task Save()
         {
-            if (string.IsNullOrWhiteSpace(PlantName) || string.IsNullOrWhiteSpace(LightRequirement) || string.IsNullOrWhiteSpace(Variety))
+            if (string.IsNullOrWhiteSpace(PlantName) || SelectedLightRequirement == null || SelectedVariety == null)
             {
                 ErrorMessage = "Пожалуйста, заполните все обязательные поля.";
                 return;
@@ -112,16 +128,18 @@ namespace Plantify.ViewModels
             }
 
             ErrorMessage = null;
+            
+            var sectionsAsJson = JsonSerializer.Serialize(Sections.Select(s => new { s.Title, s.Content }).ToList());
 
             var newSubmission = new PlantSubmission
             {
                 Name = PlantName,
-                LightRequirement = LightRequirement,
-                Variety = Variety,
+                LightRequirementId = SelectedLightRequirement.Id,
+                VarietyId = SelectedVariety.Id,
                 WateringInterval = WateringInterval,
                 FertilizingInterval = FertilizingInterval,
                 ImagePath = ImagePath,
-                Description = Description,
+                Description = sectionsAsJson,
                 SubmittedByUserId = _authenticationService.CurrentUser.Id,
             };
 
@@ -129,7 +147,6 @@ namespace Plantify.ViewModels
             await _unitOfWork.CompleteAsync();
 
             _messenger.Send(new CloseOverlayMessage());
-            // Optionally, send a message to show a 'Thank you' notification.
         }
 
         [RelayCommand]
@@ -148,9 +165,6 @@ namespace Plantify.ViewModels
 
             if (openFileDialog.ShowDialog() == true)
             {
-                // Here, we should copy the file to a designated 'uploads' folder within the project
-                // and then store the relative path. For simplicity now, we'll just store the full path.
-                // This is not ideal for a real application but sufficient for this step.
                 ImagePath = openFileDialog.FileName;
             }
         }

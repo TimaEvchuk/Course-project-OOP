@@ -12,6 +12,8 @@ namespace Plantify.Data
         public DbSet<User> Users { get; set; }
         public DbSet<Role> Roles { get; set; }
         public DbSet<Plant> Plants { get; set; }
+        public DbSet<Variety> Varieties { get; set; }
+        public DbSet<LightRequirement> LightRequirements { get; set; }
         public DbSet<PlantSection> PlantSections { get; set; } = null!;
         public DbSet<UserPlant> UserPlants { get; set; }
         public DbSet<Notification> Notifications { get; set; }

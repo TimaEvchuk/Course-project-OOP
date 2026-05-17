@@ -24,6 +24,8 @@
             <converters:NullToFalseConverter x:Key="NullToFalseConverter"/>
             <converters:NullToVisibilityCollapsedConverter x:Key="NullToVisibilityCollapsedConverter"/>
             <converters:StringToImageSourceConverter x:Key="StringToImageSourceConverter"/>
+            <converters:JsonToSectionsConverter x:Key="JsonToSectionsConverter"/>
+            <converters:EqualityConverter x:Key="EqualityConverter"/>
 
             <!-- Styles from Widgets.xaml -->
             <Style x:Key="StatWidgetStyle" TargetType="Border">

@@ -4,6 +4,7 @@ using CommunityToolkit.Mvvm.Messaging;
 using Plantify.Data;
 using Plantify.Messages;
 using Plantify.Models;
+using System;
 using System.Collections.ObjectModel;
 using System.IO;
 using System.Linq;
@@ -26,70 +27,84 @@ namespace Plantify.ViewModels
         [ObservableProperty]
         private string? _plantName;
         [ObservableProperty]
-        private string? _variety;
+        private Variety? _selectedVariety;
         [ObservableProperty]
-        private string? _lightRequirement;
+        private LightRequirement? _selectedLightRequirement;
         [ObservableProperty]
         private int _wateringInterval;
         [ObservableProperty]
         private int _fertilizingInterval;
         [ObservableProperty]
-        private string? _description;
-        [ObservableProperty]
         private string? _imagePath;
         
         [ObservableProperty]
         private string? _errorMessage;
+        
+        public ObservableCollection<PlantSectionViewModel> Sections { get; set; }
 
         public string Title => IsEditMode ? "Редактировать растение" : "Добавить новое растение";
         public string SaveButtonText => IsEditMode ? "Сохранить" : "Добавить";
         
-        public ObservableCollection<string> Varieties { get; }
-        public ObservableCollection<string> LightRequirements { get; }
+        public ObservableCollection<Variety> Varieties { get; }
+        public ObservableCollection<LightRequirement> LightRequirements { get; }
 
         public AddEditPlantViewModel(IUnitOfWork unitOfWork, IMessenger messenger)
         {
             _unitOfWork = unitOfWork;
             _messenger = messenger;
             
-            Varieties = new ObservableCollection<string>();
-            LightRequirements = new ObservableCollection<string>();
+            Varieties = new ObservableCollection<Variety>();
+            LightRequirements = new ObservableCollection<LightRequirement>();
+            Sections = new ObservableCollection<PlantSectionViewModel>();
         }
 
         [RelayCommand]
-        private async Task LoadDistinctProperties()
+        private async Task LoadCategories()
         {
-            var plants = await _unitOfWork.Plants.GetAllAsync();
-            
-            var distinctVarieties = plants.Select(p => p.Variety).Distinct().OrderBy(v => v);
+            var varieties = await _unitOfWork.Varieties.GetAllAsync();
             Varieties.Clear();
-            foreach (var variety in distinctVarieties)
+            foreach (var variety in varieties.OrderBy(v => v.Name))
             {
                 Varieties.Add(variety);
             }
 
-            var distinctLight = plants.Select(p => p.LightRequirement).Distinct().OrderBy(l => l);
+            var lightRequirements = await _unitOfWork.LightRequirements.GetAllAsync();
             LightRequirements.Clear();
-            foreach (var light in distinctLight)
+            foreach (var light in lightRequirements.OrderBy(l => l.Name))
             {
                 LightRequirements.Add(light);
             }
         }
 
-        public void Initialize(Plant? plant = null)
+        public async Task InitializeAsync(Plant? plant = null)
         {
+            await LoadCategoriesCommand.ExecuteAsync(null);
+            
+            Sections.Clear();
+            
             if (plant != null)
             {
                 IsEditMode = true;
                 _plantToEdit = plant;
 
                 PlantName = plant.Name;
-                Variety = plant.Variety;
-                LightRequirement = plant.LightRequirement;
+                SelectedVariety = Varieties.FirstOrDefault(v => v.Id == plant.VarietyId);
+                SelectedLightRequirement = LightRequirements.FirstOrDefault(l => l.Id == plant.LightRequirementId);
                 WateringInterval = plant.WateringInterval;
                 FertilizingInterval = plant.FertilizingInterval;
                 ImagePath = plant.ImagePath;
-                Description = plant.Sections.FirstOrDefault(s => s.Title == "Описание")?.Content ?? "";
+
+                if (plant.Sections.Any())
+                {
+                    foreach (var section in plant.Sections)
+                    {
+                        Sections.Add(new PlantSectionViewModel { Title = section.Title, Content = section.Content });
+                    }
+                }
+                else
+                {
+                    Sections.Add(new PlantSectionViewModel { Title = "Описание", Content = "" });
+                }
             }
             else
             {
@@ -97,19 +112,34 @@ namespace Plantify.ViewModels
                 _plantToEdit = null;
                 
                 PlantName = "";
-                Variety = "";
-                LightRequirement = "";
-                WateringInterval = 0;
-                FertilizingInterval = 0;
+                SelectedVariety = null;
+                SelectedLightRequirement = null;
+                WateringInterval = 7;
+                FertilizingInterval = 30;
                 ImagePath = null;
-                Description = "";
+                Sections.Add(new PlantSectionViewModel { Title = "Описание", Content = "" });
+            }
+        }
+        
+        [RelayCommand]
+        private void AddSection()
+        {
+            Sections.Add(new PlantSectionViewModel { Title = "", Content = "" });
+        }
+
+        [RelayCommand]
+        private void RemoveSection(PlantSectionViewModel section)
+        {
+            if (section != null)
+            {
+                Sections.Remove(section);
             }
         }
 
         [RelayCommand]
         private async Task Save()
         {
-            if (string.IsNullOrWhiteSpace(PlantName) || string.IsNullOrWhiteSpace(Variety) || string.IsNullOrWhiteSpace(LightRequirement))
+            if (string.IsNullOrWhiteSpace(PlantName) || SelectedVariety == null || SelectedLightRequirement == null)
             {
                 ErrorMessage = "Пожалуйста, заполните все обязательные поля.";
                 return;
@@ -119,46 +149,36 @@ namespace Plantify.ViewModels
             
             ProcessImageFile(ImagePath);
 
+            Plant plantToSave;
+
             if (IsEditMode && _plantToEdit != null)
             {
-                // Update existing plant
-                _plantToEdit.Name = PlantName;
-                _plantToEdit.Variety = Variety;
-                _plantToEdit.LightRequirement = LightRequirement;
-                _plantToEdit.WateringInterval = WateringInterval;
-                _plantToEdit.FertilizingInterval = FertilizingInterval;
-                _plantToEdit.ImagePath = ImagePath;
-
-                var descriptionSection = _plantToEdit.Sections.FirstOrDefault(s => s.Title == "Описание");
-                if (descriptionSection != null)
-                {
-                    descriptionSection.Content = Description ?? "";
-                }
-                else if (!string.IsNullOrWhiteSpace(Description))
-                {
-                    _plantToEdit.Sections.Add(new PlantSection { Title = "Описание", Content = Description });
-                }
-                
-                _unitOfWork.Plants.Update(_plantToEdit);
+                plantToSave = _plantToEdit;
             }
             else
             {
-                // Add new plant
-                var newPlant = new Plant
+                plantToSave = new Plant();
+                _unitOfWork.Plants.AddAsync(plantToSave);
+            }
+
+            plantToSave.Name = PlantName;
+            plantToSave.VarietyId = SelectedVariety.Id;
+            plantToSave.LightRequirementId = SelectedLightRequirement.Id;
+            plantToSave.WateringInterval = WateringInterval;
+            plantToSave.FertilizingInterval = FertilizingInterval;
+            plantToSave.ImagePath = ImagePath;
+
+            plantToSave.Sections.Clear();
+            foreach (var sectionVm in Sections)
+            {
+                if (!string.IsNullOrWhiteSpace(sectionVm.Title) || !string.IsNullOrWhiteSpace(sectionVm.Content))
                 {
-                    Name = PlantName,
-                    Variety = Variety,
-                    LightRequirement = LightRequirement,
-                    WateringInterval = WateringInterval,
-                    FertilizingInterval = FertilizingInterval,
-                    ImagePath = ImagePath,
-                };
-                if (!string.IsNullOrWhiteSpace(Description))
-                {
-                    newPlant.Sections.Add(new PlantSection { Title = "Описание", Content = Description });
+                    plantToSave.Sections.Add(new PlantSection
+                    {
+                        Title = sectionVm.Title,
+                        Content = sectionVm.Content
+                    });
                 }
-                
-                await _unitOfWork.Plants.AddAsync(newPlant);
             }
 
             await _unitOfWork.CompleteAsync();
@@ -187,11 +207,9 @@ namespace Plantify.ViewModels
         {
             if (string.IsNullOrEmpty(sourcePath) || !File.Exists(sourcePath))
             {
-                // No image to process, or path is already a project-relative path
                 return;
             }
             
-            // Avoid re-processing if it's already a relative path
             if (sourcePath.StartsWith("Images/"))
             {
                 return;

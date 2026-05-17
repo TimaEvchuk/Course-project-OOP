@@ -12,6 +12,8 @@ namespace Plantify.Data
         public IUserPlantRepository UserPlants { get; private set; }
         public INotificationRepository Notifications { get; private set; }
         public IPlantSubmissionRepository PlantSubmissions { get; private set; }
+        public IRepository<Variety> Varieties { get; private set; }
+        public IRepository<LightRequirement> LightRequirements { get; private set; }
 
         public UnitOfWork(AppDbContext context)
         {
@@ -22,6 +24,8 @@ namespace Plantify.Data
             UserPlants = new UserPlantRepository(_context);
             Notifications = new NotificationRepository(_context);
             PlantSubmissions = new PlantSubmissionRepository(_context);
+            Varieties = new Repository<Variety>(_context);
+            LightRequirements = new Repository<LightRequirement>(_context);
         }
 
         public async Task<int> CompleteAsync()

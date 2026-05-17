@@ -21,28 +21,8 @@
             <Grid Grid.Row="0" Height="30" Background="Transparent" MouseLeftButtonDown="TitleBar_MouseLeftButtonDown">
                 <TextBlock Text="Подтверждение" VerticalAlignment="Center" HorizontalAlignment="Left" Margin="10,0,0,0" Foreground="{StaticResource BrushDarkGreen}"/>
                 <Button Command="{Binding NoCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}"
-                        HorizontalAlignment="Right" VerticalAlignment="Center" Width="30" Height="30" >
-                    <Button.Style>
-                        <Style TargetType="Button">
-                            <Setter Property="Background" Value="Transparent"/>
-                            <Setter Property="Foreground" Value="{StaticResource BrushDarkGreen}"/>
-                            <Setter Property="Template">
-                                <Setter.Value>
-                                    <ControlTemplate TargetType="Button">
-                                        <Border Background="{TemplateBinding Background}" CornerRadius="8">
-                                            <TextBlock Text="✕" VerticalAlignment="Center" HorizontalAlignment="Center" FontSize="18"/>
-                                        </Border>
-                                    </ControlTemplate>
-                                </Setter.Value>
-                            </Setter>
-                            <Style.Triggers>
-                                <Trigger Property="IsMouseOver" Value="True">
-                                    <Setter Property="Foreground" Value="IndianRed"/>
-                                </Trigger>
-                            </Style.Triggers>
-                        </Style>
-                    </Button.Style>
-                </Button>
+                        Style="{StaticResource CloseButtonStyle}"
+                        HorizontalAlignment="Right" VerticalAlignment="Center" Width="30" Height="30" />
             </Grid>
 
             <!-- Content -->

@@ -53,15 +53,30 @@
         </Grid>
         
         <!-- Filter Pills -->
-        <StackPanel Grid.Row="2" Orientation="Horizontal" Margin="0,20,0,10">
-            <RadioButton Content="Все" IsChecked="True" Command="{Binding SelectFilterCommand}" CommandParameter="Все" Style="{StaticResource FilterPillRadioButtonStyle}"/>
-            <RadioButton Content="Лиственные" Command="{Binding SelectFilterCommand}" CommandParameter="Лиственные" Style="{StaticResource FilterPillRadioButtonStyle}"/>
-            <RadioButton Content="Суккуленты" Command="{Binding SelectFilterCommand}" CommandParameter="Суккуленты" Style="{StaticResource FilterPillRadioButtonStyle}"/>
-            <RadioButton Content="Лианы" Command="{Binding SelectFilterCommand}" CommandParameter="Лианы" Style="{StaticResource FilterPillRadioButtonStyle}"/>
-            <RadioButton Content="Тенелюбивые" Command="{Binding SelectFilterCommand}" CommandParameter="Тенелюбивые" Style="{StaticResource FilterPillRadioButtonStyle}"/>
-            <RadioButton Content="Светолюбивые" Command="{Binding SelectFilterCommand}" CommandParameter="Светолюбивые" Style="{StaticResource FilterPillRadioButtonStyle}"/>
-            <RadioButton Content="Теневыносливые" Command="{Binding SelectFilterCommand}" CommandParameter="Теневыносливые" Style="{StaticResource FilterPillRadioButtonStyle}"/>
-        </StackPanel>
+        <ScrollViewer Grid.Row="2" HorizontalScrollBarVisibility="Auto" VerticalScrollBarVisibility="Hidden" Margin="0,20,0,10">
+            <ItemsControl ItemsSource="{Binding AllCategories}">
+                <ItemsControl.ItemsPanel>
+                    <ItemsPanelTemplate>
+                        <StackPanel Orientation="Horizontal"/>
+                    </ItemsPanelTemplate>
+                </ItemsControl.ItemsPanel>
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate>
+                        <RadioButton Content="{Binding}" 
+                                     Command="{Binding DataContext.SelectFilterCommand, RelativeSource={RelativeSource AncestorType=ScrollViewer}}" 
+                                     CommandParameter="{Binding}" 
+                                     Style="{StaticResource FilterPillRadioButtonStyle}">
+                            <RadioButton.IsChecked>
+                                <MultiBinding Converter="{StaticResource EqualityConverter}">
+                                    <Binding Path="."/>
+                                    <Binding Path="DataContext.SelectedFilter" RelativeSource="{RelativeSource AncestorType=ScrollViewer}"/>
+                                </MultiBinding>
+                            </RadioButton.IsChecked>
+                        </RadioButton>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+        </ScrollViewer>
         
         <!-- Plant List -->
         <ListBox Grid.Row="3" ItemsSource="{Binding Plants}" HorizontalContentAlignment="Stretch" ScrollViewer.HorizontalScrollBarVisibility="Disabled" BorderThickness="0" Background="{StaticResource BrushMilkWhite}"

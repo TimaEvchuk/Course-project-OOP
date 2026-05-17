@@ -23,7 +23,7 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <TextBlock Grid.Row="0" Text="Управление каталогом" Style="{StaticResource H1}" Margin="0,0,0,20"/>
+        <TextBlock Grid.Row="0" Text="Управление контентом" Style="{StaticResource H1}" Margin="0,0,0,20"/>
 
         <TabControl Grid.Row="1">
             <TabItem Header="Каталог">
@@ -44,8 +44,8 @@
                                   AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Single">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="*"/>
-                                <DataGridTextColumn Header="Вид" Binding="{Binding Variety}" Width="150"/>
-                                <DataGridTextColumn Header="Освещение" Binding="{Binding LightRequirement}" Width="150"/>
+                                <DataGridTextColumn Header="Вид" Binding="{Binding Variety.Name}" Width="150"/>
+                                <DataGridTextColumn Header="Освещение" Binding="{Binding LightRequirement.Name}" Width="150"/>
                             </DataGrid.Columns>
                         </DataGrid>
 
@@ -77,13 +77,13 @@
                                                 <RowDefinition Height="Auto"/>
                                             </Grid.RowDefinitions>
                                             <Grid.ColumnDefinitions>
-                                                <ColumnDefinition Width="*" MinWidth="130"/>
-                                                <ColumnDefinition Width="*" MinWidth="130"/>
+                                                <ColumnDefinition Width="*" MinWidth="120"/>
+                                                <ColumnDefinition Width="*" MinWidth="125"/>
                                             </Grid.ColumnDefinitions>
 
                                             <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,10,10">
                                                 <TextBlock Text="Вид" Style="{StaticResource Caption}"/>
-                                                <TextBlock Text="{Binding SelectedPlant.Variety}" Style="{StaticResource Body}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
+                                                <TextBlock Text="{Binding SelectedPlant.Variety.Name}" Style="{StaticResource Body}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
                                             </StackPanel>
                                             
                                             <StackPanel Grid.Row="0" Grid.Column="1" Margin="0,0,10,10">
@@ -93,7 +93,7 @@
 
                                             <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,10,10">
                                                 <TextBlock Text="Освещение" Style="{StaticResource Caption}"/>
-                                                <TextBlock Text="{Binding SelectedPlant.LightRequirement}" Style="{StaticResource Body}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
+                                                <TextBlock Text="{Binding SelectedPlant.LightRequirement.Name}" Style="{StaticResource Body}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
                                             </StackPanel>
 
                                             <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,10,10">
@@ -109,7 +109,7 @@
                                         <DataTemplate>
                                             <StackPanel Margin="0,0,0,15">
                                                 <TextBlock Text="{Binding Title}" Style="{StaticResource H3}"/>
-                                                <TextBlock Text="{Binding Content}" Style="{StaticResource Body}" TextWrapping="Wrap"/>
+                                                <TextBlock Text="{Binding Content}" Style="{StaticResource Body}" FontSize="14" TextWrapping="Wrap"/>
                                             </StackPanel>
                                         </DataTemplate>
                                     </ItemsControl.ItemTemplate>
@@ -183,7 +183,7 @@
 
                                             <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,10,10">
                                                 <TextBlock Text="Вид" Style="{StaticResource Caption}"/>
-                                                <TextBlock Text="{Binding SelectedSubmission.Variety}" Style="{StaticResource Body}"/>
+                                                <TextBlock Text="{Binding SelectedSubmission.Variety.Name}" Style="{StaticResource Body}"/>
                                             </StackPanel>
                                             
                                             <StackPanel Grid.Row="0" Grid.Column="1" Margin="0,0,10,10">
@@ -193,7 +193,7 @@
 
                                             <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,10,10">
                                                 <TextBlock Text="Освещение" Style="{StaticResource Caption}"/>
-                                                <TextBlock Text="{Binding SelectedSubmission.LightRequirement}" Style="{StaticResource Body}"/>
+                                                <TextBlock Text="{Binding SelectedSubmission.LightRequirement.Name}" Style="{StaticResource Body}"/>
                                             </StackPanel>
 
                                             <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,10,10">
@@ -204,8 +204,16 @@
                                     </StackPanel>
                                 </Grid>
                                 
-                                <TextBlock Text="Описание" Style="{StaticResource Caption}" Margin="0,10,0,0"/>
-                                <TextBlock Text="{Binding SelectedSubmission.Description}" Style="{StaticResource Body}" TextWrapping="Wrap"/>
+                                <ItemsControl ItemsSource="{Binding SelectedSubmission.Description, Converter={StaticResource JsonToSectionsConverter}}" Margin="0,10,0,0">
+                                    <ItemsControl.ItemTemplate>
+                                        <DataTemplate>
+                                            <StackPanel Margin="0,0,0,15">
+                                                <TextBlock Text="{Binding Title}" Style="{StaticResource H3}"/>
+                                                <TextBlock Text="{Binding Content}" Style="{StaticResource Body}" FontSize="14" TextWrapping="Wrap"/>
+                                            </StackPanel>
+                                        </DataTemplate>
+                                    </ItemsControl.ItemTemplate>
+                                </ItemsControl>
                             </StackPanel>
                         </ScrollViewer>
                     </Grid>
@@ -216,6 +224,51 @@
                             <Button Content="Отклонить" Command="{Binding RejectSubmissionCommand}" IsEnabled="{Binding SelectedSubmission, Converter={StaticResource NullToFalseConverter}}" Margin="10,0,0,0" Style="{StaticResource DeletePlantButtonStyle}"/>
                         </StackPanel>
                     </Border>
+                </Grid>
+            </TabItem>
+            <TabItem Header="Категории" Padding="10">
+                <Grid>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="20"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <!-- Varieties Column -->
+                    <Grid Grid.Column="0">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" Text="Виды растений" Style="{StaticResource H2}" Margin="0,0,0,10"/>
+                        <ListView Grid.Row="1" ItemsSource="{Binding Varieties}" SelectedItem="{Binding SelectedVariety}" DisplayMemberPath="Name"/>
+                        <Border Grid.Row="2" Background="#F0F0F0" Padding="10" Margin="0,10,0,0">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                <Button Content="Добавить" Command="{Binding AddVarietyCommand}" Style="{StaticResource PrimaryActionButtonStyle}"/>
+                                <Button Content="Редактировать" Command="{Binding UpdateVarietyCommand}" IsEnabled="{Binding SelectedVariety, Converter={StaticResource NullToFalseConverter}}" Margin="10,0,0,0" Style="{StaticResource SecondaryButtonStyle}"/>
+                                <Button Content="Удалить" Command="{Binding DeleteVarietyCommand}" IsEnabled="{Binding SelectedVariety, Converter={StaticResource NullToFalseConverter}}" Margin="10,0,0,0" Style="{StaticResource DeletePlantButtonStyle}"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
+
+                    <!-- Light Requirements Column -->
+                    <Grid Grid.Column="2">
+                        <Grid.RowDefinitions>
+                            <RowDefinition Height="Auto"/>
+                            <RowDefinition Height="*"/>
+                            <RowDefinition Height="Auto"/>
+                        </Grid.RowDefinitions>
+                        <TextBlock Grid.Row="0" Text="Требования к свету" Style="{StaticResource H2}" Margin="0,0,0,10"/>
+                        <ListView Grid.Row="1" ItemsSource="{Binding LightRequirements}" SelectedItem="{Binding SelectedLightRequirement}" DisplayMemberPath="Name"/>
+                        <Border Grid.Row="2" Background="#F0F0F0" Padding="10" Margin="0,10,0,0">
+                            <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
+                                <Button Content="Добавить" Command="{Binding AddLightRequirementCommand}" Style="{StaticResource PrimaryActionButtonStyle}"/>
+                                <Button Content="Редактировать" Command="{Binding UpdateLightRequirementCommand}" IsEnabled="{Binding SelectedLightRequirement, Converter={StaticResource NullToFalseConverter}}" Margin="10,0,0,0" Style="{StaticResource SecondaryButtonStyle}"/>
+                                <Button Content="Удалить" Command="{Binding DeleteLightRequirementCommand}" IsEnabled="{Binding SelectedLightRequirement, Converter={StaticResource NullToFalseConverter}}" Margin="10,0,0,0" Style="{StaticResource DeletePlantButtonStyle}"/>
+                            </StackPanel>
+                        </Border>
+                    </Grid>
                 </Grid>
             </TabItem>
         </TabControl>

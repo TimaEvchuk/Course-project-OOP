@@ -11,6 +11,8 @@ namespace Plantify.Data
         IUserPlantRepository UserPlants { get; }
         INotificationRepository Notifications { get; }
         IPlantSubmissionRepository PlantSubmissions { get; }
+        IRepository<Variety> Varieties { get; }
+        IRepository<LightRequirement> LightRequirements { get; }
         Task<int> CompleteAsync();
     }
 }

@@ -22,6 +22,23 @@ namespace Plantify.Migrations
 
             SqlServerModelBuilderExtensions.UseIdentityColumns(modelBuilder);
 
+            modelBuilder.Entity("Plantify.Models.LightRequirement", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("LightRequirements");
+                });
+
             modelBuilder.Entity("Plantify.Models.Notification", b =>
                 {
                     b.Property<int>("Id")
@@ -68,22 +85,24 @@ namespace Plantify.Migrations
                     b.Property<string>("ImagePath")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("LightRequirement")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("LightRequirementId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("Variety")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("VarietyId")
+                        .HasColumnType("int");
 
                     b.Property<int>("WateringInterval")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
+
+                    b.HasIndex("LightRequirementId");
+
+                    b.HasIndex("VarietyId");
 
                     b.ToTable("Plants");
                 });
@@ -131,9 +150,8 @@ namespace Plantify.Migrations
                     b.Property<string>("ImagePath")
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<string>("LightRequirement")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("LightRequirementId")
+                        .HasColumnType("int");
 
                     b.Property<string>("Name")
                         .IsRequired()
@@ -142,16 +160,19 @@ namespace Plantify.Migrations
                     b.Property<int>("SubmittedByUserId")
                         .HasColumnType("int");
 
-                    b.Property<string>("Variety")
-                        .IsRequired()
-                        .HasColumnType("nvarchar(max)");
+                    b.Property<int>("VarietyId")
+                        .HasColumnType("int");
 
                     b.Property<int>("WateringInterval")
                         .HasColumnType("int");
 
                     b.HasKey("Id");
 
+                    b.HasIndex("LightRequirementId");
+
                     b.HasIndex("SubmittedByUserId");
+
+                    b.HasIndex("VarietyId");
 
                     b.ToTable("PlantSubmissions");
                 });
@@ -248,6 +269,23 @@ namespace Plantify.Migrations
                     b.ToTable("UserPlants");
                 });
 
+            modelBuilder.Entity("Plantify.Models.Variety", b =>
+                {
+                    b.Property<int>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("int");
+
+                    SqlServerPropertyBuilderExtensions.UseIdentityColumn(b.Property<int>("Id"));
+
+                    b.Property<string>("Name")
+                        .IsRequired()
+                        .HasColumnType("nvarchar(max)");
+
+                    b.HasKey("Id");
+
+                    b.ToTable("Varieties");
+                });
+
             modelBuilder.Entity("RoleUser", b =>
                 {
                     b.Property<int>("RolesId")
@@ -274,6 +312,25 @@ namespace Plantify.Migrations
                     b.Navigation("User");
                 });
 
+            modelBuilder.Entity("Plantify.Models.Plant", b =>
+                {
+                    b.HasOne("Plantify.Models.LightRequirement", "LightRequirement")
+                        .WithMany()
+                        .HasForeignKey("LightRequirementId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.HasOne("Plantify.Models.Variety", "Variety")
+                        .WithMany()
+                        .HasForeignKey("VarietyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("LightRequirement");
+
+                    b.Navigation("Variety");
+                });
+
             modelBuilder.Entity("Plantify.Models.PlantSection", b =>
                 {
                     b.HasOne("Plantify.Models.Plant", "Plant")
@@ -287,13 +344,29 @@ namespace Plantify.Migrations
 
             modelBuilder.Entity("Plantify.Models.PlantSubmission", b =>
                 {
+                    b.HasOne("Plantify.Models.LightRequirement", "LightRequirement")
+                        .WithMany()
+                        .HasForeignKey("LightRequirementId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
                     b.HasOne("Plantify.Models.User", "SubmittedByUser")
                         .WithMany("SubmittedPlants")
                         .HasForeignKey("SubmittedByUserId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
+                    b.HasOne("Plantify.Models.Variety", "Variety")
+                        .WithMany()
+                        .HasForeignKey("VarietyId")
+                        .OnDelete(DeleteBehavior.Cascade)
+                        .IsRequired();
+
+                    b.Navigation("LightRequirement");
+
                     b.Navigation("SubmittedByUser");
+
+                    b.Navigation("Variety");
                 });
 
             modelBuilder.Entity("Plantify.Models.UserPlant", b =>

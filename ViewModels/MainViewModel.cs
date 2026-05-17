@@ -177,10 +177,10 @@ namespace Plantify.ViewModels
             OverlayViewModel = _serviceProvider.GetRequiredService<AddPlantSuggestionViewModel>();
         }
 
-        public void Receive(ShowAddEditPlantOverlayMessage message)
+        public async void Receive(ShowAddEditPlantOverlayMessage message)
         {
             var vm = _serviceProvider.GetRequiredService<AddEditPlantViewModel>();
-            vm.Initialize(message.Value);
+            await vm.InitializeAsync(message.Value);
             OverlayViewModel = vm;
         }
         

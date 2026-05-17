@@ -1,7 +1,8 @@
 using Plantify.Models;
 using System;
+using System.Collections.Generic;
 using System.IO;
-using System.Windows;
+using System.Linq;
 using System.Windows.Media.Imaging;
 
 namespace Plantify.ViewModels
@@ -12,10 +13,10 @@ namespace Plantify.ViewModels
         public BitmapImage? DisplayImageSource { get; }
 
         public string Name => PlantModel.Name;
-        public string Variety => PlantModel.Variety;
+        public string Variety => PlantModel.Variety.Name;
         public int WateringInterval => PlantModel.WateringInterval;
         public int FertilizingInterval => PlantModel.FertilizingInterval;
-        public List<PlantSection> Sections => PlantModel.Sections;
+        public ICollection<PlantSection> Sections => PlantModel.Sections;
         public string ShortDescription => PlantModel.Sections.FirstOrDefault()?.Content ?? "";
         public string ImagePath => PlantModel.ImagePath ?? "";
 
@@ -40,10 +41,8 @@ namespace Plantify.ViewModels
                 }
             }
 
-            // If no specific image is found, use the placeholder
             if (imageToLoad == null)
             {
-                // Use Pack URI to load the embedded resource
                 imageToLoad = "pack://application:,,,/Images/placeholder.png";
             }
             
@@ -59,7 +58,6 @@ namespace Plantify.ViewModels
             }
             catch (Exception)
             {
-                // If even the placeholder fails, return null
                 return null;
             }
         }

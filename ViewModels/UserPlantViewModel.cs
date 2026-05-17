@@ -15,9 +15,9 @@ namespace Plantify.ViewModels
         public int UserPlantId => _userPlant.Id;
         
         public string Name => _userPlant.CustomName ?? _userPlant.Plant.Name;
-        public string Species => _userPlant.Plant.Variety;
+        public string Species => _userPlant.Plant.Variety.Name;
         public string Location => _userPlant.Location ?? "Не указано";
-        public string LightRequirement => _userPlant.Plant.LightRequirement;
+        public string LightRequirement => _userPlant.Plant.LightRequirement.Name;
 
         public BitmapImage? DisplayImageSource { get; private set; }
 
