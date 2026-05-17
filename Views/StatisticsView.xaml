@@ -1,0 +1,114 @@
+<UserControl x:Class="Plantify.Views.StatisticsView"
+             xmlns="http://schemas.microsoft.com/winfx/2006/xaml/presentation"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
+             xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
+             xmlns:local="clr-namespace:Plantify.Views"
+             xmlns:vm="clr-namespace:Plantify.ViewModels"
+             mc:Ignorable="d" 
+             d:DataContext="{d:DesignInstance vm:StatisticsViewModel}"
+             Background="{StaticResource BrushMilkWhite}">
+    <ScrollViewer Style="{StaticResource ScrollBarStyle}" Padding="30">
+        <StackPanel>
+            <TextBlock Text="Статистика приложения" Style="{StaticResource H1}" Margin="0,0,0,20" VerticalAlignment="Center"/>
+
+            <!-- Stat Widgets -->
+            <WrapPanel Margin="0,0,0,30">
+                <!-- Total Users -->
+                <Border Style="{StaticResource StatWidgetStyle}">
+                    <StackPanel>
+                        <TextBlock Text="{Binding TotalUsersCount}" Style="{StaticResource StatValueStyle}"/>
+                        <TextBlock Text="Всего пользователей" Style="{StaticResource StatLabelStyle}"/>
+                    </StackPanel>
+                </Border>
+                
+                <!-- Premium Users -->
+                <Border Style="{StaticResource StatWidgetStyle}">
+                    <StackPanel>
+                        <TextBlock Text="{Binding PremiumUsersCount}" Style="{StaticResource StatValueStyle}" Foreground="{StaticResource BrushDarkSand}"/>
+                        <TextBlock Text="Premium-пользователей" Style="{StaticResource StatLabelStyle}"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Blocked Users -->
+                <Border Style="{StaticResource StatWidgetStyle}">
+                    <StackPanel>
+                        <TextBlock Text="{Binding BlockedUsersCount}" Style="{StaticResource StatValueStyle}" Foreground="{StaticResource BrushTerracotta}"/>
+                        <TextBlock Text="Заблокировано" Style="{StaticResource StatLabelStyle}"/>
+                    </StackPanel>
+                </Border>
+
+                <!-- Total Plants -->
+                <Border Style="{StaticResource StatWidgetStyle}">
+                    <StackPanel>
+                        <TextBlock Text="{Binding TotalPlantsInGardensCount}" Style="{StaticResource StatValueStyle}" Foreground="{StaticResource BrushForestGreen}"/>
+                        <TextBlock Text="Растений в садах" Style="{StaticResource StatLabelStyle}"/>
+                    </StackPanel>
+                </Border>
+            </WrapPanel>
+
+            <!-- Top Users List -->
+            <TextBlock Text="Топ-5 пользователей по количеству растений" Style="{StaticResource H2}" Margin="0,0,0,10"/>
+            <ItemsControl ItemsSource="{Binding TopUsers}" 
+                          Background="Transparent" 
+                          BorderThickness="0">
+                <ItemsControl.ItemTemplate>
+                    <DataTemplate DataType="vm:UserStatItem">
+                        <Border BorderBrush="{StaticResource BrushBorderGray}" BorderThickness="0,0,0,1" Padding="0,15" Margin="0">
+                            <Grid>
+                                <Grid.ColumnDefinitions>
+                                    <ColumnDefinition Width="Auto"/>
+                                    <ColumnDefinition Width="*"/>
+                                    <ColumnDefinition Width="Auto"/>
+                                </Grid.ColumnDefinitions>
+                                <TextBlock Grid.Column="0" FontWeight="Bold" FontSize="16" Margin="0,0,10,0">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Foreground" Value="{StaticResource BrushDarkGreen}"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Rank}" Value="1">
+                                                    <Setter Property="Foreground" Value="{StaticResource BrushDarkSand}"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Rank}" Value="2">
+                                                    <Setter Property="Foreground" Value="{StaticResource BrushGray}"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Rank}" Value="3">
+                                                    <Setter Property="Foreground" Value="{StaticResource BrushTerracotta}"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                    <Run Text="{Binding Rank}"/>
+                                    <Run Text="."/>
+                                </TextBlock>
+                                <TextBlock Grid.Column="1" Text="{Binding UserName}" FontWeight="Medium" FontSize="16">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Foreground" Value="{StaticResource BrushDarkGreen}"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding Rank}" Value="1">
+                                                    <Setter Property="Foreground" Value="{StaticResource BrushDarkSand}"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Rank}" Value="2">
+                                                    <Setter Property="Foreground" Value="{StaticResource BrushGray}"/>
+                                                </DataTrigger>
+                                                <DataTrigger Binding="{Binding Rank}" Value="3">
+                                                    <Setter Property="Foreground" Value="{StaticResource BrushTerracotta}"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                                <TextBlock Grid.Column="2" FontSize="16" Foreground="{StaticResource BrushGray}">
+                                    <Run Text="{Binding PlantCount}"/>
+                                    <Run Text=" растений"/>
+                                </TextBlock>
+                            </Grid>
+                        </Border>
+                    </DataTemplate>
+                </ItemsControl.ItemTemplate>
+            </ItemsControl>
+            
+        </StackPanel>
+    </ScrollViewer>
+</UserControl>

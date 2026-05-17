@@ -6,7 +6,8 @@
         xmlns:local="clr-namespace:Plantify"
         xmlns:views="clr-namespace:Plantify.Views"
         mc:Ignorable="d"
-        Title="Plantify" Height="720" Width="1280" WindowStartupLocation="CenterScreen">
+        Title="Plantify" Height="720" Width="1280" WindowStartupLocation="CenterScreen"
+        Background="{StaticResource BrushMilkWhite}">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="240"/>

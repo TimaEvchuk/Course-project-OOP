@@ -23,6 +23,13 @@ namespace Plantify.ViewModels
         private readonly IMessenger _messenger;
         private List<User> _allUsers = new();
 
+        // Tab Management
+        [ObservableProperty]
+        private bool _isUsersViewSelected = true;
+
+        [ObservableProperty]
+        private bool _isStatisticsViewSelected = false;
+
         // For dirty checking premium status
         private bool _originalIsPremium;
         private DateTime? _originalPremiumEndDate;
@@ -48,7 +55,6 @@ namespace Plantify.ViewModels
                         IsPremiumSelectedUser = SelectedUser.IsPremium;
                         PremiumStartDateSelectedUser = SelectedUser.PremiumStartDate;
                         PremiumEndDateSelectedUser = SelectedUser.PremiumEndDate;
-                        // Store original values for dirty checking
                         _originalIsPremium = SelectedUser.IsPremium;
                         _originalPremiumEndDate = SelectedUser.PremiumEndDate;
                     }
@@ -84,7 +90,6 @@ namespace Plantify.ViewModels
             {
                 if (SetProperty(ref _isPremiumSelectedUser, value))
                 {
-                    // If toggling to true for the first time, set start date to today
                     if (value == true && _originalIsPremium == false)
                     {
                         PremiumStartDateSelectedUser = DateTime.Today;
@@ -133,13 +138,17 @@ namespace Plantify.ViewModels
 
         public ObservableCollection<User> Users { get; } = new();
         public ObservableCollection<Role> AllRoles { get; } = new();
+        
+        public StatisticsViewModel StatisticsVM { get; }
 
-        public AdminPanelViewModel(IUnitOfWork unitOfWork, AuthenticationService authenticationService, IDialogService dialogService, IMessenger messenger)
+        public AdminPanelViewModel(IUnitOfWork unitOfWork, AuthenticationService authenticationService, IDialogService dialogService, IMessenger messenger, StatisticsViewModel statisticsViewModel)
         {
             _unitOfWork = unitOfWork;
             _authenticationService = authenticationService;
             _dialogService = dialogService;
             _messenger = messenger;
+            StatisticsVM = statisticsViewModel;
+            StatisticsVM.ParentVM = this;
             _messenger.Register<AdminUserListChangedMessage>(this);
             _ = Initialize();
         }
@@ -171,6 +180,21 @@ namespace Plantify.ViewModels
         {
             await LoadRoles();
             await LoadUsers();
+            await StatisticsVM.LoadDataAsync();
+        }
+        
+        [RelayCommand]
+        private void GoToUsersView()
+        {
+            IsUsersViewSelected = true;
+            IsStatisticsViewSelected = false;
+        }
+        
+        [RelayCommand]
+        private void GoToStatisticsView()
+        {
+            IsUsersViewSelected = false;
+            IsStatisticsViewSelected = true;
         }
 
         [RelayCommand]
@@ -285,7 +309,6 @@ namespace Plantify.ViewModels
             _unitOfWork.Users.Update(userToUpdate);
             await _unitOfWork.CompleteAsync();
 
-            // Refresh the list and reset dirty state
             var selectedUserId = SelectedUser.Id;
             await LoadUsers();
             SelectedUser = Users.FirstOrDefault(u => u.Id == selectedUserId);

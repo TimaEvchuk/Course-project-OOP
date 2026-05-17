@@ -4,109 +4,151 @@
              xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006" 
              xmlns:d="http://schemas.microsoft.com/expression/blend/2008" 
              xmlns:local="clr-namespace:Plantify.Views"
+             xmlns:views="clr-namespace:Plantify.Views"
              xmlns:converters="clr-namespace:Plantify.Converters"
              mc:Ignorable="d" 
-             d:DesignHeight="600" d:DesignWidth="1000">
+             d:DesignHeight="700" d:DesignWidth="1000">
     <UserControl.Resources>
         <converters:RolesToStringConverter x:Key="RolesToStringConverter"/>
+        <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
+
+        <!-- Template for the Users View -->
+        <ControlTemplate x:Key="UsersViewTemplate">
+            <Grid>
+                <Grid.RowDefinitions>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="*"/>
+                    <RowDefinition Height="Auto"/>
+                    <RowDefinition Height="Auto"/>
+                </Grid.RowDefinitions>
+
+                <TextBox Grid.Row="0"
+                         Text="{Binding SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
+                         Margin="0,15,0,15"
+                         MinWidth="300"
+                         HorizontalAlignment="Left"
+                         VerticalAlignment="Center"
+                         Tag="Поиск по Email..."
+                         Style="{StaticResource SearchBoxStyle}"/>
+
+                <DataGrid Grid.Row="1"
+                          ItemsSource="{Binding Users}"
+                          SelectedItem="{Binding SelectedUser, Mode=TwoWay}"
+                          AutoGenerateColumns="False"
+                          IsReadOnly="True"
+                          HeadersVisibility="All"
+                          RowHeaderWidth="0"
+                          CanUserAddRows="False">
+                    <DataGrid.Columns>
+                        <DataGridTextColumn Header="Логин" Binding="{Binding Login}" Width="*"/>
+                        <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="2*"/>
+                        <DataGridTemplateColumn Header="Роли" Width="*">
+                            <DataGridTemplateColumn.CellTemplate>
+                                <DataTemplate>
+                                    <TextBlock Text="{Binding Roles, Converter={StaticResource RolesToStringConverter}}" VerticalAlignment="Center" Margin="10,0"/>
+                                </DataTemplate>
+                            </DataGridTemplateColumn.CellTemplate>
+                        </DataGridTemplateColumn>
+                        <DataGridCheckBoxColumn Header="Заблокирован" Binding="{Binding IsBlocked}" Width="Auto"/>
+                        <DataGridCheckBoxColumn Header="Premium" Binding="{Binding IsPremium}" IsReadOnly="True" Width="Auto"/>
+                    </DataGrid.Columns>
+                </DataGrid>
+
+                <GroupBox Header="Управление Premium" Grid.Row="2" Margin="0,20,0,0"
+                          Visibility="{Binding IsUserSelected, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <StackPanel Orientation="Horizontal" Margin="10">
+                        <CheckBox Content="Пользователь Premium"
+                                  IsChecked="{Binding IsPremiumSelectedUser, Mode=TwoWay}"
+                                  VerticalAlignment="Center"
+                                  Margin="0,0,20,0"/>
+                        <TextBlock Text="Дата начала:" VerticalAlignment="Center" Margin="0,0,5,0"
+                                   Visibility="{Binding IsPremiumSelectedUser, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                        <DatePicker SelectedDate="{Binding PremiumStartDateSelectedUser, Mode=TwoWay}"
+                                    Width="120" VerticalAlignment="Center" Margin="0,0,10,0" IsEnabled="False"
+                                    Visibility="{Binding IsPremiumSelectedUser, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                        <TextBlock Text="Дата окончания:" VerticalAlignment="Center" Margin="0,0,5,0"
+                                   Visibility="{Binding IsPremiumSelectedUser, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                        <DatePicker SelectedDate="{Binding PremiumEndDateSelectedUser, Mode=TwoWay}"
+                                    Width="120" VerticalAlignment="Center"
+                                    DisplayDateStart="{Binding Today, Mode=OneWay}"
+                                    Visibility="{Binding IsPremiumSelectedUser, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                        <Button Content="Сохранить"
+                                Command="{Binding SavePremiumCommand}"
+                                IsEnabled="{Binding CanSaveChanges}"
+                                Style="{StaticResource PrimaryActionButtonStyle}"
+                                Margin="20,0,0,0"/>
+                    </StackPanel>
+                </GroupBox>
+
+                <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+                    <Button Content="Добавить пользователя"
+                            Command="{Binding ShowAddUserOverlayCommand}"
+                            Style="{StaticResource PrimaryActionButtonStyle}"
+                            Margin="0,0,10,0"/>
+                    <ComboBox x:Name="RoleSelectorComboBox"
+                              ItemsSource="{Binding AllRoles}"
+                              SelectedItem="{Binding SelectedRoleForChange, Mode=TwoWay}"
+                              DisplayMemberPath="Name"
+                              MinWidth="150"
+                              VerticalAlignment="Center"
+                              Margin="0,0,10,0"/>
+                    <Button Content="Изменить роль" 
+                            IsEnabled="{Binding CanChangeRole}" 
+                            Command="{Binding ChangeUserRoleCommand}"
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            Margin="0,0,10,0"/>
+                    <Button Content="{Binding BlockButtonText}" 
+                            IsEnabled="{Binding CanModifySelectedUser}"
+                            Command="{Binding BlockUserCommand}"
+                            Style="{StaticResource SecondaryButtonStyle}"
+                            Margin="0,0,10,0"/>
+                    <Button Content="Удалить" 
+                            IsEnabled="{Binding CanModifySelectedUser}"
+                            Command="{Binding DeleteUserCommand}"
+                            Background="IndianRed"
+                            Foreground="White"/>
+                </StackPanel>
+            </Grid>
+        </ControlTemplate>
+        
+        <!-- Template for the Statistics View -->
+        <ControlTemplate x:Key="StatisticsViewTemplate">
+            <views:StatisticsView DataContext="{Binding StatisticsVM}"/>
+        </ControlTemplate>
+
     </UserControl.Resources>
-    <Grid Margin="30">
+    
+    <Grid Margin="30,0,30,30">
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/> <!-- New row for premium controls -->
-            <RowDefinition Height="Auto"/> <!-- Row for action buttons -->
         </Grid.RowDefinitions>
 
-        <TextBox Grid.Row="0"
-                 Text="{Binding SearchText, Mode=TwoWay, UpdateSourceTrigger=PropertyChanged}"
-                 Margin="0,0,0,15"
-                 MinWidth="300"
-                 HorizontalAlignment="Left"
-                 VerticalAlignment="Center"
-                 Tag="Поиск по Email..."
-                 Style="{StaticResource SearchBoxStyle}"/>
-
-        <DataGrid Grid.Row="1"
-                  ItemsSource="{Binding Users}"
-                  SelectedItem="{Binding SelectedUser, Mode=TwoWay}"
-                  AutoGenerateColumns="False"
-                  IsReadOnly="True"
-                  HeadersVisibility="All"
-                  RowHeaderWidth="0"
-                  CanUserAddRows="False">
-            <DataGrid.Columns>
-                <DataGridTextColumn Header="Логин" Binding="{Binding Login}" Width="*"/>
-                <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="2*"/>
-                <DataGridTemplateColumn Header="Роли" Width="*">
-                    <DataGridTemplateColumn.CellTemplate>
-                        <DataTemplate>
-                            <TextBlock Text="{Binding Roles, Converter={StaticResource RolesToStringConverter}}" VerticalAlignment="Center" Margin="10,0"/>
-                        </DataTemplate>
-                    </DataGridTemplateColumn.CellTemplate>
-                </DataGridTemplateColumn>
-                <DataGridCheckBoxColumn Header="Заблокирован" Binding="{Binding IsBlocked}" Width="Auto"/>
-                <DataGridCheckBoxColumn Header="Premium" Binding="{Binding IsPremium}" IsReadOnly="True" Width="Auto"/>
-            </DataGrid.Columns>
-        </DataGrid>
-
-        <!-- Premium Management Section -->
-        <GroupBox Header="Управление Premium" Grid.Row="2" Margin="0,20,0,0"
-                  Visibility="{Binding IsUserSelected, Converter={StaticResource BooleanToVisibilityConverter}}">
-            <StackPanel Orientation="Horizontal" Margin="10">
-                <CheckBox Content="Пользователь Premium"
-                          IsChecked="{Binding IsPremiumSelectedUser, Mode=TwoWay}"
-                          VerticalAlignment="Center"
-                          Margin="0,0,20,0"/>
-
-                <TextBlock Text="Дата начала:" VerticalAlignment="Center" Margin="0,0,5,0"
-                           Visibility="{Binding IsPremiumSelectedUser, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                <DatePicker SelectedDate="{Binding PremiumStartDateSelectedUser, Mode=TwoWay}"
-                            Width="120" VerticalAlignment="Center" Margin="0,0,10,0" IsEnabled="False"
-                            Visibility="{Binding IsPremiumSelectedUser, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-
-                <TextBlock Text="Дата окончания:" VerticalAlignment="Center" Margin="0,0,5,0"
-                           Visibility="{Binding IsPremiumSelectedUser, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                <DatePicker SelectedDate="{Binding PremiumEndDateSelectedUser, Mode=TwoWay}"
-                            Width="120" VerticalAlignment="Center"
-                            DisplayDateStart="{Binding Today, Mode=OneWay}"
-                            Visibility="{Binding IsPremiumSelectedUser, Converter={StaticResource BooleanToVisibilityConverter}}"/>
-                <Button Content="Сохранить"
-                        Command="{Binding SavePremiumCommand}"
-                        IsEnabled="{Binding CanSaveChanges}"
-                        Style="{StaticResource PrimaryActionButtonStyle}"
-                        Margin="20,0,0,0"/>
-            </StackPanel>
-        </GroupBox>
-
-        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
-            <Button Content="Добавить пользователя"
-                    Command="{Binding ShowAddUserOverlayCommand}"
-                    Style="{StaticResource PrimaryActionButtonStyle}"
-                    Margin="0,0,10,0"/>
-
-            <ComboBox x:Name="RoleSelectorComboBox"
-                      ItemsSource="{Binding AllRoles}"
-                      SelectedItem="{Binding SelectedRoleForChange, Mode=TwoWay}"
-                      DisplayMemberPath="Name"
-                      MinWidth="150"
-                      VerticalAlignment="Center"
-                      Margin="0,0,10,0"/>
-            <Button Content="Изменить роль" 
-                    IsEnabled="{Binding CanChangeRole}" 
-                    Command="{Binding ChangeUserRoleCommand}"
-                    Style="{StaticResource SecondaryButtonStyle}"
-                    Margin="0,0,10,0"/>
-            <Button Content="{Binding BlockButtonText}" 
-                    IsEnabled="{Binding CanModifySelectedUser}"
-                    Command="{Binding BlockUserCommand}"
-                    Style="{StaticResource SecondaryButtonStyle}"
-                    Margin="0,0,10,0"/>
-            <Button Content="Удалить" 
-                    IsEnabled="{Binding CanModifySelectedUser}"
-                    Command="{Binding DeleteUserCommand}"
-                    Background="IndianRed"
-                    Foreground="White"/>
+        <!-- Tab Header -->
+        <StackPanel Grid.Row="0" Orientation="Horizontal" Margin="0,30,0,10">
+            <RadioButton Content="Пользователи" 
+                         Style="{StaticResource AdminTabRadioButtonStyle}"
+                         IsChecked="{Binding IsUsersViewSelected}"
+                         Command="{Binding GoToUsersViewCommand}"/>
+            <RadioButton Content="Статистика" 
+                         Style="{StaticResource AdminTabRadioButtonStyle}"
+                         IsChecked="{Binding IsStatisticsViewSelected}"
+                         Command="{Binding GoToStatisticsViewCommand}"/>
         </StackPanel>
+
+        <!-- Tab Content -->
+        <ContentControl Grid.Row="1">
+            <ContentControl.Style>
+                <Style TargetType="ContentControl">
+                    <!-- Default to Users View -->
+                    <Setter Property="Template" Value="{StaticResource UsersViewTemplate}"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding IsStatisticsViewSelected}" Value="True">
+                            <Setter Property="Template" Value="{StaticResource StatisticsViewTemplate}"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </ContentControl.Style>
+        </ContentControl>
     </Grid>
 </UserControl>

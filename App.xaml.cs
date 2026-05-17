@@ -61,6 +61,7 @@ namespace Plantify
                     services.AddTransient<ScheduleViewModel>();
                     services.AddTransient<SettingsViewModel>();
                     services.AddTransient<AdminPanelViewModel>();
+                    services.AddTransient<StatisticsViewModel>();
                     services.AddTransient<AddUserViewModel>();
                     services.AddTransient<PremiumPurchaseViewModel>();
                     services.AddTransient<PlantDetailViewModel>();

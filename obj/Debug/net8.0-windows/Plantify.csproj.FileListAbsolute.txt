@@ -208,3 +208,5 @@ D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\r
 D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Styles\TextBoxes.baml
 D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Views\PremiumPurchaseView.g.cs
 D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Views\PremiumPurchaseView.baml
+D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Views\StatisticsView.g.cs
+D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Views\StatisticsView.baml
