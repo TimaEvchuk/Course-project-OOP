@@ -99,7 +99,8 @@
                                         <ColumnDefinition Width="Auto"/>
                                         <ColumnDefinition Width="Auto"/>
                                     </Grid.ColumnDefinitions>
-                                    <TextBlock Grid.Column="0" Text="{Binding Text}" TextWrapping="Wrap" VerticalAlignment="Center"/>
+                                    <TextBlock Grid.Column="0" Text="{Binding Text}" TextWrapping="Wrap" VerticalAlignment="Center"
+                                               Foreground="{StaticResource BrushTerracotta}" FontWeight="Medium"/>
                                     <TextBlock Grid.Column="1" Text="{Binding Timestamp, StringFormat='d MMMM'}" Foreground="Gray" VerticalAlignment="Center" Margin="10,0"/>
                                     <Button Grid.Column="2" Command="{Binding DismissCommand}" Style="{StaticResource NotificationCloseButtonStyle}" Width="20" Height="20" VerticalAlignment="Center"/>
                                 </Grid>

@@ -61,8 +61,7 @@ namespace Plantify.ViewModels
                 var notificationInDb = await _unitOfWork.Notifications.GetByIdAsync(item.NotificationId);
                 if (notificationInDb != null)
                 {
-                    notificationInDb.IsDismissed = true;
-                    _unitOfWork.Notifications.Update(notificationInDb);
+                    _unitOfWork.Notifications.Delete(notificationInDb);
                     await _unitOfWork.CompleteAsync();
                     Notifications.Remove(item);
                     OnPropertyChanged(nameof(HasNotifications));

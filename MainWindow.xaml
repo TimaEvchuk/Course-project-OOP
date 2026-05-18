@@ -107,7 +107,7 @@
             </Border>
 
             <!-- Workspace -->
-            <ContentControl Grid.Row="1" Content="{Binding CurrentViewModel}" Margin="5"/>
+            <ContentControl Grid.Row="1" Content="{Binding CurrentViewModel}"/>
 
             <Popup IsOpen="{Binding IsNotificationsPanelOpen}"
                    Placement="Left"

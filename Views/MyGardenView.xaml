@@ -20,7 +20,7 @@
                 BorderBrush="{StaticResource BrushTerracotta}"
                 BorderThickness="0,0,0,1"
                 Padding="20,10" 
-                Margin="0,0,0,20">
+                Margin="0">
             <Grid>
                 <Grid.ColumnDefinitions>
                     <ColumnDefinition Width="*"/>
@@ -95,7 +95,7 @@
                 </ItemsControl.ItemsPanel>
                 <ItemsControl.ItemTemplate>
                     <DataTemplate>
-                        <Border Background="White" CornerRadius="12" Width="200" Margin="0,0,20,30">
+                        <Border Background="White" CornerRadius="12" Width="200" Margin="0,0,20,20">
                             <Border.Effect>
                                 <DropShadowEffect ShadowDepth="4" BlurRadius="15" Color="{StaticResource ColorForestGreen}" Opacity="0.1"/>
                             </Border.Effect>

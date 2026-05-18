@@ -168,8 +168,9 @@ namespace Plantify.ViewModels
                 }
                 await _unitOfWork.CompleteAsync();
 
+                var icon = actionType == CareActionType.Water ? "💧" : "🌱";
                 var actionText = actionType == CareActionType.Water ? "полито" : "удобрено";
-                var successMessage = $"Успешно {actionText} {confirmedForUpdateVMs.Count} растений.";
+                var successMessage = $"{icon} Успешно {actionText} {confirmedForUpdateVMs.Count} растений!";
                 
                 var notification = new Notification
                 {
@@ -267,7 +268,7 @@ namespace Plantify.ViewModels
             {
                 var notification = new Notification
                 {
-                    Message = $"Требуется полить {wateringCount} растений",
+                    Message = $"💧 Требуется полить {wateringCount} растений!",
                     Timestamp = DateTime.Now,
                     Type = NotificationType.NeedsCare,
                     UserId = userId,
@@ -283,7 +284,7 @@ namespace Plantify.ViewModels
             {
                 var notification = new Notification
                 {
-                    Message = $"Требуется удобрить {fertilizingCount} растений",
+                    Message = $"🌱 Требуется удобрить {fertilizingCount} растений!",
                     Timestamp = DateTime.Now,
                     Type = NotificationType.NeedsCare,
                     UserId = userId,
