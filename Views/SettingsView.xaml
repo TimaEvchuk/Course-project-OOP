@@ -6,151 +6,205 @@
              xmlns:local="clr-namespace:Plantify.Views"
              xmlns:converters="clr-namespace:Plantify.Converters"
              mc:Ignorable="d"
-             d:DesignHeight="450" d:DesignWidth="800">
+             d:DesignHeight="800" d:DesignWidth="1000">
+
+    <UserControl.Resources>
+        <Style x:Key="SettingsCheckBoxStyle" TargetType="CheckBox">
+            <Setter Property="Foreground" Value="{StaticResource BrushDarkGreen}" />
+            <Setter Property="FontSize" Value="14"/>
+            <Setter Property="VerticalContentAlignment" Value="Center"/>
+            <Setter Property="Template">
+                <Setter.Value>
+                    <ControlTemplate TargetType="CheckBox">
+                        <Border x:Name="rowBorder" 
+                                Background="#E6F2E6" 
+                                CornerRadius="8" 
+                                Padding="10,8">
+                            <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                                <Border x:Name="checkBoxBorder"
+                                        Width="24" Height="24"
+                                        BorderBrush="{StaticResource BrushDarkGreen}"
+                                        Background="#FFFFFF"
+                                        BorderThickness="2"
+                                        CornerRadius="6">
+                                    <!-- Checkmark Path -->
+                                    <Path x:Name="checkMark"
+                                          Data="M 4 10 L 9 15 L 18 6"
+                                          Stroke="{StaticResource BrushDarkGreen}"
+                                          StrokeThickness="2.5"
+                                          Stretch="None"
+                                          HorizontalAlignment="Center"
+                                          VerticalAlignment="Center"
+                                          Margin="-4, -5,0,0"
+                                          Visibility="Collapsed"/>
+                                </Border>
+                                <ContentPresenter Margin="12,0,0,0"
+                                                  VerticalAlignment="Center"
+                                                  Content="{TemplateBinding Content}"/>
+                            </StackPanel>
+                        </Border>
+                        <ControlTemplate.Triggers>
+                            <Trigger Property="IsChecked" Value="True">
+                                <Setter TargetName="checkMark" Property="Visibility" Value="Visible"/>
+                            </Trigger>
+                            <Trigger Property="IsMouseOver" Value="True">
+                                <Setter TargetName="rowBorder" Property="Background" Value="#CCF2E6"/>
+                            </Trigger>
+                        </ControlTemplate.Triggers>
+                    </ControlTemplate>
+                </Setter.Value>
+            </Setter>
+        </Style>
+    </UserControl.Resources>
+
     <Grid Margin="20">
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="*"/>
-            <ColumnDefinition Width="20"/>
             <ColumnDefinition Width="*"/>
         </Grid.ColumnDefinitions>
+        <Grid.RowDefinitions>
+            <RowDefinition Height="*"/>
+            <RowDefinition Height="*"/>
+        </Grid.RowDefinitions>
 
-        <!-- Левая колонна -->
-        <StackPanel Grid.Column="0" Orientation="Vertical">
-            <!-- Раздел "Аккаунт" -->
-            <Border Style="{StaticResource StatWidgetStyle}" Padding="20">
-                <DockPanel>
-                    <TextBlock DockPanel.Dock="Top" Text="Управление аккаунтом" Style="{StaticResource H2}" FontSize="24" FontWeight="Bold" Margin="0,0,0,20"/>
+        <!-- Раздел "Аккаунт" (0,0) -->
+        <Border Grid.Row="0" Grid.Column="0" Style="{StaticResource StatWidgetStyle}" Padding="20" Margin="0,0,10,10">
+            <DockPanel>
+                <TextBlock DockPanel.Dock="Top" Text="Управление аккаунтом" Style="{StaticResource H2}" FontSize="24" FontWeight="Bold" Margin="0,0,0,20"/>
 
-                    <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
-                        <Button Content="Сменить пароль" Command="{Binding ShowChangePasswordOverlayCommand}" Style="{StaticResource PrimaryActionButtonStyle}"/>
-                        <Button Content="Выйти из аккаунта" Command="{Binding LogoutCommand}" Style="{StaticResource DestructiveButtonStyle}" Margin="10,0,0,0"/>
-                    </StackPanel>
-
-                    <Grid>
-                        <Grid.ColumnDefinitions>
-                            <ColumnDefinition Width="Auto"/>
-                            <ColumnDefinition Width="*"/>
-                        </Grid.ColumnDefinitions>
-
-                        <!-- Avatar -->
-                        <StackPanel Grid.Column="0" HorizontalAlignment="Center" VerticalAlignment="Top">
-                            <Grid Width="150" Height="150">
-                                <Ellipse Fill="{StaticResource BrushLightForestGreen}"/>
-                                <Ellipse>
-                                    <Ellipse.Fill>
-                                        <ImageBrush ImageSource="{Binding UserAvatarPath}"
-                                                    Stretch="UniformToFill"/>
-                                    </Ellipse.Fill>
-                                </Ellipse>
-                            </Grid>
-                        </StackPanel>
-
-                        <!-- User Info -->
-                        <StackPanel Grid.Column="1" Margin="30,0,0,0" VerticalAlignment="Top">
-                            <TextBlock Text="{Binding UserLogin}" Style="{StaticResource H3}" FontSize="22" FontWeight="Bold"/>
-                            <TextBlock Text="{Binding UserRole}" FontStyle="Italic" Foreground="{StaticResource BrushDarkGray}" FontSize="16" Margin="0,5,0,5"/>
-                            <TextBlock Text="{Binding UserEmail}" Foreground="{StaticResource BrushDarkGray}" FontSize="16" Margin="0,0,0,10"/>
-                            <Button Content="Изменить аватар" Command="{Binding ChangeAvatarCommand}"
-                                    Style="{StaticResource SecondaryButtonStyle}" HorizontalAlignment="Left"/>
-                        </StackPanel>
-                    </Grid>
-                </DockPanel>
-            </Border>
-
-            <!-- Раздел "Уведомления" -->
-            <Border Style="{StaticResource StatWidgetStyle}" Padding="20" Margin="0,20,0,0">
-                <StackPanel>
-                    <TextBlock Text="Управление уведомлениями" Style="{StaticResource H2}" FontSize="24" FontWeight="Bold" Margin="0,0,0,15"/>
-                    <CheckBox IsChecked="{Binding EnableCareNotifications}" Content="Напоминания об уходе" Margin="0,0,0,10"/>
-                    <CheckBox IsChecked="{Binding EnableSuccessNotifications}" Content="Подтверждения действий"/>
+                <StackPanel DockPanel.Dock="Bottom" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,10,0,0">
+                    <Button Content="Сменить пароль" Command="{Binding ShowChangePasswordOverlayCommand}" Style="{StaticResource PrimaryActionButtonStyle}"/>
+                    <Button Content="Выйти из аккаунта" Command="{Binding LogoutCommand}" Style="{StaticResource DestructiveButtonStyle}" Margin="10,0,0,0"/>
                 </StackPanel>
-            </Border>
 
-        </StackPanel>
+                <StackPanel Orientation="Horizontal" VerticalAlignment="Center">
+                    <!-- Avatar -->
+                    <Viewbox MaxWidth="150" MaxHeight="150" HorizontalAlignment="Left" VerticalAlignment="Center">
+                        <Grid Width="150" Height="150">
+                            <Ellipse Fill="{StaticResource BrushLightForestGreen}"/>
+                            <Ellipse>
+                                <Ellipse.Fill>
+                                    <ImageBrush ImageSource="{Binding UserAvatarPath}" Stretch="UniformToFill"/>
+                                </Ellipse.Fill>
+                            </Ellipse>
+                        </Grid>
+                    </Viewbox>
 
-        <!-- Правая колонна -->
-        <Grid Grid.Column="2">
-            <!-- Раздел "Подписка" -->
-            <Border Style="{StaticResource StatWidgetStyle}" Padding="20">
-                <StackPanel>
-                    <TextBlock Text="Управление тарифом" Style="{StaticResource H2}" FontSize="24"
-                               FontWeight="Bold" Margin="0,0,0,15"/>
-
-                    <TextBlock Text="{Binding SubscriptionStatusText}" VerticalAlignment="Center"
-                               Margin="0,0,0,15">
-                        <TextBlock.Style>
-                            <Style TargetType="TextBlock">
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding IsPremium}" Value="False">
-                                        <Setter Property="FontSize" Value="20"/>
-                                        <Setter Property="Foreground" Value="{StaticResource BrushDarkGray}"/>
-                                    </DataTrigger>
-                                    <DataTrigger Binding="{Binding IsPremium}" Value="True">
-                                        <Setter Property="FontSize" Value="20"/>
-                                        <Setter Property="Foreground" Value="Goldenrod"/>
-                                        <Setter Property="FontWeight" Value="Bold"/>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </TextBlock.Style>
-                    </TextBlock>
-
-                    <StackPanel Margin="0,0,0,15" Visibility="{Binding IsPremium, Converter={StaticResource
-                                                      BooleanToVisibilityConverter}}">
-                        <TextBlock FontSize="16">
-                            <Run Text="Дата начала:"/>
-                            <Run Text="{Binding PremiumStartDate, StringFormat=dd.MM.yyyy}" FontWeight="Bold"/>
-                        </TextBlock>
-                        <TextBlock Margin="0,5,0,0" FontSize="16">
-                            <Run Text="Дата окончания:"/>
-                            <Run Text="{Binding PremiumEndDate, StringFormat=dd.MM.yyyy}" FontWeight="Bold"/>
-                        </TextBlock>
+                    <!-- User Info -->
+                    <StackPanel Margin="20,0,0,0" VerticalAlignment="Center">
+                        <TextBlock Text="{Binding UserLogin}" Style="{StaticResource H3}" FontSize="22" FontWeight="Bold"/>
+                        <TextBlock Text="{Binding UserRole}" FontStyle="Italic" Foreground="{StaticResource BrushDarkGray}" FontSize="16" Margin="0,5,0,5"/>
+                        <TextBlock Text="{Binding UserEmail}" Foreground="{StaticResource BrushDarkGray}" FontSize="16" Margin="0,0,0,10"/>
+                        <Button Content="Изменить аватар" Command="{Binding ChangeAvatarCommand}" Style="{StaticResource SecondaryButtonStyle}" HorizontalAlignment="Left"/>
                     </StackPanel>
+                </StackPanel>
+            </DockPanel>
+        </Border>
 
-                    <Button Content="{Binding SubscriptionButtonText}" Command="{Binding
-                                       SubscriptionActionCommand}" HorizontalAlignment="Left" Margin="0,0,0,15">
-                        <Button.Style>
-                            <Style TargetType="Button" BasedOn="{StaticResource PrimaryActionButtonStyle}">
-                                <Style.Triggers>
-                                    <DataTrigger Binding="{Binding IsPremium}" Value="True">
-                                        <Setter Property="Background" Value="{StaticResource BrushTerracotta}"/>
-                                        <Setter Property="Foreground" Value="{StaticResource BrushPureWhite}"/>
-                                        <Setter Property="Template">
-                                            <Setter.Value>
-                                                <ControlTemplate TargetType="Button">
-                                                    <Border x:Name="ButtonBorder" Background="{TemplateBinding
-                                                                Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
-                                                        <ContentPresenter HorizontalAlignment="Center"
-                                                                          VerticalAlignment="Center"/>
-                                                    </Border>
-                                                    <ControlTemplate.Triggers>
-                                                        <Trigger Property="IsMouseOver" Value="True">
-                                                            <Setter TargetName="ButtonBorder"
-                                                                    Property="Background" Value="{StaticResource BrushDarkTerracotta}"/>
-                                                        </Trigger>
-                                                        <Trigger Property="IsEnabled" Value="False">
-                                                            <Setter TargetName="ButtonBorder"
-                                                                    Property="Background" Value="{StaticResource BrushLightGray}"/>
-                                                            <Setter Property="Foreground" Value="{StaticResource
-                                                                BrushGray}"/>
-                                                        </Trigger>
-                                                    </ControlTemplate.Triggers>
-                                                </ControlTemplate>
-                                            </Setter.Value>
-                                        </Setter>
-                                    </DataTrigger>
-                                </Style.Triggers>
-                            </Style>
-                        </Button.Style>
-                    </Button>
+        <!-- Раздел "Подписка" (0,1) -->
+        <Border Grid.Row="0" Grid.Column="1" Style="{StaticResource StatWidgetStyle}" Padding="20" Margin="10,0,0,10">
+            <StackPanel>
+                <TextBlock Text="Управление тарифом" Style="{StaticResource H2}" FontSize="24"
+                           FontWeight="Bold" Margin="0,0,0,15"/>
 
-                    <TextBlock TextWrapping="Wrap" Foreground="{StaticResource BrushDarkGray}" MaxWidth="400" TextAlignment="Left"
-                               Visibility="{Binding IsPremium, Converter={StaticResource
-                               InverseBooleanToVisibilityConverter}}">
-                        <Run Text="*При приобретении Премиум тарифа, вы получаете возможность добавлять неограниченное количество растений в свой сад, а также смотреть сводку задач на месяц вперед."/>
+                <TextBlock Text="{Binding SubscriptionStatusText}" VerticalAlignment="Center"
+                           Margin="0,0,0,15">
+                    <TextBlock.Style>
+                        <Style TargetType="TextBlock">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsPremium}" Value="False">
+                                    <Setter Property="FontSize" Value="20"/>
+                                    <Setter Property="Foreground" Value="{StaticResource BrushDarkGray}"/>
+                                </DataTrigger>
+                                <DataTrigger Binding="{Binding IsPremium}" Value="True">
+                                    <Setter Property="FontSize" Value="20"/>
+                                    <Setter Property="Foreground" Value="Goldenrod"/>
+                                    <Setter Property="FontWeight" Value="Bold"/>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </TextBlock.Style>
+                </TextBlock>
+
+                <StackPanel Margin="0,0,0,15" Visibility="{Binding IsPremium, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    <TextBlock FontSize="16">
+                        <Run Text="Дата начала:"/>
+                        <Run Text="{Binding PremiumStartDate, StringFormat=dd.MM.yyyy}" FontWeight="Bold"/>
+                    </TextBlock>
+                    <TextBlock Margin="0,5,0,0" FontSize="16">
+                        <Run Text="Дата окончания:"/>
+                        <Run Text="{Binding PremiumEndDate, StringFormat=dd.MM.yyyy}" FontWeight="Bold"/>
                     </TextBlock>
                 </StackPanel>
-            </Border>
-        </Grid>
+
+                <Button Content="{Binding SubscriptionButtonText}" Command="{Binding SubscriptionActionCommand}" HorizontalAlignment="Left" Margin="0,0,0,15">
+                    <Button.Style>
+                        <Style TargetType="Button" BasedOn="{StaticResource PrimaryActionButtonStyle}">
+                            <Style.Triggers>
+                                <DataTrigger Binding="{Binding IsPremium}" Value="True">
+                                    <Setter Property="Background" Value="{StaticResource BrushTerracotta}"/>
+                                    <Setter Property="Foreground" Value="{StaticResource BrushPureWhite}"/>
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border x:Name="ButtonBorder" Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                                                    <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
+                                                </Border>
+                                                <ControlTemplate.Triggers>
+                                                    <Trigger Property="IsMouseOver" Value="True">
+                                                        <Setter TargetName="ButtonBorder" Property="Background" Value="{StaticResource BrushDarkTerracotta}"/>
+                                                    </Trigger>
+                                                    <Trigger Property="IsEnabled" Value="False">
+                                                        <Setter TargetName="ButtonBorder" Property="Background" Value="{StaticResource BrushLightGray}"/>
+                                                        <Setter Property="Foreground" Value="{StaticResource BrushGray}"/>
+                                                    </Trigger>
+                                                </ControlTemplate.Triggers>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </DataTrigger>
+                            </Style.Triggers>
+                        </Style>
+                    </Button.Style>
+                </Button>
+
+                <TextBlock TextWrapping="Wrap" Foreground="{StaticResource BrushDarkGray}" MaxWidth="400" TextAlignment="Left"
+                           Visibility="{Binding IsPremium, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                    <Run Text="*При приобретении Премиум тарифа, вы получаете возможность добавлять неограниченное количество растений в свой сад, а также смотреть сводку задач на месяц вперед."/>
+                </TextBlock>
+            </StackPanel>
+        </Border>
+
+        <!-- Раздел "Уведомления" (1,0) -->
+        <Border Grid.Row="1" Grid.Column="0" Style="{StaticResource StatWidgetStyle}" Padding="20" Margin="0,10,10,0">
+            <StackPanel>
+                <TextBlock Text="Управление уведомлениями" Style="{StaticResource H2}" FontSize="24" FontWeight="Bold" Margin="0,0,0,20"/>
+                
+                <CheckBox IsChecked="{Binding EnableCareNotifications}" 
+                          Content="Напоминания об уходе"
+                          Style="{StaticResource SettingsCheckBoxStyle}"/>
+
+                <CheckBox IsChecked="{Binding EnableSuccessNotifications}" 
+                          Content="Подтверждения действий"
+                          Style="{StaticResource SettingsCheckBoxStyle}"
+                          Margin="0,12,0,0"/>
+            </StackPanel>
+        </Border>
+
+        <!-- Раздел "Импорт/Экспорт" (1,1) -->
+        <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource StatWidgetStyle}" Padding="20" Margin="10,10,0,0">
+            <StackPanel>
+                <TextBlock Text="Импорт/Экспорт сада" Style="{StaticResource H2}" FontSize="24" FontWeight="Bold" Margin="0,0,0,15"/>
+                <TextBlock Text="Сохраните ваш сад в файл или загрузите его из ранее сохраненной копии."
+                           TextWrapping="Wrap"
+                           Foreground="{StaticResource BrushDarkGray}"
+                           Margin="0,0,0,20"/>
+                <StackPanel Orientation="Horizontal">
+                    <Button Content="Экспортировать в JSON" Command="{Binding ExportGardenCommand}" Style="{StaticResource SecondaryButtonStyle}"/>
+                    <Button Content="Импортировать из JSON" Command="{Binding ImportGardenCommand}" Style="{StaticResource PrimaryActionButtonStyle}" Margin="10,0,0,0"/>
+                </StackPanel>
+            </StackPanel>
+        </Border>
+
     </Grid>
 </UserControl>

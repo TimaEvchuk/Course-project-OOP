@@ -77,7 +77,8 @@ namespace Plantify
                         s.GetRequiredService<IMessenger>(),
                         s.GetRequiredService<AuthenticationService>(),
                         s.GetRequiredService<IUnitOfWork>(),
-                        s.GetRequiredService<IConfiguration>()));
+                        s.GetRequiredService<IConfiguration>(),
+                        s.GetRequiredService<IDialogService>()));
                     services.AddTransient<AdminPanelViewModel>();
                     services.AddTransient<StatisticsViewModel>();
                     services.AddTransient<AddUserViewModel>();

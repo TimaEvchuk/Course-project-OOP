@@ -46,20 +46,30 @@ namespace Plantify.ViewModels
         [RelayCommand(CanExecute = nameof(CanChangePassword))]
         private async Task ChangePassword()
         {
-            if (_authenticationService.CurrentUser == null)
+            var detachedCurrentUser = _authenticationService.CurrentUser;
+            if (detachedCurrentUser == null)
             {
                 ErrorMessage = "Ошибка: пользователь не авторизован.";
                 return;
             }
 
-            if (!BCrypt.Net.BCrypt.Verify(CurrentPassword, _authenticationService.CurrentUser.PasswordHash))
+            // It's better to re-fetch the user to get the most current password hash for verification
+            var userToUpdate = await _unitOfWork.Users.GetByIdAsync(detachedCurrentUser.Id);
+            if (userToUpdate == null)
+            {
+                ErrorMessage = "Ошибка: не удалось найти пользователя в базе данных.";
+                return;
+            }
+
+            if (!BCrypt.Net.BCrypt.Verify(CurrentPassword, userToUpdate.PasswordHash))
             {
                 ErrorMessage = "Текущий пароль введен неверно.";
                 return;
             }
 
-            _authenticationService.CurrentUser.PasswordHash = BCrypt.Net.BCrypt.HashPassword(NewPassword);
-            await _unitOfWork.Users.UpdateAsync(_authenticationService.CurrentUser);
+            userToUpdate.PasswordHash = BCrypt.Net.BCrypt.HashPassword(NewPassword);
+            
+            // No need to call UpdateAsync, just complete the unit of work
             await _unitOfWork.CompleteAsync();
 
             ErrorMessage = null;

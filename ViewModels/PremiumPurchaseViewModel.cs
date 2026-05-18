@@ -36,9 +36,6 @@ namespace Plantify.ViewModels
                 return;
             }
 
-            // In a real app, this would involve payment processing.
-            // Here, we simulate a successful purchase.
-
             var userToUpdate = await _unitOfWork.Users.GetByIdAsync(_authenticationService.CurrentUser.Id);
             if (userToUpdate == null)
             {
@@ -46,35 +43,34 @@ namespace Plantify.ViewModels
                 return;
             }
 
+            // 1. Update user properties
             userToUpdate.IsPremium = true;
             userToUpdate.PremiumStartDate = DateTime.Today;
-            userToUpdate.PremiumEndDate = DateTime.Today.AddMonths(1); // 1 month subscription
+            userToUpdate.PremiumEndDate = DateTime.Today.AddMonths(1);
 
-            _unitOfWork.Users.Update(userToUpdate);
+            // 2. Save user update to the database
             await _unitOfWork.CompleteAsync();
 
-            // Update the CurrentUser in AuthenticationService to reflect the changes
+            // 3. Update the CurrentUser in AuthenticationService to reflect the changes in the current session
             _authenticationService.CurrentUser.IsPremium = true;
             _authenticationService.CurrentUser.PremiumStartDate = userToUpdate.PremiumStartDate;
             _authenticationService.CurrentUser.PremiumEndDate = userToUpdate.PremiumEndDate;
 
-            // Send notification and update messages
+            // 4. Create a notification object BUT DO NOT SAVE IT HERE
             var enableSuccessNotifications = _configuration.GetValue<bool>("NotificationSettings:EnableSuccessNotifications");
             if (enableSuccessNotifications)
             {
                 var successNotification = new Notification
                 {
-                    UserId = _authenticationService.CurrentUser.Id,
                     Message = "Вы перешли на тариф 'Премиум'!",
-                    Timestamp = DateTime.Now,
                     Type = Models.Enums.NotificationType.ActionSuccess
+                    // UserId and Timestamp will be set by the receiver (MainViewModel)
                 };
-                await _unitOfWork.Notifications.AddAsync(successNotification);
-                await _unitOfWork.CompleteAsync();
-
+                // 5. Send the unsaved notification to the hub (MainViewModel) which will save it
                 _messenger.Send(new NewNotificationMessage(successNotification));
             }
             
+            // 6. Send other UI-related messages
             _messenger.Send(new CloseOverlayMessage());
             _messenger.Send(new PremiumStatusChangedMessage(userToUpdate));
         }

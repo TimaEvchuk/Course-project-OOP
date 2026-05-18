@@ -3,6 +3,7 @@ using System.Windows.Controls;
 using Plantify.Dialogs;
 using Plantify.ViewModels;
 using Plantify.Views;
+using Microsoft.Win32;
 
 namespace Plantify.Services
 {
@@ -52,6 +53,37 @@ namespace Plantify.Services
             dialogWindow.ShowDialog();
 
             return viewModel.DialogResult;
+        }
+
+        public string ShowOpenFileDialog(string filter)
+        {
+            var openFileDialog = new OpenFileDialog
+            {
+                Filter = filter
+            };
+
+            if (openFileDialog.ShowDialog() == true)
+            {
+                return openFileDialog.FileName;
+            }
+
+            return string.Empty;
+        }
+
+        public string ShowSaveFileDialog(string filter, string defaultFileName)
+        {
+            var saveFileDialog = new SaveFileDialog
+            {
+                Filter = filter,
+                FileName = defaultFileName
+            };
+
+            if (saveFileDialog.ShowDialog() == true)
+            {
+                return saveFileDialog.FileName;
+            }
+
+            return string.Empty;
         }
     }
 }

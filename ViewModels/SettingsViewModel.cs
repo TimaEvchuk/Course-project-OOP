@@ -4,7 +4,6 @@ using CommunityToolkit.Mvvm.Messaging;
 using Plantify.Data;
 using Plantify.Messages;
 using Plantify.Services;
-using Microsoft.Win32;
 using System.IO;
 using System;
 using System.Threading.Tasks;
@@ -12,6 +11,10 @@ using System.Linq;
 using Microsoft.Extensions.Configuration;
 using System.Text.Json;
 using System.Text.Json.Nodes;
+using System.Text.Encodings.Web;
+using Plantify.Models.DTOs;
+using System.Collections.Generic;
+using Plantify.Models;
 
 namespace Plantify.ViewModels
 {
@@ -21,6 +24,7 @@ namespace Plantify.ViewModels
         private readonly AuthenticationService _authenticationService;
         private readonly IUnitOfWork _unitOfWork;
         private readonly IConfiguration _configuration;
+        private readonly IDialogService _dialogService;
 
         [ObservableProperty]
         private string? _userLogin;
@@ -55,12 +59,13 @@ namespace Plantify.ViewModels
         [ObservableProperty]
         private bool _enableSuccessNotifications;
 
-        public SettingsViewModel(IMessenger messenger, AuthenticationService authenticationService, IUnitOfWork unitOfWork, IConfiguration configuration)
+        public SettingsViewModel(IMessenger messenger, AuthenticationService authenticationService, IUnitOfWork unitOfWork, IConfiguration configuration, IDialogService dialogService)
         {
             _messenger = messenger;
             _authenticationService = authenticationService;
             _unitOfWork = unitOfWork;
             _configuration = configuration;
+            _dialogService = dialogService;
 
             _messenger.Register(this);
 
@@ -157,21 +162,31 @@ namespace Plantify.ViewModels
         [RelayCommand]
         private async Task SubscriptionAction()
         {
-            var currentUser = _authenticationService.CurrentUser;
-            if (currentUser == null) return;
+            var detachedCurrentUser = _authenticationService.CurrentUser;
+            if (detachedCurrentUser == null) return;
 
             if (IsPremium)
             {
                 // Cancel subscription
-                currentUser.IsPremium = false;
-                currentUser.PremiumStartDate = null;
-                currentUser.PremiumEndDate = null;
-                await _unitOfWork.Users.UpdateAsync(currentUser);
+                var userToUpdate = await _unitOfWork.Users.GetByIdAsync(detachedCurrentUser.Id);
+                if (userToUpdate == null) return;
+
+                userToUpdate.IsPremium = false;
+                userToUpdate.PremiumStartDate = null;
+                userToUpdate.PremiumEndDate = null;
+                
                 await _unitOfWork.CompleteAsync();
+
+                _messenger.Send(new NewNotificationMessage(new Notification { Message = "Подписка успешно отменена.", Type = Models.Enums.NotificationType.ActionSuccess }));
+
+                // Manually update the state of the service's CurrentUser to match
+                detachedCurrentUser.IsPremium = false;
+                detachedCurrentUser.PremiumStartDate = null;
+                detachedCurrentUser.PremiumEndDate = null;
 
                 // Refresh the entire view
                 LoadUserData();
-                _messenger.Send(new PremiumStatusChangedMessage(currentUser));
+                _messenger.Send(new PremiumStatusChangedMessage(detachedCurrentUser));
             }
             else
             {
@@ -202,38 +217,129 @@ namespace Plantify.ViewModels
         [RelayCommand]
         private async Task ChangeAvatar()
         {
-            var openFileDialog = new OpenFileDialog
+            var filePath = _dialogService.ShowOpenFileDialog("Image files (*.png;*.jpeg;*.jpg)|*.png;*.jpeg;*.jpg|All files (*.*)|*.*");
+
+            if (!string.IsNullOrEmpty(filePath))
             {
-                Filter = "Image files (*.png;*.jpeg;*.jpg)|*.png;*.jpeg;*.jpg|All files (*.*)|*.*"
-            };
+                var detachedCurrentUser = _authenticationService.CurrentUser;
+                if (detachedCurrentUser == null) return;
 
-            if (openFileDialog.ShowDialog() == true)
-            {
-                var sourcePath = openFileDialog.FileName;
-                var currentUser = _authenticationService.CurrentUser;
-                if (currentUser == null) return;
-
-                var extension = Path.GetExtension(sourcePath);
-                var fileName = $"avatar_{currentUser.Id}_{DateTime.Now.Ticks}{extension}";
-
-                // Assuming the solution is run from the project's root in debug.
-                // A more robust solution might need a better way to find the project root.
+                // --- Create a unique file path ---
+                var extension = Path.GetExtension(filePath);
+                var fileName = $"avatar_{detachedCurrentUser.Id}_{DateTime.Now.Ticks}{extension}";
+                
                 var projectRoot = AppDomain.CurrentDomain.BaseDirectory;
                 var avatarsDir = Path.GetFullPath(Path.Combine(projectRoot, "..\\..\\..\\Images\\Avatars"));
                 
                 Directory.CreateDirectory(avatarsDir);
                 var destPath = Path.Combine(avatarsDir, fileName);
 
-                File.Copy(sourcePath, destPath, true);
+                File.Copy(filePath, destPath, true);
+                
+                // --- Update database using the correct pattern ---
+                var userToUpdate = await _unitOfWork.Users.GetByIdAsync(detachedCurrentUser.Id);
+                if (userToUpdate == null) return; // Should not happen if user is logged in
 
-                currentUser.AvatarPath = destPath; // Save the absolute path
-                await _unitOfWork.Users.UpdateAsync(currentUser);
+                userToUpdate.AvatarPath = destPath;
+                await _unitOfWork.CompleteAsync();
+                
+                // --- Update UI and session state ---
+                detachedCurrentUser.AvatarPath = destPath; // Update the user object in the auth service
+                UserAvatarPath = destPath; // Update the property bound to the UI
+                _messenger.Send(new UserAvatarChangedMessage(destPath));
+            }
+        }
+
+        [RelayCommand]
+        private async Task ExportGarden()
+        {
+            var currentUser = _authenticationService.CurrentUser;
+            if (currentUser == null) return;
+
+            var defaultFileName = $"plantify_garden_{currentUser.Login}_{DateTime.Now:yyyyMMdd}.json";
+            var filePath = _dialogService.ShowSaveFileDialog("JSON files (*.json)|*.json", defaultFileName);
+
+            if (string.IsNullOrEmpty(filePath)) return;
+
+            var userPlants = await _unitOfWork.UserPlants.FindAsync(up => up.UserId == currentUser.Id);
+            
+            var gardenDto = userPlants.Select(up => new UserPlantDto
+            {
+                PlantId = up.PlantId,
+                CustomName = up.CustomName,
+                Location = up.Location,
+                Description = up.Description,
+                LastUserWateringDate = up.LastUserWateringDate,
+                LastFertilizedDate = up.LastFertilizedDate
+            }).ToList();
+
+            try
+            {
+                var options = new JsonSerializerOptions
+                {
+                    WriteIndented = true,
+                    Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+                };
+                var json = JsonSerializer.Serialize(gardenDto, options);
+                await File.WriteAllTextAsync(filePath, json);
+                
+                _messenger.Send(new NewNotificationMessage(new Notification { Message = "Сад успешно экспортирован!", Type = Models.Enums.NotificationType.ActionSuccess }));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                _messenger.Send(new NewNotificationMessage(new Notification { Message = $"Ошибка экспорта: {ex.Message}", Type = Models.Enums.NotificationType.Warning }));
+            }
+        }
+
+        [RelayCommand]
+        private async Task ImportGarden()
+        {
+            var currentUser = _authenticationService.CurrentUser;
+            if (currentUser == null) return;
+
+            var filePath = _dialogService.ShowOpenFileDialog("JSON files (*.json)|*.json");
+            if (string.IsNullOrEmpty(filePath)) return;
+
+            try
+            {
+                var json = await File.ReadAllTextAsync(filePath);
+                var gardenDto = JsonSerializer.Deserialize<List<UserPlantDto>>(json);
+
+                if (gardenDto == null || !gardenDto.Any())
+                {
+                    _messenger.Send(new NewNotificationMessage(new Notification { Message = "Файл импорта пуст или некорректен.", Type = Models.Enums.NotificationType.Warning }));
+                    return;
+                }
+
+                // Удаляем старые растения
+                var oldUserPlants = await _unitOfWork.UserPlants.FindAsync(up => up.UserId == currentUser.Id);
+                _unitOfWork.UserPlants.RemoveRange(oldUserPlants);
+
+                // Добавляем новые
+                var newUserPlants = gardenDto.Select(dto => new UserPlant
+                {
+                    UserId = currentUser.Id,
+                    PlantId = dto.PlantId,
+                    CustomName = dto.CustomName,
+                    Location = dto.Location,
+                    Description = dto.Description,
+                    LastUserWateringDate = dto.LastUserWateringDate,
+                    LastFertilizedDate = dto.LastFertilizedDate
+                }).ToList();
+
+                await _unitOfWork.UserPlants.AddRangeAsync(newUserPlants);
                 await _unitOfWork.CompleteAsync();
 
-                // Update the UI
-                UserAvatarPath = currentUser.AvatarPath;
-                _messenger.Send(new UserAvatarChangedMessage(UserAvatarPath));
+                _messenger.Send(new GardenStateChangedMessage());
+                _messenger.Send(new NewNotificationMessage(new Notification { Message = "Сад успешно импортирован!", Type = Models.Enums.NotificationType.ActionSuccess }));
+            }
+            catch (Exception ex)
+            {
+                Console.WriteLine(ex);
+                _messenger.Send(new NewNotificationMessage(new Notification { Message = $"Ошибка импорта: {ex.Message}", Type = Models.Enums.NotificationType.Warning }));
             }
         }
     }
 }
+

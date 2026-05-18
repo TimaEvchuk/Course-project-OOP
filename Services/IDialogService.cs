@@ -6,5 +6,7 @@ namespace Plantify.Services
     {
         ConfirmationDialogResult ShowConfirmationDialog(string message, bool showApplyToAll = false);
         InputDialogResult ShowInputDialog(string title, string message, string defaultText = "");
+        string ShowOpenFileDialog(string filter);
+        string ShowSaveFileDialog(string filter, string defaultFileName);
     }
 }
