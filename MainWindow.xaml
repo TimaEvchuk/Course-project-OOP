@@ -5,6 +5,7 @@
         xmlns:mc="http://schemas.openxmlformats.org/markup-compatibility/2006"
         xmlns:local="clr-namespace:Plantify"
         xmlns:views="clr-namespace:Plantify.Views"
+        xmlns:vm="clr-namespace:Plantify.ViewModels"
         mc:Ignorable="d"
         Title="Plantify" Height="720" Width="1280" WindowStartupLocation="CenterScreen"
         Background="{StaticResource BrushMilkWhite}">
@@ -20,21 +21,27 @@
             <StackPanel>
                 <TextBlock Text="Plantify" Style="{StaticResource H1}" Margin="20"/>
                 <StackPanel Margin="0,20,0,0">
-                    <RadioButton Content="Мой сад" Command="{Binding GoToMyGardenCommand}" IsChecked="True" Style="{StaticResource SidebarRadioButtonStyle}"/>
-                    <RadioButton Content="Энциклопедия" Command="{Binding GoToEncyclopediaCommand}" Style="{StaticResource SidebarRadioButtonStyle}"/>
-                    <RadioButton Content="Дэшборд" Command="{Binding GoToDashboardCommand}" Style="{StaticResource SidebarRadioButtonStyle}"/>
+                    <RadioButton Content="Мой сад" Command="{Binding GoToMyGardenCommand}" Style="{StaticResource SidebarRadioButtonStyle}"
+                                 IsChecked="{Binding CurrentViewModel, Converter={StaticResource ViewModelTypeToBooleanConverter}, ConverterParameter={x:Type vm:MyGardenViewModel}}"/>
+                    <RadioButton Content="Энциклопедия" Command="{Binding GoToEncyclopediaCommand}" Style="{StaticResource SidebarRadioButtonStyle}"
+                                 IsChecked="{Binding CurrentViewModel, Converter={StaticResource ViewModelTypeToBooleanConverter}, ConverterParameter={x:Type vm:EncyclopediaViewModel}}"/>
+                    <RadioButton Content="Дэшборд" Command="{Binding GoToDashboardCommand}" Style="{StaticResource SidebarRadioButtonStyle}"
+                                 IsChecked="{Binding CurrentViewModel, Converter={StaticResource ViewModelTypeToBooleanConverter}, ConverterParameter={x:Type vm:DashboardViewModel}}"/>
                     
                     <!-- Role-specific panels -->
                     <RadioButton Content="Админ-панель" 
                                  Command="{Binding GoToAdminPanelCommand}" 
                                  Style="{StaticResource SidebarRadioButtonStyle}"
-                                 Visibility="{Binding IsAdmin, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                 Visibility="{Binding IsAdmin, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                 IsChecked="{Binding CurrentViewModel, Converter={StaticResource ViewModelTypeToBooleanConverter}, ConverterParameter={x:Type vm:AdminPanelViewModel}}"/>
                     <RadioButton Content="Менеджер-панель" 
                                  Command="{Binding GoToContentManagerPanelCommand}" 
                                  Style="{StaticResource SidebarRadioButtonStyle}"
-                                 Visibility="{Binding IsContentManager, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                                 Visibility="{Binding IsContentManager, Converter={StaticResource BooleanToVisibilityConverter}}"
+                                 IsChecked="{Binding CurrentViewModel, Converter={StaticResource ViewModelTypeToBooleanConverter}, ConverterParameter={x:Type vm:PlantManagementViewModel}}"/>
                     
-                    <RadioButton Content="Настройки" Command="{Binding GoToSettingsCommand}" Style="{StaticResource SidebarRadioButtonStyle}"/>
+                    <RadioButton Content="Настройки" Command="{Binding GoToSettingsCommand}" Style="{StaticResource SidebarRadioButtonStyle}"
+                                 IsChecked="{Binding CurrentViewModel, Converter={StaticResource ViewModelTypeToBooleanConverter}, ConverterParameter={x:Type vm:SettingsViewModel}}"/>
                 </StackPanel>
             </StackPanel>
         </Border>
@@ -113,7 +120,32 @@
                             <Image Source="{Binding NotificationIconPath}" Width="24" Height="24"/>
                         </ToggleButton>
 
-                        <Ellipse Fill="{StaticResource BrushForestGreen}" Width="40" Height="40" Margin="15,0,0,0"/>
+                        <Button Command="{Binding GoToSettingsCommand}" Margin="15,0,0,0">
+                            <Button.Style>
+                                <Style TargetType="Button">
+                                    <Setter Property="Background" Value="Transparent"/>
+                                    <Setter Property="BorderThickness" Value="0"/>
+                                    <Setter Property="Cursor" Value="Hand"/>
+                                    <Setter Property="Template">
+                                        <Setter.Value>
+                                            <ControlTemplate TargetType="Button">
+                                                <Border Background="{TemplateBinding Background}" BorderThickness="{TemplateBinding BorderThickness}">
+                                                    <ContentPresenter/>
+                                                </Border>
+                                            </ControlTemplate>
+                                        </Setter.Value>
+                                    </Setter>
+                                </Style>
+                            </Button.Style>
+                            <Grid Width="40" Height="40">
+                                <Ellipse Fill="{StaticResource BrushForestGreen}"/>
+                                <Ellipse>
+                                    <Ellipse.Fill>
+                                        <ImageBrush ImageSource="{Binding CurrentUserAvatarPath}" Stretch="UniformToFill"/>
+                                    </Ellipse.Fill>
+                                </Ellipse>
+                            </Grid>
+                        </Button>
                     </StackPanel>
                 </Grid>
             </Border>

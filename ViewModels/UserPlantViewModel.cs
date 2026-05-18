@@ -14,10 +14,10 @@ namespace Plantify.ViewModels
 
         public int UserPlantId => _userPlant.Id;
         
-        public string Name => _userPlant.CustomName ?? _userPlant.Plant.Name;
-        public string Species => _userPlant.Plant.Variety.Name;
+        public string Name => _userPlant.CustomName ?? _userPlant.Plant?.Name ?? "Неизвестное растение";
+        public string Species => _userPlant.Plant?.Variety?.Name ?? "Неизвестно";
         public string Location => _userPlant.Location ?? "Не указано";
-        public string LightRequirement => _userPlant.Plant.LightRequirement.Name;
+        public string LightRequirement => _userPlant.Plant?.LightRequirement?.Name ?? "Неизвестно";
 
         public BitmapImage? DisplayImageSource { get; private set; }
 
@@ -83,16 +83,11 @@ namespace Plantify.ViewModels
                 }
             }
             
-            if (imageToLoad == null)
-            {
-                imageToLoad = "pack://application:,,,/Images/placeholder.png";
-            }
-
             try
             {
                 var bitmap = new BitmapImage();
                 bitmap.BeginInit();
-                bitmap.UriSource = new Uri(imageToLoad, UriKind.RelativeOrAbsolute);
+                bitmap.UriSource = new Uri(imageToLoad ?? "pack://application:,,,/Images/placeholder.png", UriKind.RelativeOrAbsolute);
                 bitmap.CacheOption = BitmapCacheOption.OnLoad;
                 bitmap.EndInit();
                 bitmap.Freeze(); 
@@ -100,7 +95,22 @@ namespace Plantify.ViewModels
             }
             catch (Exception)
             {
-                return null; 
+                // If the primary image fails, try the placeholder as a fallback.
+                try
+                {
+                    var fallback = new BitmapImage();
+                    fallback.BeginInit();
+                    fallback.UriSource = new Uri("pack://application:,,,/Images/placeholder.png", UriKind.RelativeOrAbsolute);
+                    fallback.CacheOption = BitmapCacheOption.OnLoad;
+                    fallback.EndInit();
+                    fallback.Freeze();
+                    return fallback;
+                }
+                catch
+                {
+                    // If even the placeholder fails, return an empty image to avoid a null crash.
+                    return new BitmapImage();
+                }
             }
         }
     }

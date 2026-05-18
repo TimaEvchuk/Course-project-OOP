@@ -9,6 +9,7 @@ namespace Plantify.Models
         public string Email { get; set; } = null!;
         public string PasswordHash { get; set; } = null!;
         public string Login { get; set; } = null!;
+        public string? AvatarPath { get; set; }
         public bool IsBlocked { get; set; }
         public bool IsPremium { get; set; }
         public DateTime? PremiumStartDate { get; set; }

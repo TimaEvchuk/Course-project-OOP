@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.Extensions.Configuration;
 using Plantify.Data;
 using Plantify.Messages;
 using Plantify.Models;
@@ -16,12 +17,14 @@ namespace Plantify.ViewModels
         private readonly IMessenger _messenger;
         private readonly AuthenticationService _authenticationService;
         private readonly IUnitOfWork _unitOfWork;
+        private readonly IConfiguration _configuration;
 
-        public PremiumPurchaseViewModel(IMessenger messenger, AuthenticationService authenticationService, IUnitOfWork unitOfWork)
+        public PremiumPurchaseViewModel(IMessenger messenger, AuthenticationService authenticationService, IUnitOfWork unitOfWork, IConfiguration configuration)
         {
             _messenger = messenger;
             _authenticationService = authenticationService;
             _unitOfWork = unitOfWork;
+            _configuration = configuration;
         }
 
         [RelayCommand]
@@ -56,17 +59,21 @@ namespace Plantify.ViewModels
             _authenticationService.CurrentUser.PremiumEndDate = userToUpdate.PremiumEndDate;
 
             // Send notification and update messages
-            var successNotification = new Notification
+            var enableSuccessNotifications = _configuration.GetValue<bool>("NotificationSettings:EnableSuccessNotifications");
+            if (enableSuccessNotifications)
             {
-                UserId = _authenticationService.CurrentUser.Id,
-                Message = "Вы перешли на тариф 'Премиум'!",
-                Timestamp = DateTime.Now,
-                Type = Models.Enums.NotificationType.ActionSuccess
-            };
-            await _unitOfWork.Notifications.AddAsync(successNotification);
-            await _unitOfWork.CompleteAsync();
+                var successNotification = new Notification
+                {
+                    UserId = _authenticationService.CurrentUser.Id,
+                    Message = "Вы перешли на тариф 'Премиум'!",
+                    Timestamp = DateTime.Now,
+                    Type = Models.Enums.NotificationType.ActionSuccess
+                };
+                await _unitOfWork.Notifications.AddAsync(successNotification);
+                await _unitOfWork.CompleteAsync();
 
-            _messenger.Send(new NewNotificationMessage(successNotification));
+                _messenger.Send(new NewNotificationMessage(successNotification));
+            }
             
             _messenger.Send(new CloseOverlayMessage());
             _messenger.Send(new PremiumStatusChangedMessage(userToUpdate));

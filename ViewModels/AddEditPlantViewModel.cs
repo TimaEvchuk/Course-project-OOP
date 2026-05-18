@@ -25,11 +25,17 @@ namespace Plantify.ViewModels
         private Plant? _plantToEdit;
 
         [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(SaveCommand))]
         private string? _plantName;
+        
         [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(SaveCommand))]
         private Variety? _selectedVariety;
+        
         [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(SaveCommand))]
         private LightRequirement? _selectedLightRequirement;
+
         [ObservableProperty]
         private int _wateringInterval;
         [ObservableProperty]
@@ -119,6 +125,8 @@ namespace Plantify.ViewModels
                 ImagePath = null;
                 Sections.Add(new PlantSectionViewModel { Title = "Описание", Content = "" });
             }
+            // Manually trigger re-evaluation after initialization
+            SaveCommand.NotifyCanExecuteChanged();
         }
         
         [RelayCommand]
@@ -136,15 +144,24 @@ namespace Plantify.ViewModels
             }
         }
 
-        [RelayCommand]
+        private bool CanSave()
+        {
+            var canSaveResult = !string.IsNullOrWhiteSpace(PlantName) &&
+                                PlantName.Length >= 2 &&
+                                SelectedVariety != null &&
+                                SelectedLightRequirement != null;
+            
+            MessageBox.Show($"CanSave evaluated: {canSaveResult}\n" +
+                            $"PlantName: '{PlantName}' ({(PlantName?.Length ?? 0)} chars)\n" +
+                            $"SelectedVariety: {SelectedVariety?.Name ?? "null"}\n" +
+                            $"SelectedLightRequirement: {SelectedLightRequirement?.Name ?? "null"}");
+
+            return canSaveResult;
+        }
+
+        [RelayCommand(CanExecute = nameof(CanSave))]
         private async Task Save()
         {
-            if (string.IsNullOrWhiteSpace(PlantName) || SelectedVariety == null || SelectedLightRequirement == null)
-            {
-                ErrorMessage = "Пожалуйста, заполните все обязательные поля.";
-                return;
-            }
-
             ErrorMessage = null;
             
             ProcessImageFile(ImagePath);
@@ -158,7 +175,7 @@ namespace Plantify.ViewModels
             else
             {
                 plantToSave = new Plant();
-                _unitOfWork.Plants.AddAsync(plantToSave);
+                await _unitOfWork.Plants.AddAsync(plantToSave);
             }
 
             plantToSave.Name = PlantName;

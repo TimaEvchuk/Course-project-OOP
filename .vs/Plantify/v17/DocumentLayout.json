@@ -3,54 +3,8 @@
   "WorkspaceRootPath": "D:\\2 \u043A\u0443\u0440\u0441\\\u041E\u041E\u041F\\Course-project\\Plantify\\Plantify\\",
   "Documents": [
     {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/PlantifyDB/True/SqlTable/dbo.Users.sql||{0058A1F7-65F3-4DB9-B3D0-CA7E64DD73CD}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{C19E7593-2182-4DC1-BDD5-C73E07E1673D}|Plantify.csproj|d:\\2 \u043A\u0443\u0440\u0441\\\u043E\u043E\u043F\\course-project\\plantify\\plantify\\views\\plantmanagementview.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
-      "RelativeMoniker": "D:0:0:{C19E7593-2182-4DC1-BDD5-C73E07E1673D}|Plantify.csproj|solutionrelative:views\\plantmanagementview.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{C19E7593-2182-4DC1-BDD5-C73E07E1673D}|Plantify.csproj|d:\\2 \u043A\u0443\u0440\u0441\\\u043E\u043E\u043F\\course-project\\plantify\\plantify\\views\\plantdetailview.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
-      "RelativeMoniker": "D:0:0:{C19E7593-2182-4DC1-BDD5-C73E07E1673D}|Plantify.csproj|solutionrelative:views\\plantdetailview.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\timae\\AppData\\Local\\Temp\\.vsdbgsrc\\79af52176639c5284dddaaa3052cf59d36ff5644fb998b01e73e55f38e873233\\DependencyObject.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{C19E7593-2182-4DC1-BDD5-C73E07E1673D}|Plantify.csproj|d:\\2 \u043A\u0443\u0440\u0441\\\u043E\u043E\u043F\\course-project\\plantify\\plantify\\views\\addeditplantview.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
-      "RelativeMoniker": "D:0:0:{C19E7593-2182-4DC1-BDD5-C73E07E1673D}|Plantify.csproj|solutionrelative:views\\addeditplantview.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/PlantifyDB/True/SqlTable/dbo.Plants.sql||{0058A1F7-65F3-4DB9-B3D0-CA7E64DD73CD}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/PlantifyDB/True/SqlTable/dbo.PlantSubmissions.sql||{0058A1F7-65F3-4DB9-B3D0-CA7E64DD73CD}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/PlantifyDB/True/SqlTable/dbo.PlantSections.sql||{0058A1F7-65F3-4DB9-B3D0-CA7E64DD73CD}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{C19E7593-2182-4DC1-BDD5-C73E07E1673D}|Plantify.csproj|d:\\2 \u043A\u0443\u0440\u0441\\\u043E\u043E\u043F\\course-project\\plantify\\plantify\\views\\statisticsview.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
-      "RelativeMoniker": "D:0:0:{C19E7593-2182-4DC1-BDD5-C73E07E1673D}|Plantify.csproj|solutionrelative:views\\statisticsview.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{A2FE74E1-B743-11D0-AE1A-00A0C90FFFC3}|\u003CMiscFiles\u003E|C:\\Users\\timae\\AppData\\Local\\Temp\\.vsdbgsrc\\1b77cb146b3dc6f60ca3b7de619b68fc3904b4f03155b255fa425d7d7bd36ae9\\PropertyPathWorker.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{C19E7593-2182-4DC1-BDD5-C73E07E1673D}|Plantify.csproj|d:\\2 \u043A\u0443\u0440\u0441\\\u043E\u043E\u043F\\course-project\\plantify\\plantify\\plantify.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|",
-      "RelativeMoniker": "D:0:0:{C19E7593-2182-4DC1-BDD5-C73E07E1673D}|Plantify.csproj|solutionrelative:plantify.csproj||{FA3CD31E-987B-443A-9B81-186104E8DAC1}|"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{C19E7593-2182-4DC1-BDD5-C73E07E1673D}|Plantify.csproj|d:\\2 \u043A\u0443\u0440\u0441\\\u043E\u043E\u043F\\course-project\\plantify\\plantify\\viewmodels\\adminpanelviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}",
-      "RelativeMoniker": "D:0:0:{C19E7593-2182-4DC1-BDD5-C73E07E1673D}|Plantify.csproj|solutionrelative:viewmodels\\adminpanelviewmodel.cs||{A6C744A8-0E4A-4FC6-886A-064283054674}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{C19E7593-2182-4DC1-BDD5-C73E07E1673D}|Plantify.csproj|d:\\2 \u043A\u0443\u0440\u0441\\\u043E\u043E\u043F\\course-project\\plantify\\plantify\\views\\adduserplantview.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
-      "RelativeMoniker": "D:0:0:{C19E7593-2182-4DC1-BDD5-C73E07E1673D}|Plantify.csproj|solutionrelative:views\\adduserplantview.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
-    },
-    {
-      "AbsoluteMoniker": "D:0:0:{C19E7593-2182-4DC1-BDD5-C73E07E1673D}|Plantify.csproj|d:\\2 \u043A\u0443\u0440\u0441\\\u043E\u043E\u043F\\course-project\\plantify\\plantify\\views\\adduserview.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
-      "RelativeMoniker": "D:0:0:{C19E7593-2182-4DC1-BDD5-C73E07E1673D}|Plantify.csproj|solutionrelative:views\\adduserview.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
+      "AbsoluteMoniker": "D:0:0:{C19E7593-2182-4DC1-BDD5-C73E07E1673D}|Plantify.csproj|d:\\2 \u043A\u0443\u0440\u0441\\\u043E\u043E\u043F\\course-project\\plantify\\plantify\\views\\settingsview.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}",
+      "RelativeMoniker": "D:0:0:{C19E7593-2182-4DC1-BDD5-C73E07E1673D}|Plantify.csproj|solutionrelative:views\\settingsview.xaml||{F11ACC28-31D1-4C80-A34B-F4E09D3D753C}"
     }
   ],
   "DocumentGroupContainers": [
@@ -85,149 +39,14 @@
             {
               "$type": "Document",
               "DocumentIndex": 0,
-              "Title": "dbo.Users.sql",
-              "DocumentMoniker": "ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/PlantifyDB/True/SqlTable/dbo.Users.sql",
-              "ToolTip": "ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/PlantifyDB/True/SqlTable/dbo.Users.sql",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000826|",
-              "WhenOpened": "2026-05-17T20:53:25.629Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 2,
-              "Title": "PlantDetailView.xaml",
-              "DocumentMoniker": "D:\\2 \u043A\u0443\u0440\u0441\\\u041E\u041E\u041F\\Course-project\\Plantify\\Plantify\\Views\\PlantDetailView.xaml",
-              "RelativeDocumentMoniker": "Views\\PlantDetailView.xaml",
-              "ToolTip": "D:\\2 \u043A\u0443\u0440\u0441\\\u041E\u041E\u041F\\Course-project\\Plantify\\Plantify\\Views\\PlantDetailView.xaml",
-              "RelativeToolTip": "Views\\PlantDetailView.xaml",
+              "Title": "SettingsView.xaml",
+              "DocumentMoniker": "D:\\2 \u043A\u0443\u0440\u0441\\\u041E\u041E\u041F\\Course-project\\Plantify\\Plantify\\Views\\SettingsView.xaml",
+              "RelativeDocumentMoniker": "Views\\SettingsView.xaml",
+              "ToolTip": "D:\\2 \u043A\u0443\u0440\u0441\\\u041E\u041E\u041F\\Course-project\\Plantify\\Plantify\\Views\\SettingsView.xaml",
+              "RelativeToolTip": "Views\\SettingsView.xaml",
               "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2026-05-17T13:56:29.65Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 1,
-              "Title": "PlantManagementView.xaml",
-              "DocumentMoniker": "D:\\2 \u043A\u0443\u0440\u0441\\\u041E\u041E\u041F\\Course-project\\Plantify\\Plantify\\Views\\PlantManagementView.xaml",
-              "RelativeDocumentMoniker": "Views\\PlantManagementView.xaml",
-              "ToolTip": "D:\\2 \u043A\u0443\u0440\u0441\\\u041E\u041E\u041F\\Course-project\\Plantify\\Plantify\\Views\\PlantManagementView.xaml",
-              "RelativeToolTip": "Views\\PlantManagementView.xaml",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2026-05-17T13:50:20.256Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 3,
-              "Title": "DependencyObject.cs",
-              "DocumentMoniker": "C:\\Users\\timae\\AppData\\Local\\Temp\\.vsdbgsrc\\79af52176639c5284dddaaa3052cf59d36ff5644fb998b01e73e55f38e873233\\DependencyObject.cs",
-              "ToolTip": "C:\\Users\\timae\\AppData\\Local\\Temp\\.vsdbgsrc\\79af52176639c5284dddaaa3052cf59d36ff5644fb998b01e73e55f38e873233\\DependencyObject.cs [\u0422\u043E\u043B\u044C\u043A\u043E \u0447\u0442\u0435\u043D\u0438\u0435]",
-              "ViewState": "AgIAAAICAAAAAAAAAAAgwAQCAAACAAAAAQAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-17T12:42:52.747Z",
-              "EditorCaption": " [\u0422\u043E\u043B\u044C\u043A\u043E \u0447\u0442\u0435\u043D\u0438\u0435]"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 4,
-              "Title": "AddEditPlantView.xaml",
-              "DocumentMoniker": "D:\\2 \u043A\u0443\u0440\u0441\\\u041E\u041E\u041F\\Course-project\\Plantify\\Plantify\\Views\\AddEditPlantView.xaml",
-              "RelativeDocumentMoniker": "Views\\AddEditPlantView.xaml",
-              "ToolTip": "D:\\2 \u043A\u0443\u0440\u0441\\\u041E\u041E\u041F\\Course-project\\Plantify\\Plantify\\Views\\AddEditPlantView.xaml",
-              "RelativeToolTip": "Views\\AddEditPlantView.xaml",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2026-05-17T12:39:52.777Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 7,
-              "Title": "dbo.PlantSections.sql",
-              "DocumentMoniker": "ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/PlantifyDB/True/SqlTable/dbo.PlantSections.sql",
-              "ToolTip": "ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/PlantifyDB/True/SqlTable/dbo.PlantSections.sql",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000826|",
-              "WhenOpened": "2026-05-17T10:52:39.919Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 6,
-              "Title": "dbo.PlantSubmissions.sql",
-              "DocumentMoniker": "ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/PlantifyDB/True/SqlTable/dbo.PlantSubmissions.sql",
-              "ToolTip": "ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/PlantifyDB/True/SqlTable/dbo.PlantSubmissions.sql",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000826|",
-              "WhenOpened": "2026-05-17T10:52:34.694Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 5,
-              "Title": "dbo.Plants.sql",
-              "DocumentMoniker": "ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/PlantifyDB/True/SqlTable/dbo.Plants.sql",
-              "ToolTip": "ViewDataWindow_MSSQL__/_localdb__MSSQLLocalDB/PlantifyDB/True/SqlTable/dbo.Plants.sql",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000826|",
-              "WhenOpened": "2026-05-17T10:50:49.961Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 8,
-              "Title": "StatisticsView.xaml",
-              "DocumentMoniker": "D:\\2 \u043A\u0443\u0440\u0441\\\u041E\u041E\u041F\\Course-project\\Plantify\\Plantify\\Views\\StatisticsView.xaml",
-              "RelativeDocumentMoniker": "Views\\StatisticsView.xaml",
-              "ToolTip": "D:\\2 \u043A\u0443\u0440\u0441\\\u041E\u041E\u041F\\Course-project\\Plantify\\Plantify\\Views\\StatisticsView.xaml",
-              "RelativeToolTip": "Views\\StatisticsView.xaml",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2026-05-17T08:12:16.606Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 9,
-              "Title": "PropertyPathWorker.cs",
-              "DocumentMoniker": "C:\\Users\\timae\\AppData\\Local\\Temp\\.vsdbgsrc\\1b77cb146b3dc6f60ca3b7de619b68fc3904b4f03155b255fa425d7d7bd36ae9\\PropertyPathWorker.cs",
-              "ToolTip": "C:\\Users\\timae\\AppData\\Local\\Temp\\.vsdbgsrc\\1b77cb146b3dc6f60ca3b7de619b68fc3904b4f03155b255fa425d7d7bd36ae9\\PropertyPathWorker.cs",
-              "ViewState": "AgIAABUFAAAAAAAAAAAAAL0EAABuAAAAAQAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-17T07:26:26.192Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 10,
-              "Title": "Plantify.csproj",
-              "DocumentMoniker": "D:\\2 \u043A\u0443\u0440\u0441\\\u041E\u041E\u041F\\Course-project\\Plantify\\Plantify\\Plantify.csproj",
-              "RelativeDocumentMoniker": "Plantify.csproj",
-              "ToolTip": "D:\\2 \u043A\u0443\u0440\u0441\\\u041E\u041E\u041F\\Course-project\\Plantify\\Plantify\\Plantify.csproj",
-              "RelativeToolTip": "Plantify.csproj",
-              "ViewState": "AgIAABsAAAAAAAAAAAAAAAAAAAAAAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000758|",
-              "WhenOpened": "2026-05-17T07:25:00.161Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 11,
-              "Title": "AdminPanelViewModel.cs",
-              "DocumentMoniker": "D:\\2 \u043A\u0443\u0440\u0441\\\u041E\u041E\u041F\\Course-project\\Plantify\\Plantify\\ViewModels\\AdminPanelViewModel.cs",
-              "RelativeDocumentMoniker": "ViewModels\\AdminPanelViewModel.cs",
-              "ToolTip": "D:\\2 \u043A\u0443\u0440\u0441\\\u041E\u041E\u041F\\Course-project\\Plantify\\Plantify\\ViewModels\\AdminPanelViewModel.cs",
-              "RelativeToolTip": "ViewModels\\AdminPanelViewModel.cs",
-              "ViewState": "AgIAAB8AAAAAAAAAAAAiwC8AAAAwAAAAAAAAAA==",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.000738|",
-              "WhenOpened": "2026-05-16T22:57:33.812Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 12,
-              "Title": "AddUserPlantView.xaml",
-              "DocumentMoniker": "D:\\2 \u043A\u0443\u0440\u0441\\\u041E\u041E\u041F\\Course-project\\Plantify\\Plantify\\Views\\AddUserPlantView.xaml",
-              "RelativeDocumentMoniker": "Views\\AddUserPlantView.xaml",
-              "ToolTip": "D:\\2 \u043A\u0443\u0440\u0441\\\u041E\u041E\u041F\\Course-project\\Plantify\\Plantify\\Views\\AddUserPlantView.xaml",
-              "RelativeToolTip": "Views\\AddUserPlantView.xaml",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2026-05-16T22:56:05.682Z"
-            },
-            {
-              "$type": "Document",
-              "DocumentIndex": 13,
-              "Title": "AddUserView.xaml",
-              "DocumentMoniker": "D:\\2 \u043A\u0443\u0440\u0441\\\u041E\u041E\u041F\\Course-project\\Plantify\\Plantify\\Views\\AddUserView.xaml",
-              "RelativeDocumentMoniker": "Views\\AddUserView.xaml",
-              "ToolTip": "D:\\2 \u043A\u0443\u0440\u0441\\\u041E\u041E\u041F\\Course-project\\Plantify\\Plantify\\Views\\AddUserView.xaml",
-              "RelativeToolTip": "Views\\AddUserView.xaml",
-              "Icon": "ae27a6b0-e345-4288-96df-5eaf394ee369.003549|",
-              "WhenOpened": "2026-05-16T21:36:04.05Z"
+              "WhenOpened": "2026-05-18T04:56:11.51Z",
+              "EditorCaption": ""
             }
           ]
         },

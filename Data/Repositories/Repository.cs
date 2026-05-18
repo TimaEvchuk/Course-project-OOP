@@ -78,6 +78,12 @@ namespace Plantify.Data.Repositories
             _dbSet.Update(entity);
         }
 
+        public Task UpdateAsync(T entity)
+        {
+            _dbSet.Update(entity);
+            return Task.CompletedTask;
+        }
+
         public void Delete(T entity)
         {
             _dbSet.Remove(entity);

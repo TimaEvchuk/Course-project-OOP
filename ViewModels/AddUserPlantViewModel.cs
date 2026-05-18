@@ -11,6 +11,8 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media.Imaging;
+using Microsoft.Extensions.Configuration;
+using Plantify.Models.Enums;
 
 namespace Plantify.ViewModels
 {
@@ -19,6 +21,7 @@ namespace Plantify.ViewModels
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMessenger _messenger;
         private readonly AuthenticationService _authenticationService;
+        private readonly IConfiguration _configuration;
 
         [ObservableProperty]
         private ObservableCollection<Plant> _allPlants = new();
@@ -55,11 +58,12 @@ namespace Plantify.ViewModels
 
         public string Title => IsEditMode ? "Редактировать растение" : "Добавить растение в сад";
 
-        public AddUserPlantViewModel(IUnitOfWork unitOfWork, IMessenger messenger, AuthenticationService authenticationService)
+        public AddUserPlantViewModel(IUnitOfWork unitOfWork, IMessenger messenger, AuthenticationService authenticationService, IConfiguration configuration)
         {
             _unitOfWork = unitOfWork;
             _messenger = messenger;
             _authenticationService = authenticationService;
+            _configuration = configuration;
         }
 
         public void Initialize(ShowAddUserPlantOverlayMessage message)
@@ -127,22 +131,30 @@ namespace Plantify.ViewModels
             if (_authenticationService.CurrentUser == null) { MessageBox.Show("Ошибка: пользователь не авторизован."); return; }
             
             ErrorMessage = null;
+            string successMessage;
 
             if (IsEditMode && OriginalUserPlant != null)
             {
-                OriginalUserPlant.PlantId = SelectedPlant.Id;
-                OriginalUserPlant.CustomName = string.IsNullOrWhiteSpace(CustomName) ? SelectedPlant.Name : CustomName;
-                OriginalUserPlant.Location = Location;
-                OriginalUserPlant.Description = Description;
-                OriginalUserPlant.LastUserWateringDate = LastWateringDate;
-                OriginalUserPlant.LastFertilizedDate = LastFertilizingDate;
-                
-                _unitOfWork.UserPlants.Update(OriginalUserPlant);
+                var plantToUpdate = await _unitOfWork.UserPlants.GetByIdAsync(OriginalUserPlant.Id);
+                if (plantToUpdate == null)
+                {
+                    ErrorMessage = "Не удалось найти редактируемое растение в базе данных.";
+                    return;
+                }
+
+                plantToUpdate.PlantId = SelectedPlant.Id;
+                plantToUpdate.CustomName = string.IsNullOrWhiteSpace(CustomName) ? SelectedPlant.Name : CustomName;
+                plantToUpdate.Location = Location;
+                plantToUpdate.Description = Description;
+                plantToUpdate.LastUserWateringDate = LastWateringDate;
+                plantToUpdate.LastFertilizedDate = LastFertilizingDate;
+
+                successMessage = $"Данные о растении '{plantToUpdate.CustomName}' успешно обновлены!";
             }
             else
             {
                 // Plant limit check for non-premium users
-                if (!_authenticationService.IsCurrentUserPremium())
+                if (!_authenticationService.IsPremiumActive())
                 {
                     var plantCount = await _unitOfWork.UserPlants.CountAsync(p => p.UserId == _authenticationService.CurrentUser.Id);
                     if (plantCount >= 5)
@@ -163,12 +175,29 @@ namespace Plantify.ViewModels
                     LastFertilizedDate = LastFertilizingDate,
                 };
                 await _unitOfWork.UserPlants.AddAsync(newUserPlant);
+                successMessage = $"Растение '{newUserPlant.CustomName}' успешно добавлено в ваш сад!";
             }
             
             await _unitOfWork.CompleteAsync();
 
+            var enableSuccessNotifications = _configuration.GetValue<bool>("NotificationSettings:EnableSuccessNotifications");
+            if (enableSuccessNotifications)
+            {
+                var notification = new Notification
+                {
+                    Message = successMessage,
+                    Timestamp = DateTime.Now,
+                    Type = NotificationType.ActionSuccess,
+                    UserId = _authenticationService.CurrentUser.Id,
+                    IsDismissed = false
+                };
+                await _unitOfWork.Notifications.AddAsync(notification);
+                await _unitOfWork.CompleteAsync();
+                _messenger.Send(new NewNotificationMessage(notification));
+            }
+
             _messenger.Send(new CloseOverlayMessage());
-            _messenger.Send(new NavigateMessage(typeof(MyGardenViewModel)));
+            _messenger.Send(new GardenStateChangedMessage());
         }
 
         [RelayCommand]

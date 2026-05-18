@@ -1,6 +1,7 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.Extensions.DependencyInjection;
 using Plantify.Data;
 using Plantify.Messages;
 using Plantify.Models;
@@ -14,16 +15,16 @@ namespace Plantify.ViewModels
     public partial class NotificationViewModel : BaseViewModel
     {
         private readonly IMessenger _messenger;
-        private readonly IUnitOfWork _unitOfWork;
+        private readonly IServiceScopeFactory _scopeFactory;
         private readonly AuthenticationService _authenticationService;
 
         [ObservableProperty]
         private ObservableCollection<NotificationItemViewModel> _notifications = new();
 
-        public NotificationViewModel(IMessenger messenger, IUnitOfWork unitOfWork, AuthenticationService authenticationService)
+        public NotificationViewModel(IMessenger messenger, IServiceScopeFactory scopeFactory, AuthenticationService authenticationService)
         {
             _messenger = messenger;
-            _unitOfWork = unitOfWork;
+            _scopeFactory = scopeFactory;
             _authenticationService = authenticationService;
 
             LoadNotificationsCommand.Execute(null);
@@ -33,16 +34,20 @@ namespace Plantify.ViewModels
         private async Task LoadNotifications()
         {
             if (_authenticationService.CurrentUser == null) return;
-
-            var notifications = await _unitOfWork.Notifications.GetAllAsync(
-                filter: n => n.UserId == _authenticationService.CurrentUser.Id && !n.IsDismissed,
-                orderBy: q => q.OrderByDescending(n => n.Timestamp)
+            
+            using (var scope = _scopeFactory.CreateScope())
+            {
+                var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+                var notifications = await unitOfWork.Notifications.GetAllAsync(
+                    filter: n => n.UserId == _authenticationService.CurrentUser.Id && !n.IsDismissed,
+                    orderBy: q => q.OrderByDescending(n => n.Timestamp)
                 );
 
-            Notifications.Clear();
-            foreach (var notification in notifications)
-            {
-                Notifications.Add(new NotificationItemViewModel(notification, DismissNotification));
+                Notifications.Clear();
+                foreach (var notification in notifications)
+                {
+                    Notifications.Add(new NotificationItemViewModel(notification, DismissNotification));
+                }
             }
             OnPropertyChanged(nameof(HasNotifications));
         }
@@ -58,13 +63,17 @@ namespace Plantify.ViewModels
         {
             if (Notifications.Contains(item))
             {
-                var notificationInDb = await _unitOfWork.Notifications.GetByIdAsync(item.NotificationId);
-                if (notificationInDb != null)
+                using (var scope = _scopeFactory.CreateScope())
                 {
-                    _unitOfWork.Notifications.Delete(notificationInDb);
-                    await _unitOfWork.CompleteAsync();
-                    Notifications.Remove(item);
-                    OnPropertyChanged(nameof(HasNotifications));
+                    var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
+                    var notificationInDb = await unitOfWork.Notifications.GetByIdAsync(item.NotificationId);
+                    if (notificationInDb != null)
+                    {
+                        unitOfWork.Notifications.Delete(notificationInDb);
+                        await unitOfWork.CompleteAsync();
+                        Notifications.Remove(item);
+                        OnPropertyChanged(nameof(HasNotifications));
+                    }
                 }
             }
         }

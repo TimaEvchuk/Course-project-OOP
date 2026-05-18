@@ -1,9 +1,11 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.Extensions.Configuration;
 using Plantify.Data;
 using Plantify.Messages;
 using Plantify.Models;
+using Plantify.Models.Enums;
 using Plantify.Services;
 using System;
 using System.Collections.Generic;
@@ -27,6 +29,8 @@ namespace Plantify.ViewModels
         private readonly IUnitOfWork _unitOfWork;
         private readonly AuthenticationService _authenticationService;
         private readonly IMessenger _messenger;
+        private readonly IConfiguration _configuration;
+        private string _previousHealthStatusText = "";
 
         [ObservableProperty]
         private int _gardenHealthPercentage;
@@ -98,11 +102,12 @@ namespace Plantify.ViewModels
         [ObservableProperty]
         private bool _isMonthViewVisible;
 
-        public DashboardViewModel(IUnitOfWork unitOfWork, AuthenticationService authenticationService, IMessenger messenger)
+        public DashboardViewModel(IUnitOfWork unitOfWork, AuthenticationService authenticationService, IMessenger messenger, IConfiguration configuration)
         {
             _unitOfWork = unitOfWork;
             _authenticationService = authenticationService;
             _messenger = messenger;
+            _configuration = configuration;
 
             _messenger.Register<GardenStateChangedMessage>(this);
             _messenger.Register<UserLoggedInMessage>(this);
@@ -175,7 +180,7 @@ namespace Plantify.ViewModels
 
         private void UpdatePremiumStatus()
         {
-            IsNotPremiumUser = !_authenticationService.IsCurrentUserPremium();
+            IsNotPremiumUser = !_authenticationService.IsPremiumActive();
             OnPropertyChanged(nameof(IsPremiumUser));
             ShowPremiumPurchaseCommand.NotifyCanExecuteChanged();
 
@@ -388,6 +393,26 @@ namespace Plantify.ViewModels
                 GardenHealthBrush = new SolidColorBrush(Color.FromRgb(60, 179, 113)); // MediumSeaGreen
                 GardenHealthStatusText = "Отличное состояние";
             }
+            
+            if (GardenHealthStatusText == "Требует внимания" && _previousHealthStatusText != "Требует внимания")
+            {
+                var enableCareNotifications = _configuration.GetValue<bool>("NotificationSettings:EnableCareNotifications");
+                if (enableCareNotifications)
+                {
+                    var notification = new Notification
+                    {
+                        Message = "Уровень здоровья сада стал плохим!",
+                        Timestamp = DateTime.Now,
+                        Type = NotificationType.Warning,
+                        UserId = currentUser.Id,
+                        IsDismissed = false
+                    };
+                    await _unitOfWork.Notifications.AddAsync(notification);
+                    await _unitOfWork.CompleteAsync();
+                    _messenger.Send(new NewNotificationMessage(notification));
+                }
+            }
+            _previousHealthStatusText = GardenHealthStatusText;
         }
     }
 }

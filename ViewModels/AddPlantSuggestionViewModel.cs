@@ -10,7 +10,9 @@ using System.Collections.ObjectModel;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using Microsoft.Extensions.Configuration;
 using Microsoft.Win32;
+using Plantify.Models.Enums;
 
 namespace Plantify.ViewModels
 {
@@ -19,14 +21,18 @@ namespace Plantify.ViewModels
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMessenger _messenger;
         private readonly AuthenticationService _authenticationService;
+        private readonly IConfiguration _configuration;
 
         [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(SaveCommand))]
         private string? _plantName;
 
         [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(SaveCommand))]
         private LightRequirement? _selectedLightRequirement;
 
         [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(SaveCommand))]
         private Variety? _selectedVariety;
 
         private int _wateringInterval;
@@ -66,11 +72,12 @@ namespace Plantify.ViewModels
 
         public string Title => "Предложить новое растение";
 
-        public AddPlantSuggestionViewModel(IUnitOfWork unitOfWork, IMessenger messenger, AuthenticationService authenticationService)
+        public AddPlantSuggestionViewModel(IUnitOfWork unitOfWork, IMessenger messenger, AuthenticationService authenticationService, IConfiguration configuration)
         {
             _unitOfWork = unitOfWork;
             _messenger = messenger;
             _authenticationService = authenticationService;
+            _configuration = configuration;
 
             Varieties = new ObservableCollection<Variety>();
             LightRequirements = new ObservableCollection<LightRequirement>();
@@ -113,20 +120,18 @@ namespace Plantify.ViewModels
             }
         }
 
-        [RelayCommand]
+        private bool CanSave()
+        {
+            return !string.IsNullOrWhiteSpace(PlantName) &&
+                   PlantName.Length >= 2 &&
+                   SelectedVariety != null &&
+                   SelectedLightRequirement != null &&
+                   _authenticationService.CurrentUser != null;
+        }
+
+        [RelayCommand(CanExecute = nameof(CanSave))]
         private async Task Save()
         {
-            if (string.IsNullOrWhiteSpace(PlantName) || SelectedLightRequirement == null || SelectedVariety == null)
-            {
-                ErrorMessage = "Пожалуйста, заполните все обязательные поля.";
-                return;
-            }
-            if (_authenticationService.CurrentUser == null)
-            {
-                ErrorMessage = "Ошибка: пользователь не авторизован.";
-                return;
-            }
-
             ErrorMessage = null;
             
             var sectionsAsJson = JsonSerializer.Serialize(Sections.Select(s => new { s.Title, s.Content }).ToList());
@@ -145,6 +150,22 @@ namespace Plantify.ViewModels
 
             await _unitOfWork.PlantSubmissions.AddAsync(newSubmission);
             await _unitOfWork.CompleteAsync();
+            
+            var enableSuccessNotifications = _configuration.GetValue<bool>("NotificationSettings:EnableSuccessNotifications");
+            if (enableSuccessNotifications)
+            {
+                var notification = new Notification
+                {
+                    Message = "Заявка на добавление растения успешно отправлена!",
+                    Timestamp = DateTime.Now,
+                    Type = NotificationType.ActionSuccess,
+                    UserId = _authenticationService.CurrentUser.Id,
+                    IsDismissed = false
+                };
+                await _unitOfWork.Notifications.AddAsync(notification);
+                await _unitOfWork.CompleteAsync();
+                _messenger.Send(new NewNotificationMessage(notification));
+            }
 
             _messenger.Send(new CloseOverlayMessage());
         }

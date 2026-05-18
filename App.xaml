@@ -26,6 +26,8 @@
             <converters:StringToImageSourceConverter x:Key="StringToImageSourceConverter"/>
             <converters:JsonToSectionsConverter x:Key="JsonToSectionsConverter"/>
             <converters:EqualityConverter x:Key="EqualityConverter"/>
+            <converters:ViewModelTypeToBooleanConverter x:Key="ViewModelTypeToBooleanConverter"/>
+            <converters:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter"/>
 
             <!-- Styles from Widgets.xaml -->
             <Style x:Key="StatWidgetStyle" TargetType="Border">
@@ -100,6 +102,9 @@
             </DataTemplate>
             <DataTemplate DataType="{x:Type vm:AddEditPlantViewModel}">
                 <views:AddEditPlantView/>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:ChangePasswordViewModel}">
+                <views:ChangePasswordView/>
             </DataTemplate>
 
             <!-- Global Effects -->

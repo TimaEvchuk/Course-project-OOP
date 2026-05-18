@@ -22,7 +22,10 @@ namespace Plantify.ViewModels
         IRecipient<ShowAddUserAdminOverlayMessage>,
         IRecipient<ShowPremiumPurchaseOverlayMessage>,
         IRecipient<ShowAddPlantSuggestionOverlayMessage>,
-        IRecipient<ShowAddEditPlantOverlayMessage>
+        IRecipient<ShowAddEditPlantOverlayMessage>,
+        IRecipient<ShowChangePasswordOverlayMessage>,
+        IRecipient<UserLoggedOutMessage>,
+        IRecipient<UserAvatarChangedMessage>
     {
         [ObservableProperty]
         private BaseViewModel _currentViewModel = null!;
@@ -47,6 +50,9 @@ namespace Plantify.ViewModels
 
         [ObservableProperty]
         private bool _hasNewNotifications;
+        
+        [ObservableProperty]
+        private string? _currentUserAvatarPath;
 
         private readonly IServiceProvider _serviceProvider;
         private readonly IMessenger _messenger;
@@ -140,15 +146,16 @@ namespace Plantify.ViewModels
             HasNewNotifications = true;
         }
 
-        public void Receive(UserLoggedInMessage message)
+        public async void Receive(UserLoggedInMessage message)
         {
             CurrentUser = message.User;
             IsLoggedIn = true;
             IsAdmin = CurrentUser.Roles.Any(r => r.Name == "Администратор");
             IsContentManager = CurrentUser.Roles.Any(r => r.Name == "Контент-менеджер");
+            CurrentUserAvatarPath = CurrentUser.AvatarPath;
             
             // Also load notifications on login
-            NotificationViewModel.LoadNotificationsCommand.Execute(null);
+            await NotificationViewModel.LoadNotificationsCommand.ExecuteAsync(null);
             Navigate(typeof(MyGardenViewModel), "Мой сад");
         }
         
@@ -182,6 +189,26 @@ namespace Plantify.ViewModels
             var vm = _serviceProvider.GetRequiredService<AddEditPlantViewModel>();
             await vm.InitializeAsync(message.Value);
             OverlayViewModel = vm;
+        }
+
+        public void Receive(ShowChangePasswordOverlayMessage message)
+        {
+            OverlayViewModel = _serviceProvider.GetRequiredService<ChangePasswordViewModel>();
+        }
+
+        public void Receive(UserLoggedOutMessage message)
+        {
+            IsLoggedIn = false;
+            CurrentUser = null;
+            IsAdmin = false;
+            IsContentManager = false;
+            CurrentUserAvatarPath = null;
+            Navigate(typeof(LoginViewModel), "Вход");
+        }
+
+        public void Receive(UserAvatarChangedMessage message)
+        {
+            CurrentUserAvatarPath = message.Value;
         }
         
         [RelayCommand]

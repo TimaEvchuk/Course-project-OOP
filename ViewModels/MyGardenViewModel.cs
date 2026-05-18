@@ -2,6 +2,7 @@ using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Microsoft.EntityFrameworkCore;
+using Microsoft.Extensions.Configuration;
 using Plantify.Data;
 using Plantify.Dialogs;
 using Plantify.Messages;
@@ -16,12 +17,14 @@ using System.Threading.Tasks;
 
 namespace Plantify.ViewModels
 {
-    public partial class MyGardenViewModel : BaseViewModel, IRecipient<UserPlantSelectionChangedMessage>
+    public partial class MyGardenViewModel : BaseViewModel, IRecipient<UserPlantSelectionChangedMessage>, IRecipient<GardenStateChangedMessage>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMessenger _messenger;
         private readonly AuthenticationService _authenticationService;
         private readonly IDialogService _dialogService;
+        private readonly IConfiguration _configuration;
+        private bool _isLoading = false;
 
         [ObservableProperty]
         private ObservableCollection<UserPlantViewModel> _userPlants = new();
@@ -37,14 +40,16 @@ namespace Plantify.ViewModels
 
         private enum CareActionType { Water, Fertilize }
 
-        public MyGardenViewModel(IUnitOfWork unitOfWork, IMessenger messenger, AuthenticationService authenticationService, IDialogService dialogService)
+        public MyGardenViewModel(IUnitOfWork unitOfWork, IMessenger messenger, AuthenticationService authenticationService, IDialogService dialogService, IConfiguration configuration)
         {
             _unitOfWork = unitOfWork;
             _messenger = messenger;
             _authenticationService = authenticationService;
             _dialogService = dialogService;
-            _messenger.Register(this);
-            LoadUserPlantsCommand.Execute(null);
+            _configuration = configuration;
+            _messenger.Register<UserPlantSelectionChangedMessage>(this);
+            _messenger.Register<GardenStateChangedMessage>(this);
+            LoadUserPlantsCommand.Execute(true);
         }
 
         partial void OnIsInMassSelectionModeChanged(bool value)
@@ -163,28 +168,33 @@ namespace Plantify.ViewModels
                         {
                             plantToUpdate.LastFertilizedDate = DateTime.Today;
                         }
-                        _unitOfWork.UserPlants.Update(plantToUpdate);
                     }
                 }
                 await _unitOfWork.CompleteAsync();
-                _messenger.Send(new GardenStateChangedMessage());
 
-                var icon = actionType == CareActionType.Water ? "💧" : "🌱";
-                var actionText = actionType == CareActionType.Water ? "полито" : "удобрено";
-                var successMessage = $"{icon} Успешно {actionText} {confirmedForUpdateVMs.Count} растений!";
-                
-                var notification = new Notification
+                var enableSuccessNotifications = _configuration.GetValue<bool>("NotificationSettings:EnableSuccessNotifications");
+                if (enableSuccessNotifications)
                 {
-                    Message = successMessage,
-                    Timestamp = DateTime.Now,
-                    Type = NotificationType.ActionSuccess,
-                    UserId = _authenticationService.CurrentUser.Id,
-                    IsDismissed = false
-                };
-                await _unitOfWork.Notifications.AddAsync(notification);
-                await _unitOfWork.CompleteAsync();
+                    var icon = actionType == CareActionType.Water ? "💧" : "🌱";
+                    var actionText = actionType == CareActionType.Water ? "полито" : "удобрено";
+                    var successMessage = $"{icon} Успешно {actionText} {confirmedForUpdateVMs.Count} растений!";
+                    
+                    var notification = new Notification
+                    {
+                        Message = successMessage,
+                        Timestamp = DateTime.Now,
+                        Type = NotificationType.ActionSuccess,
+                        UserId = _authenticationService.CurrentUser.Id,
+                        IsDismissed = false
+                    };
+                    await _unitOfWork.Notifications.AddAsync(notification);
+                    await _unitOfWork.CompleteAsync();
+                    
+                    _messenger.Send(new NewNotificationMessage(notification));
+                }
                 
-                _messenger.Send(new NewNotificationMessage(notification));
+                // Send this message only after all DB operations are done.
+                _messenger.Send(new GardenStateChangedMessage());
             }
 
             // Reset UI
@@ -193,21 +203,39 @@ namespace Plantify.ViewModels
             // Reload plants to show updated dates
             if (confirmedForUpdateVMs.Any())
             {
-                await LoadUserPlants();
+                await LoadUserPlants(false);
             }
         }
 
         [RelayCommand]
         private async Task DeletePlant(UserPlantViewModel? plantVM)
         {
-            if (plantVM == null) return;
+            if (plantVM == null || _authenticationService.CurrentUser == null) return;
+
             var plantToDelete = await _unitOfWork.UserPlants.GetByIdAsync(plantVM.UserPlantId);
             if (plantToDelete != null)
             {
+                var plantName = plantVM.Name;
                 _unitOfWork.UserPlants.Delete(plantToDelete);
                 await _unitOfWork.CompleteAsync();
                 UserPlants.Remove(plantVM);
                 UpdateTasksSummary();
+                
+                var enableSuccessNotifications = _configuration.GetValue<bool>("NotificationSettings:EnableSuccessNotifications");
+                if (enableSuccessNotifications)
+                {
+                    var notification = new Notification
+                    {
+                        Message = $"Растение '{plantName}' успешно удалено!",
+                        Timestamp = DateTime.Now,
+                        Type = NotificationType.ActionSuccess,
+                        UserId = _authenticationService.CurrentUser.Id,
+                        IsDismissed = false
+                    };
+                    await _unitOfWork.Notifications.AddAsync(notification);
+                    await _unitOfWork.CompleteAsync();
+                    _messenger.Send(new NewNotificationMessage(notification));
+                }
             }
         }
 
@@ -223,34 +251,50 @@ namespace Plantify.ViewModels
         }
 
         [RelayCommand]
-        private async Task LoadUserPlants()
+        private async Task LoadUserPlants(bool generateNotifications = true)
         {
-            if (_authenticationService.CurrentUser == null)
-            {
-                ShowEmptyState = true;
-                UserPlants.Clear();
-                UpdateTasksSummary();
-                return;
-            }
-            
-            var userId = _authenticationService.CurrentUser.Id; 
-            var plants = await _unitOfWork.UserPlants.GetAllAsync(
-                filter: up => up.UserId == userId,
-                include: i => i.Include(up => up.Plant).ThenInclude(p => p.Sections)
-            );
+            if (_isLoading) return;
+            _isLoading = true;
 
-            UserPlants.Clear();
-            foreach (var userPlant in plants.OrderBy(p => p.LastUserWateringDate))
+            try
             {
-                UserPlants.Add(new UserPlantViewModel(userPlant, _messenger));
+                if (_authenticationService.CurrentUser == null)
+                {
+                    ShowEmptyState = true;
+                    UserPlants.Clear();
+                    UpdateTasksSummary();
+                    return;
+                }
+
+                var userId = _authenticationService.CurrentUser.Id;
+                var plants = await _unitOfWork.UserPlants.GetAllAsync(
+                    filter: up => up.UserId == userId,
+                    include: i => i.Include(up => up.Plant).ThenInclude(p => p.Sections)
+                );
+
+                UserPlants.Clear();
+                foreach (var userPlant in plants.OrderBy(p => p.LastUserWateringDate))
+                {
+                    UserPlants.Add(new UserPlantViewModel(userPlant, _messenger));
+                }
+                UpdateTasksSummary();
+
+                if (generateNotifications)
+                {
+                    await GenerateNeedsCareNotifications();
+                }
             }
-            UpdateTasksSummary();
-            
-            await GenerateNeedsCareNotifications();
+            finally
+            {
+                _isLoading = false;
+            }
         }
 
         private async Task GenerateNeedsCareNotifications()
         {
+            var enableCareNotifications = _configuration.GetValue<bool>("NotificationSettings:EnableCareNotifications");
+            if (!enableCareNotifications) return;
+            
             if (_authenticationService.CurrentUser == null) return;
             var userId = _authenticationService.CurrentUser.Id;
 
@@ -317,6 +361,11 @@ namespace Plantify.ViewModels
             OnPropertyChanged(nameof(IsAnyPlantSelected));
             UpdateTasksSummary();
             IsInMassSelectionMode = SelectedPlantsCount > 0;
+        }
+
+        public async void Receive(GardenStateChangedMessage message)
+        {
+            await LoadUserPlants(false);
         }
     }
 }

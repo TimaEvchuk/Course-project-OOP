@@ -38,40 +38,59 @@ namespace Plantify
                         options.UseSqlServer(context.Configuration.GetConnectionString("DefaultConnection"));
                     }, ServiceLifetime.Transient);
 
-                    services.AddScoped(typeof(IRepository<>), typeof(Repository<>));
-                    services.AddScoped<IPlantRepository, PlantRepository>();
-                    services.AddScoped<IUserPlantRepository, UserPlantRepository>();
-                    services.AddScoped<INotificationRepository, NotificationRepository>();
-                    services.AddScoped<IUnitOfWork, UnitOfWork>();
+                    services.AddTransient(typeof(IRepository<>), typeof(Repository<>));
+                    services.AddTransient<IPlantRepository, PlantRepository>();
+                    services.AddTransient<IUserPlantRepository, UserPlantRepository>();
+                    services.AddTransient<INotificationRepository, NotificationRepository>();
+                    services.AddTransient<IUnitOfWork, UnitOfWork>();
 
                     services.AddSingleton<IMessenger>(WeakReferenceMessenger.Default);
+                    
+                    // Singleton services that need access to scoped services like IUnitOfWork
+                    // should inject IServiceScopeFactory.
                     services.AddSingleton(s => new AuthenticationService(
-                        s.GetRequiredService<IUnitOfWork>(), 
+                        s.GetRequiredService<IServiceScopeFactory>(), 
                         s.GetRequiredService<IMessenger>()));
+                        
+                    services.AddSingleton(s => new NotificationViewModel(
+                        s.GetRequiredService<IMessenger>(), 
+                        s.GetRequiredService<IServiceScopeFactory>(),
+                        s.GetRequiredService<AuthenticationService>()));
+
                     services.AddTransient<IDialogService, DialogService>();
                     
                     services.AddSingleton<MainViewModel>();
                     services.AddTransient<LoginViewModel>();
                     services.AddTransient<RegisterViewModel>();
-                    services.AddTransient<DashboardViewModel>();
-                    services.AddTransient<EncyclopediaViewModel>();
+                    services.AddTransient(s => new DashboardViewModel(s.GetRequiredService<IUnitOfWork>(), s.GetRequiredService<AuthenticationService>(), s.GetRequiredService<IMessenger>(), s.GetRequiredService<IConfiguration>()));
+                    services.AddTransient(s => new EncyclopediaViewModel(s.GetRequiredService<IUnitOfWork>(), s.GetRequiredService<IMessenger>()));
                     services.AddTransient<PlantManagementViewModel>();
-                    services.AddTransient<MyGardenViewModel>();
-                    services.AddTransient<AddUserPlantViewModel>();
+                    services.AddTransient(s => new MyGardenViewModel(
+                        s.GetRequiredService<IUnitOfWork>(),
+                        s.GetRequiredService<IMessenger>(),
+                        s.GetRequiredService<AuthenticationService>(),
+                        s.GetRequiredService<IDialogService>(),
+                        s.GetRequiredService<IConfiguration>()));
+                    services.AddTransient(s => new AddUserPlantViewModel(s.GetRequiredService<IUnitOfWork>(), s.GetRequiredService<IMessenger>(), s.GetRequiredService<AuthenticationService>(), s.GetRequiredService<IConfiguration>()));
                     services.AddTransient<ScheduleViewModel>();
-                    services.AddTransient<SettingsViewModel>();
+                    services.AddTransient(s => new SettingsViewModel(
+                        s.GetRequiredService<IMessenger>(),
+                        s.GetRequiredService<AuthenticationService>(),
+                        s.GetRequiredService<IUnitOfWork>(),
+                        s.GetRequiredService<IConfiguration>()));
                     services.AddTransient<AdminPanelViewModel>();
                     services.AddTransient<StatisticsViewModel>();
                     services.AddTransient<AddUserViewModel>();
-                    services.AddTransient<PremiumPurchaseViewModel>();
+                    services.AddTransient(s => new PremiumPurchaseViewModel(
+                        s.GetRequiredService<IMessenger>(),
+                        s.GetRequiredService<AuthenticationService>(),
+                        s.GetRequiredService<IUnitOfWork>(),
+                        s.GetRequiredService<IConfiguration>()));
                     services.AddTransient<PlantDetailViewModel>();
-                    services.AddTransient<AddPlantSuggestionViewModel>();
+                    services.AddTransient(s => new AddPlantSuggestionViewModel(s.GetRequiredService<IUnitOfWork>(), s.GetRequiredService<IMessenger>(), s.GetRequiredService<AuthenticationService>(), s.GetRequiredService<IConfiguration>()));
                     services.AddTransient<AddEditPlantViewModel>();
                     services.AddTransient<InputDialogViewModel>();
-                    services.AddSingleton(s => new NotificationViewModel(
-                        s.GetRequiredService<IMessenger>(), 
-                        s.GetRequiredService<IUnitOfWork>(),
-                        s.GetRequiredService<AuthenticationService>()));
+                    services.AddTransient<ChangePasswordViewModel>();
 
                     services.AddSingleton<MainWindow>();
                 });
@@ -154,7 +173,7 @@ namespace Plantify
                             new Models.PlantSection { Title = "Происхождение и особенности", Content = "Фикус — это обширный род растений из семейства Тутовые, объединяющий более 800 видов, и его «родственником» является инжир . Большинство комнатных фикусов — вечнозеленые деревья, родиной которых являются тропические леса Индии, Китая, Юго-Восточной Азии и Африки. В природе многие из них начинают жизнь как эпифиты, оплетая воздушными корнями стволы других деревьев. В комнатной культуре самые популярные виды — это каучуконосный фикус с крупными темными листьями, изящный фикус Бенджамина с мелкими листочками и эффектный лировидный фикус, чьи листья напоминают музыкальный инструмент . Именно за свою разнообразную красоту и относительную неприхотливость фикусы уже много десятилетий остаются классикой домашнего озеленения." },
                             new Models.PlantSection { Title = "Освещение и полив", Content = "Фикус — растение довольно светолюбивое, но при этом не переносит прямых солнечных лучей. Для него идеально подойдет хорошо освещенное место с ярким, но рассеянным светом, например, рядом с восточным или западным окном . Исключение составляют пестролистные сорта, которым для сохранения яркой окраски требуется больше света . Что касается полива, то здесь фикус проявляет характер: он любит умеренно влажную почву летом, когда его поливают примерно 1-2 раза в неделю, но крайне не терпит застоя воды у корней . На избыточный полив он часто реагирует сбрасыванием листьев. Зимой, в период покоя, полив значительно сокращают, примерно до одного раза в 10-12 дней, дожидаясь, пока верхний слой грунта хорошо просохнет . Воду из поддона после полива всегда нужно сливать." },
                             new Models.PlantSection { Title = "Влажность и удобрение", Content = "Будучи тропическим растением, фикус очень ценит высокую влажность воздуха, что особенно актуально во время отопительного сезона . Он с благодарностью отзовется на регулярное опрыскивание листьев отстоянной водой, теплый душ и простое протирание листьев влажной губкой, что также помогает убрать пыль и позволяет растению лучше «дышать» . Для поддержания сил фикусу необходимы регулярные подкормки в период активного роста, с весны до осени. Идеально подойдут жидкие комплексные удобрения для декоративно-лиственных растений, которые вносят примерно раз в две недели . Зимой, когда рост замедляется, подкормки следует прекратить или свести к минимуму, удобряя не чаще одного раза в месяц-полтора ." },
-                            new Models.PlantSection { Title = "Уход и возможные проблемы", Content = "В целом уход за фикусом нельзя назвать сложным, однако у него есть одна ярко выраженная особенность — он большой консерватор и очень не любит перемен . Растение может сбросить листья в ответ на простой перенос горшка на новое место, на сквозняк, резкий перепад температуры или поворот относительно источника света . Поэтому, выбрав для него подходящее место, постарайтесь не переставлять его без крайней необходимости. Самая частая проблема со здоровьем фикуса — это корневая гниль, возникающая из-за чрезмерного полива и сигнализирующая о себе пожелтением и опаданием листьев . Из вредителей на фикус могут напасть щитовка, мучнистый червец и паутинный клещ, который особенно любит сухой воздух ." },
+                            new Models.PlantSection { Title = "Уход и возможные проблемы", Content = "В целом уход за фикусом нельзя назвать сложным, но у него есть одна ярко выраженная особенность — он большой консерватор и очень не любит перемен . Растение может сбросить листья в ответ на простой перенос горшка на новое место, на сквозняк, резкий перепад температуры или поворот относительно источника света . Поэтому, выбрав для него подходящее место, постарайтесь не переставлять его без крайней необходимости. Самая частая проблема со здоровьем фикуса — это корневая гниль, возникающая из-за чрезмерного полива и сигнализирующая о себе пожелтением и опаданием листьев . Из вредителей на фикус могут напасть щитовка, мучнистый червец и паутинный клещ, который особенно любит сухой воздух ." },
                             new Models.PlantSection { Title = "Важный нюанс и итоги", Content = "Стоит помнить, что млечный сок фикуса, особенно каучуконосного, может вызвать раздражение при попадании на кожу, поэтому все работы по обрезке лучше проводить в перчатках, а само растение размещать подальше от детей и домашних животных. Подводя итог, фикус — это благодарное и долговечное растение, если обеспечить ему несколько базовых условий: постоянное место с ярким, но рассеянным светом, осторожный полив без застоя воды, высокую влажность воздуха и регулярное питание в теплое время года. При соблюдении этих несложных правил он будет радовать вас своей мощной зеленью долгие годы." }
                         };
                         foreach(var s in ficusSections) ficus.Sections.Add(s);
