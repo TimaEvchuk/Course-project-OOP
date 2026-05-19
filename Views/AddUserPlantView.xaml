@@ -81,33 +81,29 @@
             
             <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="0,0,-20,0" Padding="0,0,20,0" Style="{StaticResource ScrollBarStyle}">
                 <StackPanel>
-                    <TextBlock Text="Выберите растение" Style="{StaticResource FormLabelStyle}"/>
+                    <TextBlock Style="{StaticResource FormLabelStyle}">
+                        <Run Text="Выберите растение"/>
+                        <Run Text="*" Foreground="{StaticResource BrushTerracotta}"/>
+                    </TextBlock>
                     <ComboBox ItemsSource="{Binding AllPlants}"
                               SelectedItem="{Binding SelectedPlant}"
                               DisplayMemberPath="Name"
                               Style="{StaticResource FormComboBoxStyle}"
                               ItemContainerStyle="{StaticResource FormComboBoxItemStyle}"/>
 
-                    <TextBlock Text="Имя (необязательно)" Style="{StaticResource FormLabelStyle}"/>
+                    <TextBlock Text="Имя" Style="{StaticResource FormLabelStyle}"/>
                     <TextBox Text="{Binding CustomName, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" Style="{StaticResource FormTextBoxStyle}"/>
 
                     <TextBlock Text="Местоположение" Style="{StaticResource FormLabelStyle}"/>
                     <TextBox Text="{Binding Location, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" Style="{StaticResource FormTextBoxStyle}"/>
 
-                    <TextBlock Text="Описание" Style="{StaticResource FormLabelStyle}"/>
-                    <TextBox Text="{Binding Description, UpdateSourceTrigger=PropertyChanged}" 
-                             Height="100" 
-                             AcceptsReturn="True" 
-                             TextWrapping="Wrap"
-                             VerticalScrollBarVisibility="Auto"
-                             HorizontalAlignment="Stretch"
-                             Style="{StaticResource FormTextBoxStyle}"/>
-
                     <TextBlock Text="Дата последнего полива" Style="{StaticResource FormLabelStyle}"/>
-                    <DatePicker SelectedDate="{Binding LastWateringDate, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" />
+                    <DatePicker SelectedDate="{Binding LastWateringDate, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" 
+                                DisplayDateEnd="{Binding Today, Mode=OneTime}"/>
 
                     <TextBlock Text="Дата последнего удобрения" Style="{StaticResource FormLabelStyle}"/>
-                    <DatePicker SelectedDate="{Binding LastFertilizingDate, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" />
+                    <DatePicker SelectedDate="{Binding LastFertilizingDate, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch"
+                                DisplayDateEnd="{Binding Today, Mode=OneTime}"/>
                 </StackPanel>
             </ScrollViewer>
 

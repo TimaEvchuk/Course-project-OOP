@@ -5,23 +5,23 @@
         <Setter Property="Background" Value="{StaticResource BrushForestGreen20Transparent}"/>
         <Setter Property="BorderBrush" Value="{StaticResource BrushDarkGreen}"/>
         <Setter Property="Foreground" Value="{StaticResource BrushDarkGreen}"/>
-        <Setter Property="Padding" Value="10,8"/>
+        <Setter Property="Padding" Value="8,3"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="FontFamily" Value="{StaticResource FontInter}"/>
         <Setter Property="FontWeight" Value="Medium"/>
-        <Setter Property="FontSize" Value="14"/>
-        <Setter Property="MinHeight" Value="38"/>
+        <Setter Property="FontSize" Value="12"/>
+        <Setter Property="MinHeight" Value="24"/>
     </Style>
     <Style x:Key="FormPasswordBoxStyle" TargetType="PasswordBox">
         <Setter Property="Background" Value="{StaticResource BrushForestGreen20Transparent}"/>
         <Setter Property="BorderBrush" Value="{StaticResource BrushDarkGreen}"/>
         <Setter Property="Foreground" Value="{StaticResource BrushDarkGreen}"/>
-        <Setter Property="Padding" Value="10,8"/>
+        <Setter Property="Padding" Value="8,3"/>
         <Setter Property="BorderThickness" Value="1"/>
         <Setter Property="FontFamily" Value="{StaticResource FontInter}"/>
         <Setter Property="FontWeight" Value="Medium"/>
-        <Setter Property="FontSize" Value="14"/>
-        <Setter Property="MinHeight" Value="38"/>
+        <Setter Property="FontSize" Value="10"/>
+        <Setter Property="MinHeight" Value="24"/>
     </Style>
     <Style x:Key="FormComboBoxStyle" TargetType="ComboBox">
         <Setter Property="Background" Value="{StaticResource BrushForestGreen20Transparent}"/>
@@ -37,9 +37,15 @@
     <Style x:Key="FormLabelStyle" TargetType="TextBlock" BasedOn="{StaticResource {x:Type TextBlock}}">
         <Setter Property="FontFamily" Value="{StaticResource FontInter}"/>
         <Setter Property="FontWeight" Value="Bold"/>
-        <Setter Property="FontSize" Value="16"/>
+        <Setter Property="FontSize" Value="12"/>
         <Setter Property="Foreground" Value="{StaticResource BrushDarkGreen}"/>
-        <Setter Property="Margin" Value="0,15,0,5"/>
+        <Setter Property="Margin" Value="0,10,0,3"/>
+    </Style>
+
+    <Style x:Key="ValidationErrorTextStyle" TargetType="TextBlock">
+        <Setter Property="Foreground" Value="Red"/>
+        <Setter Property="FontSize" Value="11"/>
+        <Setter Property="Margin" Value="2,2,0,0"/>
     </Style>
 
     <Style x:Key="SearchBoxStyle" TargetType="TextBox">

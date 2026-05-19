@@ -45,13 +45,22 @@
 
                     <!-- Column 0 -->
                     <StackPanel Grid.Column="0">
-                        <TextBlock Text="Название растения" Style="{StaticResource FormLabelStyle}"/>
+                        <TextBlock Style="{StaticResource FormLabelStyle}">
+                            <Run Text="Название растения"/>
+                            <Run Text="*" Foreground="{StaticResource BrushTerracotta}"/>
+                        </TextBlock>
                         <TextBox Text="{Binding PlantName, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBoxStyle}" HorizontalAlignment="Stretch"/>
 
-                        <TextBlock Text="Вид" Style="{StaticResource FormLabelStyle}"/>
+                        <TextBlock Style="{StaticResource FormLabelStyle}">
+                            <Run Text="Вид"/>
+                            <Run Text="*" Foreground="{StaticResource BrushTerracotta}"/>
+                        </TextBlock>
                         <ComboBox ItemsSource="{Binding Varieties}" SelectedItem="{Binding SelectedVariety}" DisplayMemberPath="Name" Style="{StaticResource FormComboBoxStyle}" HorizontalAlignment="Stretch"/>
 
-                        <TextBlock Text="Требования к свету" Style="{StaticResource FormLabelStyle}"/>
+                        <TextBlock Style="{StaticResource FormLabelStyle}">
+                            <Run Text="Требования к свету"/>
+                            <Run Text="*" Foreground="{StaticResource BrushTerracotta}"/>
+                        </TextBlock>
                         <ComboBox ItemsSource="{Binding LightRequirements}" SelectedItem="{Binding SelectedLightRequirement}" DisplayMemberPath="Name" Style="{StaticResource FormComboBoxStyle}" HorizontalAlignment="Stretch"/>
                     </StackPanel>
                     

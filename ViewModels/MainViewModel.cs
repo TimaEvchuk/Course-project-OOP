@@ -8,6 +8,8 @@ using Plantify.Models;
 using Plantify.Data;
 using Plantify.Services;
 using System.Linq;
+using System.Windows.Media;
+using System.Windows;
 
 namespace Plantify.ViewModels
 {
@@ -54,9 +56,18 @@ namespace Plantify.ViewModels
         [ObservableProperty]
         private string? _currentUserAvatarPath;
 
+        [ObservableProperty]
+        private Brush _currentBackground;
+        
+        [ObservableProperty]
+        private GridLength _headerHeight;
+
         private readonly IServiceProvider _serviceProvider;
         private readonly IMessenger _messenger;
         
+        private readonly Brush _defaultBackground = new SolidColorBrush((Color)Application.Current.FindResource("ColorMilkWhite"));
+        private readonly Brush _authBackground;
+
         public User? CurrentUser { get; private set; }
 
         public NotificationViewModel NotificationViewModel { get; }
@@ -70,6 +81,18 @@ namespace Plantify.ViewModels
             _serviceProvider = serviceProvider;
             _messenger = messenger;
             NotificationViewModel = notificationViewModel;
+
+            // Define brushes after resources are loaded
+            var stops = new GradientStopCollection
+            {
+                new GradientStop { Color = (Color)Application.Current.FindResource("ColorDarkGreen"), Offset = 0.5 },
+                new GradientStop { Color = (Color)Application.Current.FindResource("ColorForestGreen"), Offset = 0.5 }
+            };
+            _authBackground = new LinearGradientBrush(stops, new Point(0, 1), new Point(1, 0));
+            _authBackground.Freeze(); // Freeze for performance
+            
+            _currentBackground = _defaultBackground;
+            _headerHeight = new GridLength(0); // Start with no header
 
             _messenger.RegisterAll(this);
 
@@ -93,8 +116,27 @@ namespace Plantify.ViewModels
 
         private void Navigate(Type viewModelType, string pageTitle)
         {
+            if (viewModelType == typeof(LoginViewModel) || viewModelType == typeof(RegisterViewModel))
+            {
+                CurrentBackground = _authBackground;
+                HeaderHeight = new GridLength(0);
+            }
+            else
+            {
+                CurrentBackground = _defaultBackground;
+                HeaderHeight = new GridLength(80);
+            }
+            
             CurrentViewModel = (BaseViewModel)_serviceProvider.GetRequiredService(viewModelType);
-            CurrentPageTitle = pageTitle;
+
+            if (CurrentViewModel is ITitledViewModel titledViewModel && !string.IsNullOrEmpty(titledViewModel.Title))
+            {
+                CurrentPageTitle = titledViewModel.Title;
+            }
+            else
+            {
+                CurrentPageTitle = pageTitle;
+            }
         }
 
         public void Receive(NavigateMessage message)
@@ -173,6 +215,7 @@ namespace Plantify.ViewModels
             IsAdmin = CurrentUser.Roles.Any(r => r.Name == "Администратор");
             IsContentManager = CurrentUser.Roles.Any(r => r.Name == "Контент-менеджер");
             CurrentUserAvatarPath = CurrentUser.AvatarPath;
+            CurrentBackground = _defaultBackground; // Set default background on login
             
             // Also load notifications on login
             await NotificationViewModel.LoadNotificationsCommand.ExecuteAsync(null);

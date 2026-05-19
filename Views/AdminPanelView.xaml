@@ -54,10 +54,10 @@
                     </DataGrid.Columns>
                 </DataGrid>
 
-                <GroupBox Header="Управление Premium" Grid.Row="2" Margin="0,20,0,0"
+                <GroupBox Header="Управление Премиум" Grid.Row="2" Margin="0,20,0,0"
                           Visibility="{Binding IsUserSelected, Converter={StaticResource BooleanToVisibilityConverter}}">
                     <StackPanel Orientation="Horizontal" Margin="10">
-                        <CheckBox Content="Пользователь Premium"
+                        <CheckBox Content="Пользователь Премиум"
                                   IsChecked="{Binding IsPremiumSelectedUser, Mode=TwoWay}"
                                   VerticalAlignment="Center"
                                   Margin="0,0,20,0"/>
@@ -85,28 +85,52 @@
                             Command="{Binding ShowAddUserOverlayCommand}"
                             Style="{StaticResource PrimaryActionButtonStyle}"
                             Margin="0,0,10,0"/>
-                    <ComboBox x:Name="RoleSelectorComboBox"
-                              ItemsSource="{Binding AllRoles}"
-                              SelectedItem="{Binding SelectedRoleForChange, Mode=TwoWay}"
-                              DisplayMemberPath="Name"
-                              MinWidth="150"
-                              VerticalAlignment="Center"
-                              Margin="0,0,10,0"/>
-                    <Button Content="Изменить роль" 
-                            IsEnabled="{Binding CanChangeRole}" 
-                            Command="{Binding ChangeUserRoleCommand}"
-                            Style="{StaticResource SecondaryButtonStyle}"
-                            Margin="0,0,10,0"/>
+
+                    <Border BorderBrush="{StaticResource BrushBorderGray}" BorderThickness="1" CornerRadius="8" Padding="10,5">
+                        <StackPanel Orientation="Horizontal">
+                            <Grid>
+                                <ComboBox x:Name="RoleSelectorComboBox"
+                                          ItemsSource="{Binding AllRoles}"
+                                          SelectedItem="{Binding SelectedRoleForChange, Mode=TwoWay}"
+                                          DisplayMemberPath="Name"
+                                          MinWidth="170"
+                                          VerticalAlignment="Center"/>
+                                <TextBlock Text="Выберите роль"
+                                           Foreground="{StaticResource BrushGray}"
+                                           VerticalAlignment="Center" HorizontalAlignment="Left"
+                                           Margin="5,0,0,0"
+                                           IsHitTestVisible="False">
+                                    <TextBlock.Style>
+                                        <Style TargetType="TextBlock">
+                                            <Setter Property="Visibility" Value="Collapsed"/>
+                                            <Style.Triggers>
+                                                <DataTrigger Binding="{Binding ElementName=RoleSelectorComboBox, Path=SelectedItem}" Value="{x:Null}">
+                                                    <Setter Property="Visibility" Value="Visible"/>
+                                                </DataTrigger>
+                                            </Style.Triggers>
+                                        </Style>
+                                    </TextBlock.Style>
+                                </TextBlock>
+                            </Grid>
+
+                            <Button Content="Изменить роль" 
+                                    IsEnabled="{Binding CanChangeRole}" 
+                                    Command="{Binding ChangeUserRoleCommand}"
+                                    Style="{StaticResource SecondaryButtonStyle}"
+                                    Margin="10,0,0,0"/>
+                        </StackPanel>
+                    </Border>
+                    
                     <Button Content="{Binding BlockButtonText}" 
                             IsEnabled="{Binding CanModifySelectedUser}"
                             Command="{Binding BlockUserCommand}"
                             Style="{StaticResource SecondaryButtonStyle}"
-                            Margin="0,0,10,0"/>
+                            Margin="10,0,0,0"/>
                     <Button Content="Удалить" 
                             IsEnabled="{Binding CanModifySelectedUser}"
                             Command="{Binding DeleteUserCommand}"
-                            Background="IndianRed"
-                            Foreground="White"/>
+                            Style="{StaticResource DestructiveButtonStyle}"
+                            Margin="10,0,0,0"/>
                 </StackPanel>
             </Grid>
         </ControlTemplate>

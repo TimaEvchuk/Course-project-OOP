@@ -7,7 +7,7 @@
              xmlns:vm="clr-namespace:Plantify.ViewModels"
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance Type=vm:PlantDetailViewModel, IsDesignTimeCreatable=False}">
-    <Border Background="{StaticResource BrushPureWhite}" CornerRadius="12" Margin="30">
+    <Border Background="{StaticResource BrushMilkWhite}" CornerRadius="12" Margin="30">
         <Grid>
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="300"/>
@@ -28,17 +28,43 @@
 
             <!-- Right Side Content -->
             <StackPanel Grid.Row="0" Grid.Column="1" Margin="20">
-                <TextBlock Text="{Binding Plant.Name}" Style="{StaticResource H1}" TextWrapping="Wrap" Margin="0,0,45,0"/>
-                <Border Background="{StaticResource BrushForestGreen20Transparent}" CornerRadius="10" Padding="8,4" HorizontalAlignment="Left" Margin="0,10,0,0">
-                    <TextBlock Text="{Binding Plant.Variety}" Foreground="{StaticResource BrushForestGreen}" FontSize="12"/>
-                </Border>
-                <TextBlock Text="{Binding Plant.WateringInterval, StringFormat='Полив: раз в {0} дней'}" Style="{StaticResource Body}" Margin="0,20,0,5"/>
-                <TextBlock Text="{Binding Plant.FertilizingInterval, StringFormat='Удобрение: раз в {0} дней'}" Style="{StaticResource Body}"/>
+                <TextBlock Text="{Binding Plant.PlantModel.Name}" Style="{StaticResource H1}" TextWrapping="Wrap" Margin="0,0,45,0"/>
+
+                <Grid Margin="0,15,0,0">
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="Auto"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+                    <Grid.ColumnDefinitions>
+                        <ColumnDefinition Width="*"/>
+                        <ColumnDefinition Width="*"/>
+                    </Grid.ColumnDefinitions>
+
+                    <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,10,10">
+                        <TextBlock Text="Вид" Style="{StaticResource Caption}"/>
+                        <TextBlock Text="{Binding Plant.PlantModel.Variety.Name}" Style="{StaticResource Body}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
+                    </StackPanel>
+                    
+                    <StackPanel Grid.Row="0" Grid.Column="1" Margin="0,0,10,10">
+                        <TextBlock Text="Полив" Style="{StaticResource Caption}"/>
+                        <TextBlock Text="{Binding Plant.PlantModel.WateringInterval, StringFormat='Раз в {0} дней'}" Style="{StaticResource Body}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,10,10">
+                        <TextBlock Text="Освещение" Style="{StaticResource Caption}"/>
+                        <TextBlock Text="{Binding Plant.PlantModel.LightRequirement.Name}" Style="{StaticResource Body}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,10,10">
+                        <TextBlock Text="Удобрение" Style="{StaticResource Caption}"/>
+                        <TextBlock Text="{Binding Plant.PlantModel.FertilizingInterval, StringFormat='Раз в {0} дней'}" Style="{StaticResource Body}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
+                    </StackPanel>
+                </Grid>
             </StackPanel>
 
             <!-- Description Sections -->
-            <ScrollViewer Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" VerticalScrollBarVisibility="Auto" Margin="20,10,20,20">
-                <ItemsControl ItemsSource="{Binding Plant.Sections}">
+            <ScrollViewer Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="2" VerticalScrollBarVisibility="Auto" Margin="20,10,20,20" Style="{StaticResource ScrollBarStyle}">
+                <ItemsControl ItemsSource="{Binding Plant.PlantModel.Sections}">
                     <ItemsControl.ItemTemplate>
                         <DataTemplate>
                             <StackPanel Margin="0,15,0,0">
@@ -82,37 +108,7 @@
             </Button>
             
             <!-- Close Button - Declared last to be on top -->
-            <Button Grid.Row="0" Grid.Column="1" Panel.ZIndex="1" Command="{Binding CloseCommand}" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="10"
-                    Width="32" Height="32">
-                <Button.Style>
-                    <Style TargetType="Button">
-                        <Setter Property="Background" Value="Transparent"/>
-                        <Setter Property="BorderBrush" Value="Transparent"/>
-                        <Setter Property="Foreground" Value="{StaticResource BrushBaseGray}"/>
-                        <Setter Property="Cursor" Value="Hand"/>
-                        <Setter Property="Template">
-                            <Setter.Value>
-                                <ControlTemplate TargetType="Button">
-                                    <Border Background="Transparent" CornerRadius="16">
-                                        <Path Data="M0,0 L12,12 M0,12 L12,0"
-                                              Stroke="{TemplateBinding Foreground}"
-                                              StrokeThickness="2.5"
-                                              Width="16" Height="16"
-                                              VerticalAlignment="Center"
-                                              HorizontalAlignment="Center"
-                                              Stretch="Uniform"/>
-                                    </Border>
-                                </ControlTemplate>
-                            </Setter.Value>
-                        </Setter>
-                        <Style.Triggers>
-                            <Trigger Property="IsMouseOver" Value="True">
-                                <Setter Property="Foreground" Value="{StaticResource BrushDarkGreen}"/>
-                            </Trigger>
-                        </Style.Triggers>
-                    </Style>
-                </Button.Style>
-            </Button>
+            <Button Grid.Row="0" Grid.Column="1" Panel.ZIndex="1" Command="{Binding CloseCommand}" HorizontalAlignment="Right" VerticalAlignment="Top" Margin="10" Style="{StaticResource CloseButtonStyle}"/>
         </Grid>
     </Border>
 </UserControl>

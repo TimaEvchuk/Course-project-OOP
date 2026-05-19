@@ -93,6 +93,7 @@ namespace Plantify.ViewModels
                     if (value == true && _originalIsPremium == false)
                     {
                         PremiumStartDateSelectedUser = DateTime.Today;
+                        PremiumEndDateSelectedUser = DateTime.Today.AddDays(31);
                     }
                     
                     OnPropertyChanged(nameof(CanSaveChanges));

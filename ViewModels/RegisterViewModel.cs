@@ -55,19 +55,20 @@ namespace Plantify.ViewModels
         [RelayCommand]
         private async Task Register()
         {
-            ValidateAllProperties();
-            if (HasErrors)
+            // Basic client-side check
+            if (string.IsNullOrWhiteSpace(Login) || string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Password) || Password != ConfirmPassword)
             {
-                ErrorMessage = string.Join("\n", GetErrors().Select(e => e.ErrorMessage));
+                ErrorMessage = "Неверный email или пароль";
                 return;
             }
+            
             ErrorMessage = "";
 
             bool success = await _authenticationService.Register(Login, Email, Password);
 
             if (!success)
             {
-                ErrorMessage = "Ошибка регистрации. Возможно, логин или почта уже заняты.";
+                ErrorMessage = "Неверный email или пароль";
                 return;
             }
             

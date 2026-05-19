@@ -24,8 +24,8 @@
             <TextBlock Text="{Binding Message}" Margin="0,0,0,15" TextWrapping="Wrap" Style="{StaticResource Body}"/>
             <TextBox Text="{Binding InputText, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBoxStyle}" />
             <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
-                <Button Content="Отмена" IsCancel="True" Click="CancelButton_Click" Style="{StaticResource SecondaryButtonStyle}"/>
-                <Button Content="OK" IsDefault="True" Click="OkButton_Click" Margin="10,0,0,0" Style="{StaticResource PrimaryActionButtonStyle}"/>
+                <Button Content="Отмена" IsCancel="True" Command="{Binding CancelCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}" Style="{StaticResource SecondaryButtonStyle}"/>
+                <Button Content="OK" IsDefault="True" Command="{Binding OkCommand}" CommandParameter="{Binding RelativeSource={RelativeSource AncestorType=Window}}" Margin="10,0,0,0" Style="{StaticResource PrimaryActionButtonStyle}"/>
             </StackPanel>
         </StackPanel>
     </Grid>

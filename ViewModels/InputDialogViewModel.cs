@@ -14,6 +14,7 @@ namespace Plantify.ViewModels
         private string _message;
 
         [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(OkCommand))]
         private string _inputText;
 
         public InputDialogResult DialogResult { get; private set; }
@@ -24,6 +25,19 @@ namespace Plantify.ViewModels
             _message = message;
             _inputText = defaultText;
             DialogResult = new InputDialogResult();
+        }
+
+        private bool CanConfirm()
+        {
+            return !string.IsNullOrWhiteSpace(InputText) && InputText.Trim().Length >= 2;
+        }
+
+        [RelayCommand(CanExecute = nameof(CanConfirm))]
+        private void Ok(Window window)
+        {
+            DialogResult.Confirmed = true;
+            DialogResult.Text = InputText;
+            window?.Close();
         }
 
         [RelayCommand]

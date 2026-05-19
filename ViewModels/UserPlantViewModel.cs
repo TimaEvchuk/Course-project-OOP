@@ -67,7 +67,7 @@ namespace Plantify.ViewModels
 
         partial void OnIsTaskCompletedTodayChanged(bool value)
         {
-            _messenger.Send(new UserPlantSelectionChangedMessage(value ? 1 : -1)); // Send message for change
+            _messenger.Send(new UserPlantSelectionChangedMessage(0)); // Value is not used, just triggers re-calculation
         }
 
         private BitmapImage? LoadImage(string? imagePath)

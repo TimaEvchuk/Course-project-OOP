@@ -77,7 +77,9 @@ namespace Plantify.ViewModels
         [RelayCommand]
         private async Task LoadPlants()
         {
-            var plantList = await _unitOfWork.Plants.GetAllAsync(include: q => q.Include(p => p.Sections).Include(p => p.Variety).Include(p => p.LightRequirement));
+            var plantList = await _unitOfWork.Plants.GetAllAsync(
+                include: q => q.Include(p => p.Sections).Include(p => p.Variety).Include(p => p.LightRequirement),
+                withTracking: false);
             Plants.Clear();
             foreach (var plant in plantList)
             {
@@ -99,14 +101,14 @@ namespace Plantify.ViewModels
         [RelayCommand]
         private async Task LoadCategories()
         {
-            var varietyList = await _unitOfWork.Varieties.GetAllAsync();
+            var varietyList = await _unitOfWork.Varieties.GetAllAsync(withTracking: false);
             Varieties.Clear();
             foreach (var item in varietyList.OrderBy(v => v.Name))
             {
                 Varieties.Add(item);
             }
 
-            var lightList = await _unitOfWork.LightRequirements.GetAllAsync();
+            var lightList = await _unitOfWork.LightRequirements.GetAllAsync(withTracking: false);
             LightRequirements.Clear();
             foreach (var item in lightList.OrderBy(l => l.Name))
             {
@@ -206,7 +208,7 @@ namespace Plantify.ViewModels
         private async Task AddVariety()
         {
             var result = _dialogService.ShowInputDialog("Введите название нового вида:", "Добавить вид");
-            if (result.Confirmed && !string.IsNullOrWhiteSpace(result.Text))
+            if (result.Confirmed && !string.IsNullOrWhiteSpace(result.Text) && result.Text.Trim().Length >= 2)
             {
                 var newVariety = new Variety { Name = result.Text.Trim() };
                 await _unitOfWork.Varieties.AddAsync(newVariety);
@@ -246,7 +248,7 @@ namespace Plantify.ViewModels
         private async Task AddLightRequirement()
         {
             var result = _dialogService.ShowInputDialog("Введите новое требование к свету:", "Добавить требование");
-            if (result.Confirmed && !string.IsNullOrWhiteSpace(result.Text))
+            if (result.Confirmed && !string.IsNullOrWhiteSpace(result.Text) && result.Text.Trim().Length >= 2)
             {
                 var newReq = new LightRequirement { Name = result.Text.Trim() };
                 await _unitOfWork.LightRequirements.AddAsync(newReq);

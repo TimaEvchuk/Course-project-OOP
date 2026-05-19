@@ -18,14 +18,14 @@
             </Grid.RowDefinitions>
             
             <Grid Grid.Row="0" Margin="0,0,0,20">
-                <TextBlock Text="Приобрести Premium" Style="{StaticResource H1}" TextWrapping="Wrap"
+                <TextBlock Text="Приобрести Премиум" Style="{StaticResource H1}" TextWrapping="Wrap"
                            HorizontalAlignment="Center"/>
                 <Button Command="{Binding CancelCommand}" Style="{StaticResource CloseButtonStyle}" 
                         HorizontalAlignment="Right" VerticalAlignment="Top" Width="35" Height="35" Margin="0,-25,-25,0"/>
             </Grid>
             
             <StackPanel Grid.Row="1" HorizontalAlignment="Center" VerticalAlignment="Center">
-                <TextBlock Text="Тариф: Premium" FontSize="20" FontWeight="Bold" Margin="0,0,0,10"
+                <TextBlock Text="Тариф: Премиум" FontSize="20" FontWeight="Bold" Margin="0,0,0,10"
                            HorizontalAlignment="Center" Foreground="{StaticResource BrushDarkGreen}"/>
                 <TextBlock Text="Период: 1 месяц" FontSize="16" Margin="0,0,0,5"
                            HorizontalAlignment="Center"/>

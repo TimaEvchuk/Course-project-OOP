@@ -14,7 +14,8 @@ namespace Plantify.Data.Repositories
         Task<IEnumerable<T>> GetAllAsync(
             Expression<Func<T, bool>>? filter = null,
             Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
-            Func<IQueryable<T>, IIncludableQueryable<T, object>>? include = null);
+            Func<IQueryable<T>, IIncludableQueryable<T, object>>? include = null,
+            bool withTracking = true);
         Task<IEnumerable<T>> FindAsync(Expression<Func<T, bool>> predicate);
         Task<int> CountAsync(Expression<Func<T, bool>>? predicate = null);
         Task AddAsync(T entity);

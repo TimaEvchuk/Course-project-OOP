@@ -170,7 +170,7 @@
 
                 <TextBlock TextWrapping="Wrap" Foreground="{StaticResource BrushDarkGray}" MaxWidth="400" TextAlignment="Left"
                            Visibility="{Binding IsPremium, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
-                    <Run Text="*При приобретении Премиум тарифа, вы получаете возможность добавлять неограниченное количество растений в свой сад, а также смотреть сводку задач на месяц вперед."/>
+                    <Run Text="*При приобретении Премиум тарифа, вы получаете возможность добавлять неограниченное количество растений в свой сад, а также смотреть сводку задач на месяц вперед и импортировать/экспортировать сад из JSON-файла."/>
                 </TextBlock>
             </StackPanel>
         </Border>
@@ -192,19 +192,28 @@
         </Border>
 
         <!-- Раздел "Импорт/Экспорт" (1,1) -->
-        <Border Grid.Row="1" Grid.Column="1" Style="{StaticResource StatWidgetStyle}" Padding="20" Margin="10,10,0,0">
-            <StackPanel>
-                <TextBlock Text="Импорт/Экспорт сада" Style="{StaticResource H2}" FontSize="24" FontWeight="Bold" Margin="0,0,0,15"/>
-                <TextBlock Text="Сохраните ваш сад в файл или загрузите его из ранее сохраненной копии."
-                           TextWrapping="Wrap"
-                           Foreground="{StaticResource BrushDarkGray}"
-                           Margin="0,0,0,20"/>
-                <StackPanel Orientation="Horizontal">
-                    <Button Content="Экспортировать в JSON" Command="{Binding ExportGardenCommand}" Style="{StaticResource SecondaryButtonStyle}"/>
-                    <Button Content="Импортировать из JSON" Command="{Binding ImportGardenCommand}" Style="{StaticResource PrimaryActionButtonStyle}" Margin="10,0,0,0"/>
+        <Grid Grid.Row="1" Grid.Column="1" Margin="10,10,0,0">
+            <Border Style="{StaticResource StatWidgetStyle}" Padding="20" IsEnabled="{Binding IsPremium}">
+                <StackPanel>
+                    <TextBlock Text="Импорт/Экспорт сада" Style="{StaticResource H2}" FontSize="24" FontWeight="Bold" Margin="0,0,0,15"/>
+                    <TextBlock Text="Сохраните ваш сад в файл или загрузите его из ранее сохраненной копии."
+                               TextWrapping="Wrap"
+                               Foreground="{StaticResource BrushDarkGray}"
+                               Margin="0,0,0,20"/>
+                    <StackPanel Orientation="Horizontal">
+                        <Button Content="Экспортировать в JSON" Command="{Binding ExportGardenCommand}" Style="{StaticResource SecondaryButtonStyle}"/>
+                        <Button Content="Импортировать из JSON" Command="{Binding ImportGardenCommand}" Style="{StaticResource PrimaryActionButtonStyle}" Margin="10,0,0,0"/>
+                    </StackPanel>
                 </StackPanel>
-            </StackPanel>
-        </Border>
+            </Border>
+            
+            <Border Background="#D0FFFFFF" CornerRadius="8"
+                    Visibility="{Binding IsPremium, Converter={StaticResource InverseBooleanToVisibilityConverter}}">
+                <TextBlock Text="Только для Премиум"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                           FontSize="22" FontWeight="Bold" Foreground="{StaticResource BrushDarkGreen}"/>
+            </Border>
+        </Grid>
 
     </Grid>
 </UserControl>

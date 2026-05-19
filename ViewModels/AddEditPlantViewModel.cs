@@ -48,7 +48,7 @@ namespace Plantify.ViewModels
         
         public ObservableCollection<PlantSectionViewModel> Sections { get; set; }
 
-        public string Title => IsEditMode ? "Редактировать растение" : "Добавить новое растение";
+        public override string Title => IsEditMode ? "Редактировать растение" : "Добавить новое растение";
         public string SaveButtonText => IsEditMode ? "Сохранить" : "Добавить";
         
         public ObservableCollection<Variety> Varieties { get; }
@@ -146,17 +146,10 @@ namespace Plantify.ViewModels
 
         private bool CanSave()
         {
-            var canSaveResult = !string.IsNullOrWhiteSpace(PlantName) &&
-                                PlantName.Length >= 2 &&
-                                SelectedVariety != null &&
-                                SelectedLightRequirement != null;
-            
-            MessageBox.Show($"CanSave evaluated: {canSaveResult}\n" +
-                            $"PlantName: '{PlantName}' ({(PlantName?.Length ?? 0)} chars)\n" +
-                            $"SelectedVariety: {SelectedVariety?.Name ?? "null"}\n" +
-                            $"SelectedLightRequirement: {SelectedLightRequirement?.Name ?? "null"}");
-
-            return canSaveResult;
+            return !string.IsNullOrWhiteSpace(PlantName) &&
+                   PlantName.Length >= 2 &&
+                   SelectedVariety != null &&
+                   SelectedLightRequirement != null;
         }
 
         [RelayCommand(CanExecute = nameof(CanSave))]
@@ -179,8 +172,8 @@ namespace Plantify.ViewModels
             }
 
             plantToSave.Name = PlantName;
-            plantToSave.VarietyId = SelectedVariety.Id;
-            plantToSave.LightRequirementId = SelectedLightRequirement.Id;
+            plantToSave.VarietyId = SelectedVariety!.Id;
+            plantToSave.LightRequirementId = SelectedLightRequirement!.Id;
             plantToSave.WateringInterval = WateringInterval;
             plantToSave.FertilizingInterval = FertilizingInterval;
             plantToSave.ImagePath = ImagePath;

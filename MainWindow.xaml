@@ -8,7 +8,7 @@
         xmlns:vm="clr-namespace:Plantify.ViewModels"
         mc:Ignorable="d"
         Title="Plantify" Height="720" Width="1280" WindowStartupLocation="CenterScreen"
-        Background="{StaticResource BrushMilkWhite}">
+        Background="{Binding CurrentBackground}">
     <Grid>
         <Grid.ColumnDefinitions>
             <ColumnDefinition Width="240"/>
@@ -17,7 +17,8 @@
 
         <!-- Sidebar -->
         <Border Grid.Column="0" BorderBrush="{StaticResource BrushBorderGray}" BorderThickness="0,0,1,0"
-                Visibility="{Binding IsLoggedIn, Converter={StaticResource BooleanToVisibilityConverter}}">
+                Visibility="{Binding IsLoggedIn, Converter={StaticResource BooleanToVisibilityConverter}}"
+                Background="{StaticResource BrushPureWhite}">
             <StackPanel>
                 <TextBlock Text="Plantify" Style="{StaticResource H1}" Margin="20"/>
                 <StackPanel Margin="0,20,0,0">
@@ -60,13 +61,14 @@
                 </Style>
             </Grid.Style>
             <Grid.RowDefinitions>
-                <RowDefinition Height="80"/>
+                <RowDefinition Height="{Binding HeaderHeight}"/>
                 <RowDefinition Height="*"/>
             </Grid.RowDefinitions>
 
             <!-- Header -->
             <Border Grid.Row="0" BorderBrush="{StaticResource BrushBorderGray}" BorderThickness="0,0,0,1"
-                    Visibility="{Binding IsLoggedIn, Converter={StaticResource BooleanToVisibilityConverter}}">
+                    Visibility="{Binding IsLoggedIn, Converter={StaticResource BooleanToVisibilityConverter}}"
+                    Background="{StaticResource BrushPureWhite}">
                 <Grid>
                     <TextBlock Text="{Binding CurrentPageTitle}" Style="{StaticResource H1}" VerticalAlignment="Center" Margin="30,0,0,0"/>
                     <StackPanel Orientation="Horizontal" HorizontalAlignment="Right" VerticalAlignment="Center" Margin="0,0,30,0">

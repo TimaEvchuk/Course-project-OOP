@@ -40,19 +40,19 @@ namespace Plantify.ViewModels
         [RelayCommand]
         private async Task SignIn()
         {
-            ValidateAllProperties();
-            if (HasErrors)
+            if (string.IsNullOrWhiteSpace(Login) || string.IsNullOrWhiteSpace(Password))
             {
-                ErrorMessage = string.Join("\n", GetErrors().Select(e => e.ErrorMessage));
+                ErrorMessage = "Неверный пароль или логин";
                 return;
             }
+            
             ErrorMessage = "";
 
             bool success = await _authenticationService.SignIn(Login, Password);
 
             if (!success)
             {
-                ErrorMessage = "Неверный логин или пароль.";
+                ErrorMessage = "Неверный пароль или логин";
                 return;
             }
             

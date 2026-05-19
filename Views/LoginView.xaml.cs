@@ -1,4 +1,5 @@
 using System.Windows.Controls;
+using Plantify.ViewModels;
 
 namespace Plantify.Views
 {
@@ -10,6 +11,14 @@ namespace Plantify.Views
         public LoginView()
         {
             InitializeComponent();
+        }
+
+        private void PasswordBox_PasswordChanged(object sender, System.Windows.RoutedEventArgs e)
+        {
+            if (this.DataContext is LoginViewModel viewModel)
+            {
+                viewModel.Password = ((PasswordBox)sender).Password;
+            }
         }
     }
 }

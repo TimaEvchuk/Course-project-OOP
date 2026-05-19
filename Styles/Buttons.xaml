@@ -66,7 +66,7 @@
                              <Setter TargetName="PillBorder" Property="BorderBrush" Value="{StaticResource BrushForestGreen}" />
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
-                            <Setter Property="Background" Value="{StaticResource BrushLightGray}"/>
+                            <Setter Property="Background" Value="{StaticResource BrushBorderGray}"/>
                             <Setter Property="Foreground" Value="{StaticResource BrushGray}"/>
                             <Setter Property="Cursor" Value="Arrow"/>
                         </Trigger>
@@ -101,6 +101,11 @@
                             <Setter TargetName="ButtonBorder" Property="Background" Value="{StaticResource BrushLightForestGreen}"/>
                             <Setter Property="Foreground" Value="{StaticResource BrushPureWhite}"/>
                         </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="ButtonBorder" Property="Background" Value="{StaticResource BrushBorderGray}"/>
+                            <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="{StaticResource BrushBorderGray}"/>
+                            <Setter Property="Foreground" Value="{StaticResource BrushGray}"/>
+                        </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
             </Setter.Value>
@@ -117,7 +122,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="Button">
-                    <Border x:Name="ButtonBorder" Background="{TemplateBinding Background}" CornerRadius="8" Padding="{TemplateBinding Padding}">
+                    <Border x:Name="ButtonBorder" Background="{StaticResource BrushTerracotta}" CornerRadius="8" Padding="{TemplateBinding Padding}">
                         <ContentPresenter HorizontalAlignment="Center" VerticalAlignment="Center"/>
                     </Border>
                     <ControlTemplate.Triggers>
@@ -125,7 +130,8 @@
                             <Setter TargetName="ButtonBorder" Property="Background" Value="{StaticResource BrushDarkTerracotta}"/>
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
-                            <Setter TargetName="ButtonBorder" Property="Background" Value="{StaticResource BrushLightGray}"/>
+                            <Setter TargetName="ButtonBorder" Property="Background" Value="{StaticResource BrushBorderGray}"/>
+                            <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="{StaticResource BrushBorderGray}"/>
                             <Setter Property="Foreground" Value="{StaticResource BrushGray}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
@@ -185,7 +191,8 @@
                             <Setter TargetName="ButtonBorder" Property="Background" Value="{StaticResource BrushLightForestGreen}"/>
                         </Trigger>
                         <Trigger Property="IsEnabled" Value="False">
-                            <Setter TargetName="ButtonBorder" Property="Background" Value="{StaticResource BrushLightGray}"/>
+                            <Setter TargetName="ButtonBorder" Property="Background" Value="{StaticResource BrushBorderGray}"/>
+                            <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="{StaticResource BrushBorderGray}"/>
                             <Setter Property="Foreground" Value="{StaticResource BrushGray}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
@@ -206,6 +213,11 @@
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="ButtonBorder" Property="Background" Value="{StaticResource BrushSand}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="ButtonBorder" Property="Background" Value="{StaticResource BrushBorderGray}"/>
+                            <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="{StaticResource BrushBorderGray}"/>
+                            <Setter Property="Foreground" Value="{StaticResource BrushGray}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>
@@ -233,6 +245,11 @@
                     <ControlTemplate.Triggers>
                         <Trigger Property="IsMouseOver" Value="True">
                             <Setter TargetName="ButtonBorder" Property="Background" Value="{StaticResource BrushDarkSand}"/>
+                        </Trigger>
+                        <Trigger Property="IsEnabled" Value="False">
+                            <Setter TargetName="ButtonBorder" Property="Background" Value="{StaticResource BrushBorderGray}"/>
+                            <Setter TargetName="ButtonBorder" Property="BorderBrush" Value="{StaticResource BrushBorderGray}"/>
+                            <Setter Property="Foreground" Value="{StaticResource BrushGray}"/>
                         </Trigger>
                     </ControlTemplate.Triggers>
                 </ControlTemplate>

@@ -20,18 +20,21 @@ namespace Plantify.ViewModels
         [NotifyDataErrorInfo]
         [Required(ErrorMessage = "Логин обязателен")]
         [MinLength(3, ErrorMessage = "Логин должен содержать минимум 3 символа")]
+        [NotifyCanExecuteChangedFor(nameof(AddUserCommand))]
         private string _login = "";
 
         [ObservableProperty]
         [NotifyDataErrorInfo]
         [Required(ErrorMessage = "Email обязателен")]
         [EmailAddress(ErrorMessage = "Некорректный формат Email")]
+        [NotifyCanExecuteChangedFor(nameof(AddUserCommand))]
         private string _email = "";
 
         [ObservableProperty]
         [NotifyDataErrorInfo]
         [Required(ErrorMessage = "Пароль обязателен")]
         [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,20}$", ErrorMessage = "Пароль должен содержать заглавную и строчную буквы, цифру, и быть длиной 8-20 символов.")]
+        [NotifyCanExecuteChangedFor(nameof(AddUserCommand))]
         private string _password = "";
 
         private string _confirmPassword = "";
@@ -41,12 +44,17 @@ namespace Plantify.ViewModels
         public string ConfirmPassword
         {
             get => _confirmPassword;
-            set => SetProperty(ref _confirmPassword, value, true);
+            set
+            {
+                SetProperty(ref _confirmPassword, value, true);
+                AddUserCommand.NotifyCanExecuteChanged();
+            }
         }
         
         [ObservableProperty]
         [NotifyDataErrorInfo]
         [Required(ErrorMessage = "Необходимо выбрать роль")]
+        [NotifyCanExecuteChangedFor(nameof(AddUserCommand))]
         private Role? _selectedRole;
         
         public ObservableCollection<Role> AllRoles { get; } = new();
@@ -67,15 +75,15 @@ namespace Plantify.ViewModels
             }
         }
 
-        [RelayCommand]
-        private async Task AddUser()
+        private bool CanAddUser()
         {
             ValidateAllProperties();
-            if (HasErrors)
-            {
-                return;
-            }
+            return !HasErrors;
+        }
 
+        [RelayCommand(CanExecute = nameof(CanAddUser))]
+        private async Task AddUser()
+        {
             if ((await _unitOfWork.Users.FindAsync(u => u.Login == Login)).Any())
             {
                 // TODO: Show this server-side error in the UI. 

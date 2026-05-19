@@ -49,13 +49,30 @@ namespace Plantify.Services
                             UserId = user.Id,
                             Message = "Подписка на тариф 'Премиум' истекла!",
                             Timestamp = DateTime.Now,
-                            Type = Models.Enums.NotificationType.NeedsCare
+                            Type = Models.Enums.NotificationType.Warning
                         };
                         await unitOfWork.Notifications.AddAsync(expiredNotification);
-                        await unitOfWork.CompleteAsync();
-
-                        // Send message to update UI
                         _messenger.Send(new NewNotificationMessage(expiredNotification));
+                        
+                        // Trim garden to 5 plants
+                        var userPlants = (await unitOfWork.UserPlants.FindAsync(p => p.UserId == user.Id)).ToList();
+                        if (userPlants.Count > 5)
+                        {
+                            var plantsToDelete = userPlants.OrderByDescending(p => p.Id).Skip(5).ToList();
+                            unitOfWork.UserPlants.RemoveRange(plantsToDelete);
+                            
+                            var trimNotification = new Notification
+                            {
+                                UserId = user.Id,
+                                Message = $"Ваш сад был сокращен до 5 растений.",
+                                Timestamp = DateTime.Now,
+                                Type = Models.Enums.NotificationType.Warning
+                            };
+                            await unitOfWork.Notifications.AddAsync(trimNotification);
+                            _messenger.Send(new NewNotificationMessage(trimNotification));
+                        }
+
+                        await unitOfWork.CompleteAsync();
                     }
 
                     CurrentUser = user;

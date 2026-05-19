@@ -32,9 +32,15 @@ namespace Plantify.Data.Repositories
         public async Task<IEnumerable<T>> GetAllAsync(
             Expression<Func<T, bool>>? filter = null,
             Func<IQueryable<T>, IOrderedQueryable<T>>? orderBy = null,
-            Func<IQueryable<T>, IIncludableQueryable<T, object>>? include = null)
+            Func<IQueryable<T>, IIncludableQueryable<T, object>>? include = null,
+            bool withTracking = true)
         {
             IQueryable<T> query = _dbSet;
+
+            if (!withTracking)
+            {
+                query = query.AsNoTracking();
+            }
 
             if (include != null)
             {

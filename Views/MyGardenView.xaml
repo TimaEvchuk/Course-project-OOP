@@ -11,6 +11,8 @@
     <Grid>
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
@@ -75,13 +77,58 @@
             </Grid>
         </Border>
 
+        <!-- Date and Filter Bar -->
+        <Grid Grid.Row="1" Margin="30,15,30,0">
+            <Grid.ColumnDefinitions>
+                <ColumnDefinition Width="*"/>
+                <ColumnDefinition Width="Auto"/>
+            </Grid.ColumnDefinitions>
+
+            <TextBlock Grid.Column="0" Text="{Binding FilteredPlantCountSummary}" Foreground="{StaticResource BrushDarkGreen}" FontSize="20" VerticalAlignment="Center" FontWeight="Bold"/>
+
+            <StackPanel Grid.Column="1" Orientation="Horizontal">
+                <Border BorderBrush="{StaticResource BrushBorderGray}" BorderThickness="1" CornerRadius="5" Padding="5" Width="300" HorizontalAlignment="Left" Background="{StaticResource BrushPureWhite}">
+                    <Grid>
+                        <Grid.ColumnDefinitions>
+                            <ColumnDefinition Width="Auto"/>
+                            <ColumnDefinition Width="*"/>
+                        </Grid.ColumnDefinitions>
+                        <TextBlock Grid.Column="0" Text="🔍" VerticalAlignment="Center" Margin="5,0"/>
+                        <TextBlock Grid.Column="1" Text="Найдите растение..." IsHitTestVisible="False" VerticalAlignment="Center" Foreground="Gray" Margin="5,0,0,0">
+                            <TextBlock.Style>
+                                <Style TargetType="TextBlock">
+                                    <Setter Property="Visibility" Value="Collapsed"/>
+                                    <Style.Triggers>
+                                        <DataTrigger Binding="{Binding SearchText}" Value="">
+                                            <Setter Property="Visibility" Value="Visible"/>
+                                        </DataTrigger>
+                                    </Style.Triggers>
+                                </Style>
+                            </TextBlock.Style>
+                        </TextBlock>
+                        <TextBox Grid.Column="1" Text="{Binding SearchText, UpdateSourceTrigger=PropertyChanged}" VerticalAlignment="Center" BorderThickness="0" Background="Transparent"
+                                 Style="{StaticResource SearchTextBoxStyle}"/>
+                    </Grid>
+                </Border>
+                <ComboBox ItemsSource="{Binding Categories}" SelectedItem="{Binding SelectedCategory}" 
+                          MinWidth="150" Margin="10,0,0,0" Style="{StaticResource FormComboBoxStyle}"
+                          VerticalContentAlignment="Center"/>
+            </StackPanel>
+        </Grid>
+        
+        <!-- Separator -->
+        <Border Grid.Row="2" Height="1" Background="{StaticResource BrushBorderGray}" Margin="30,15,30,0"/>
+
         <!-- Plant Grid -->
-        <ScrollViewer Grid.Row="1" VerticalScrollBarVisibility="Auto" Margin="30,0,0,0">
+        <ScrollViewer Grid.Row="3" VerticalScrollBarVisibility="Auto" Margin="30,15,0,0">
             <ScrollViewer.Style>
                 <Style TargetType="ScrollViewer" BasedOn="{StaticResource ScrollBarStyle}">
                     <Setter Property="Visibility" Value="Visible"/>
                     <Style.Triggers>
                         <DataTrigger Binding="{Binding ShowEmptyState}" Value="True">
+                            <Setter Property="Visibility" Value="Collapsed"/>
+                        </DataTrigger>
+                        <DataTrigger Binding="{Binding ShowEmptyFilterState}" Value="True">
                             <Setter Property="Visibility" Value="Collapsed"/>
                         </DataTrigger>
                     </Style.Triggers>
@@ -136,10 +183,9 @@
                                 <!-- Info Section -->
                                 <StackPanel Margin="15,10,15,15">
                                     <TextBlock Text="{Binding Name}" Style="{StaticResource H2}" TextTrimming="CharacterEllipsis"/>
-                                    <TextBlock Text="{Binding Species}" Foreground="Gray" FontSize="12" Margin="0,2,0,10"/>
 
                                     <!-- Characteristics (Example) -->
-                                    <StackPanel Orientation="Vertical" Margin="0,0,0,15">
+                                    <StackPanel Orientation="Vertical" Margin="0,10,0,15">
                                         <Border Background="{StaticResource BrushLightGray}" CornerRadius="12" Padding="8,4" Margin="0,0,0,5" HorizontalAlignment="Left">
                                             <StackPanel Orientation="Horizontal">
                                                 <TextBlock Text="☀️" VerticalAlignment="Center"/>
@@ -148,8 +194,8 @@
                                         </Border>
                                         <Border Background="{StaticResource BrushLightGray}" CornerRadius="12" Padding="8,4" HorizontalAlignment="Left">
                                             <StackPanel Orientation="Horizontal">
-                                                <TextBlock Text="🌡️" VerticalAlignment="Center"/>
-                                                <TextBlock Text="20-25°C" FontSize="12" Margin="4,0,0,0" VerticalAlignment="Center"/>
+                                                <TextBlock Text="🌱" VerticalAlignment="Center"/>
+                                                <TextBlock Text="{Binding Species}" FontSize="12" Margin="4,0,0,0" VerticalAlignment="Center"/>
                                             </StackPanel>
                                         </Border>
                                     </StackPanel>
@@ -192,8 +238,9 @@
                 </ItemsControl.ItemTemplate>
             </ItemsControl>
         </ScrollViewer>
-        <!-- Empty State -->
-        <Grid Grid.Row="1">
+        
+        <!-- Empty State: Truly Empty Garden -->
+        <Grid Grid.Row="3">
             <Grid.Style>
                 <Style TargetType="Grid">
                     <Setter Property="Visibility" Value="Collapsed"/>
@@ -240,8 +287,30 @@
             </StackPanel>
         </Grid>
 
+        <!-- Empty State: No Filter Results -->
+        <Grid Grid.Row="3">
+            <Grid.Style>
+                <Style TargetType="Grid">
+                    <Setter Property="Visibility" Value="Collapsed"/>
+                    <Style.Triggers>
+                        <DataTrigger Binding="{Binding ShowEmptyFilterState}" Value="True">
+                            <Setter Property="Visibility" Value="Visible"/>
+                        </DataTrigger>
+                    </Style.Triggers>
+                </Style>
+            </Grid.Style>
+            <StackPanel HorizontalAlignment="Center" VerticalAlignment="Center" Margin="0,0,0,50">
+                <Image Source="/Images/MyGardenPlaceholder.png" Width="200" Height="200" Margin="20"/>
+                <TextBlock Text="У вас пока нету таких растений в саду"
+                           FontSize="20"
+                           Foreground="Gray"
+                           HorizontalAlignment="Center"
+                           Margin="0,0,0,20"/>
+            </StackPanel>
+        </Grid>
+
         <!-- Confirm Care Buttons -->
-        <StackPanel Grid.Row="1" 
+        <StackPanel Grid.Row="3" 
                     Orientation="Horizontal"
                     HorizontalAlignment="Right" 
                     VerticalAlignment="Bottom"
@@ -257,6 +326,20 @@
                 </Style>
             </StackPanel.Style>
 
+            <Button Command="{Binding ToggleSelectAllFilteredCommand}"
+                    Content="{Binding SelectAllFilteredButtonText}"
+                    Margin="0,0,10,0">
+                <Button.Style>
+                    <Style TargetType="Button" BasedOn="{StaticResource PrimaryActionButtonStyle}">
+                        <Style.Triggers>
+                            <DataTrigger Binding="{Binding IsSelectAllFilteredActive}" Value="True">
+                                <Setter Property="BorderBrush" Value="{StaticResource BrushBorderGray}"/>
+                            </DataTrigger>
+                        </Style.Triggers>
+                    </Style>
+                </Button.Style>
+            </Button>
+
             <Button Content="Полить" 
                     Command="{Binding ConfirmWaterActionCommand}"
                     Style="{StaticResource PrimaryActionButtonStyle}"/>
@@ -264,6 +347,14 @@
             <Button Content="Удобрить" 
                     Command="{Binding ConfirmFertilizeActionCommand}"
                     Style="{StaticResource FertilizeActionButtonStyle}"
+                    Margin="10,0,0,0"/>
+            
+            <Button Content="🗑️" 
+                    Command="{Binding DeleteSelectedPlantsCommand}"
+                    Style="{StaticResource DestructiveButtonStyle}"
+                    Width="50"
+                    Padding="10"
+                    ToolTip="Удалить выбранные"
                     Margin="10,0,0,0"/>
         </StackPanel>
     </Grid>

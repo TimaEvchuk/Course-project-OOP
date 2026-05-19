@@ -27,6 +27,7 @@ namespace Plantify.ViewModels
         private ObservableCollection<Plant> _allPlants = new();
 
         [ObservableProperty]
+        [NotifyCanExecuteChangedFor(nameof(SaveCommand))]
         private Plant? _selectedPlant;
         
         [ObservableProperty]
@@ -34,9 +35,6 @@ namespace Plantify.ViewModels
         
         [ObservableProperty]
         private string? _location;
-
-        [ObservableProperty]
-        private string? _description;
 
         [ObservableProperty]
         private DateTime _lastWateringDate;
@@ -56,7 +54,8 @@ namespace Plantify.ViewModels
         [ObservableProperty]
         private string? _errorMessage;
 
-        public string Title => IsEditMode ? "Редактировать растение" : "Добавить растение в сад";
+        public override string Title => IsEditMode ? "Редактировать растение" : "Добавить растение в сад";
+        public DateTime Today => DateTime.Today;
 
         public AddUserPlantViewModel(IUnitOfWork unitOfWork, IMessenger messenger, AuthenticationService authenticationService, IConfiguration configuration)
         {
@@ -77,7 +76,6 @@ namespace Plantify.ViewModels
 
                 CustomName = OriginalUserPlant.CustomName;
                 Location = OriginalUserPlant.Location;
-                Description = OriginalUserPlant.Description;
                 LastWateringDate = OriginalUserPlant.LastUserWateringDate;
                 LastFertilizingDate = OriginalUserPlant.LastFertilizedDate;
                 
@@ -91,13 +89,13 @@ namespace Plantify.ViewModels
                 
                 CustomName = message.PlantToPreFill?.Name ?? "";
                 Location = "";
-                Description = "";
                 SelectedPlant = message.PlantToPreFill;
                 LastWateringDate = DateTime.Today;
                 LastFertilizingDate = DateTime.Today;
                 
                 DisplayImageSource = LoadImage(message.PlantToPreFill?.ImagePath);
             }
+            SaveCommand.NotifyCanExecuteChanged();
         }
         
         partial void OnSelectedPlantChanged(Plant? value)
@@ -106,12 +104,13 @@ namespace Plantify.ViewModels
             {
                 DisplayImageSource = LoadImage(value.ImagePath);
             }
+            SaveCommand.NotifyCanExecuteChanged();
         }
 
         [RelayCommand]
         private async Task LoadAllPlants()
         {
-            var plants = await _unitOfWork.Plants.GetAllAsync();
+            var plants = await _unitOfWork.Plants.GetAllAsync(withTracking: false);
             AllPlants.Clear();
             foreach (var plant in plants)
             {
@@ -123,11 +122,12 @@ namespace Plantify.ViewModels
                 SelectedPlant = AllPlants.FirstOrDefault(p => p.Id == OriginalUserPlant.PlantId);
             }
         }
+
+        private bool CanSave() => SelectedPlant != null;
         
-        [RelayCommand]
+        [RelayCommand(CanExecute = nameof(CanSave))]
         private async Task Save()
         {
-            if (SelectedPlant == null) { MessageBox.Show("Пожалуйста, выберите растение."); return; }
             if (_authenticationService.CurrentUser == null) { MessageBox.Show("Ошибка: пользователь не авторизован."); return; }
             
             ErrorMessage = null;
@@ -135,19 +135,16 @@ namespace Plantify.ViewModels
 
             if (IsEditMode && OriginalUserPlant != null)
             {
-                var plantToUpdate = await _unitOfWork.UserPlants.GetByIdAsync(OriginalUserPlant.Id);
-                if (plantToUpdate == null)
-                {
-                    ErrorMessage = "Не удалось найти редактируемое растение в базе данных.";
-                    return;
-                }
-
-                plantToUpdate.PlantId = SelectedPlant.Id;
+                // The OriginalUserPlant is detached since it was loaded with AsNoTracking.
+                // We need to update its properties and then tell the context to track it as a Modified entity.
+                var plantToUpdate = OriginalUserPlant;
+                plantToUpdate.PlantId = SelectedPlant!.Id;
                 plantToUpdate.CustomName = string.IsNullOrWhiteSpace(CustomName) ? SelectedPlant.Name : CustomName;
                 plantToUpdate.Location = Location;
-                plantToUpdate.Description = Description;
                 plantToUpdate.LastUserWateringDate = LastWateringDate;
                 plantToUpdate.LastFertilizedDate = LastFertilizingDate;
+
+                _unitOfWork.UserPlants.Update(plantToUpdate);
 
                 successMessage = $"Данные о растении '{plantToUpdate.CustomName}' успешно обновлены!";
             }
@@ -166,11 +163,10 @@ namespace Plantify.ViewModels
 
                 var newUserPlant = new UserPlant
                 {
-                    PlantId = SelectedPlant.Id,
+                    PlantId = SelectedPlant!.Id,
                     UserId = _authenticationService.CurrentUser.Id,
                     CustomName = string.IsNullOrWhiteSpace(CustomName) ? SelectedPlant.Name : CustomName,
                     Location = Location,
-                    Description = Description,
                     LastUserWateringDate = LastWateringDate,
                     LastFertilizedDate = LastFertilizingDate,
                 };
@@ -178,8 +174,6 @@ namespace Plantify.ViewModels
                 successMessage = $"Растение '{newUserPlant.CustomName}' успешно добавлено в ваш сад!";
             }
             
-            await _unitOfWork.CompleteAsync();
-
             var enableSuccessNotifications = _configuration.GetValue<bool>("NotificationSettings:EnableSuccessNotifications");
             if (enableSuccessNotifications)
             {
@@ -192,9 +186,10 @@ namespace Plantify.ViewModels
                     IsDismissed = false
                 };
                 await _unitOfWork.Notifications.AddAsync(notification);
-                await _unitOfWork.CompleteAsync();
                 _messenger.Send(new NewNotificationMessage(notification));
             }
+
+            await _unitOfWork.CompleteAsync();
 
             _messenger.Send(new CloseOverlayMessage());
             _messenger.Send(new GardenStateChangedMessage());

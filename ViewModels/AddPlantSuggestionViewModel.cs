@@ -70,8 +70,7 @@ namespace Plantify.ViewModels
         public ObservableCollection<Variety> Varieties { get; }
         public ObservableCollection<LightRequirement> LightRequirements { get; }
 
-        public string Title => "Предложить новое растение";
-
+        public override string Title => "Предложить новое растение";
         public AddPlantSuggestionViewModel(IUnitOfWork unitOfWork, IMessenger messenger, AuthenticationService authenticationService, IConfiguration configuration)
         {
             _unitOfWork = unitOfWork;

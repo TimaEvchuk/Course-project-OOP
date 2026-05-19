@@ -8,12 +8,6 @@
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance Type=vm:AddEditPlantViewModel, IsDesignTimeCreatable=False}">
     
-    <i:Interaction.Triggers>
-        <i:EventTrigger EventName="Loaded">
-            <i:InvokeCommandAction Command="{Binding LoadCategoriesCommand}" />
-        </i:EventTrigger>
-    </i:Interaction.Triggers>
-
     <Border Background="{StaticResource BrushMilkWhite}" CornerRadius="12" Padding="30" Width="800">
         <Grid>
             <Grid.RowDefinitions>
@@ -43,11 +37,20 @@
                     </Grid.RowDefinitions>
 
                     <StackPanel Grid.Column="0">
-                        <TextBlock Text="Название растения" Style="{StaticResource FormLabelStyle}"/>
+                        <TextBlock Style="{StaticResource FormLabelStyle}">
+                            <Run Text="Название растения"/>
+                            <Run Text="*" Foreground="{StaticResource BrushTerracotta}"/>
+                        </TextBlock>
                         <TextBox Text="{Binding PlantName, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBoxStyle}" HorizontalAlignment="Stretch"/>
-                        <TextBlock Text="Вид" Style="{StaticResource FormLabelStyle}"/>
+                        <TextBlock Style="{StaticResource FormLabelStyle}">
+                            <Run Text="Вид"/>
+                            <Run Text="*" Foreground="{StaticResource BrushTerracotta}"/>
+                        </TextBlock>
                         <ComboBox ItemsSource="{Binding Varieties}" SelectedItem="{Binding SelectedVariety}" DisplayMemberPath="Name" IsEditable="False" Style="{StaticResource FormComboBoxStyle}" HorizontalAlignment="Stretch"/>
-                        <TextBlock Text="Требования к свету" Style="{StaticResource FormLabelStyle}"/>
+                        <TextBlock Style="{StaticResource FormLabelStyle}">
+                            <Run Text="Требования к свету"/>
+                            <Run Text="*" Foreground="{StaticResource BrushTerracotta}"/>
+                        </TextBlock>
                         <ComboBox ItemsSource="{Binding LightRequirements}" SelectedItem="{Binding SelectedLightRequirement}" DisplayMemberPath="Name" IsEditable="False" Style="{StaticResource FormComboBoxStyle}" HorizontalAlignment="Stretch"/>
                     </StackPanel>
                     
