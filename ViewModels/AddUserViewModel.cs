@@ -39,19 +39,19 @@ namespace Plantify.ViewModels
 
         private string _confirmPassword = "";
 
-        [Required(ErrorMessage = "Подтверждение пароля обязательно")]
-        [Compare(nameof(Password), ErrorMessage = "Пароли не совпадают.")]
-        public string ConfirmPassword
-        {
-            get => _confirmPassword;
-            set
-            {
-                SetProperty(ref _confirmPassword, value, true);
-                AddUserCommand.NotifyCanExecuteChanged();
-            }
+     [Required(ErrorMessage = "Подтверждение пароля обязательно")]
+     [Compare(nameof(Password), ErrorMessage = "Пароли не совпадают.")]
+     public string ConfirmPassword
+     {
+         get => _confirmPassword;
+         set
+         {
+             SetProperty(ref _confirmPassword, value, true);
+             AddUserCommand.NotifyCanExecuteChanged();
         }
-        
-        [ObservableProperty]
+    }
+
+[ObservableProperty]
         [NotifyDataErrorInfo]
         [Required(ErrorMessage = "Необходимо выбрать роль")]
         [NotifyCanExecuteChangedFor(nameof(AddUserCommand))]

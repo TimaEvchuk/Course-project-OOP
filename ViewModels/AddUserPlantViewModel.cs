@@ -186,11 +186,17 @@ namespace Plantify.ViewModels
                     IsDismissed = false
                 };
                 await _unitOfWork.Notifications.AddAsync(notification);
-                _messenger.Send(new NewNotificationMessage(notification));
+                // The messenger call is moved to after CompleteAsync
             }
 
             await _unitOfWork.CompleteAsync();
+            _unitOfWork.DetachAllEntities();
 
+            // Send messages after the operation is fully complete
+            if (enableSuccessNotifications)
+            {
+                _messenger.Send(new NewNotificationMessage(new Notification { Message = successMessage }));
+            }
             _messenger.Send(new CloseOverlayMessage());
             _messenger.Send(new GardenStateChangedMessage());
         }

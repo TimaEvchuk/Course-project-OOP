@@ -182,29 +182,11 @@ namespace Plantify.ViewModels
             IsNotificationsPanelOpen = false;
         }
 
-        public async void Receive(NewNotificationMessage message)
+        public void Receive(NewNotificationMessage message)
         {
-            if (CurrentUser == null) return;
-
-            // Create a new Notification instance to ensure its ID is 0 and it's not being tracked
-            var newNotification = new Notification
-            {
-                Message = message.Notification.Message,
-                Type = message.Notification.Type,
-                UserId = CurrentUser.Id,
-                Timestamp = DateTime.UtcNow,
-                IsDismissed = false // Default to not dismissed
-            };
-
-            using (var scope = _serviceProvider.CreateScope())
-            {
-                var unitOfWork = scope.ServiceProvider.GetRequiredService<IUnitOfWork>();
-                await unitOfWork.Notifications.AddAsync(newNotification);
-                await unitOfWork.CompleteAsync();
-            }
-
-            // Pass the newly created and saved notification (now with an Id from the DB) to the ViewModel
-            NotificationViewModel.AddNewNotification(newNotification);
+            // The notification is already created and saved by the sender.
+            // This receiver's only job is to pass it to the UI.
+            NotificationViewModel.AddNewNotification(message.Notification);
             HasNewNotifications = true;
         }
 

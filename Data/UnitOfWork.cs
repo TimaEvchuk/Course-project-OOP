@@ -33,6 +33,11 @@ namespace Plantify.Data
             return await _context.SaveChangesAsync();
         }
 
+        public void DetachAllEntities()
+        {
+            _context.DetachAllEntities();
+        }
+
         public void Dispose()
         {
             _context.Dispose();

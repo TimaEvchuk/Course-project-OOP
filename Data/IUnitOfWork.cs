@@ -14,5 +14,6 @@ namespace Plantify.Data
         IRepository<Variety> Varieties { get; }
         IRepository<LightRequirement> LightRequirements { get; }
         Task<int> CompleteAsync();
+        void DetachAllEntities();
     }
 }

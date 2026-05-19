@@ -19,6 +19,18 @@ namespace Plantify.Data
         public DbSet<Notification> Notifications { get; set; }
         public DbSet<PlantSubmission> PlantSubmissions { get; set; }
 
+        public void DetachAllEntities()
+        {
+            var undetachedEntries = this.ChangeTracker.Entries()
+                .Where(e => e.State != EntityState.Detached)
+                .ToList();
+
+            foreach (var entry in undetachedEntries)
+            {
+                entry.State = EntityState.Detached;
+            }
+        }
+
         protected override void OnModelCreating(ModelBuilder modelBuilder)
         {
             base.OnModelCreating(modelBuilder);

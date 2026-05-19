@@ -200,15 +200,15 @@ namespace Plantify.ViewModels
             {
                 var plantIdsToDelete = selectedPlantVMs.Select(vm => vm.UserPlantId).ToList();
                 var plantsInDb = await _unitOfWork.UserPlants.FindAsync(p => plantIdsToDelete.Contains(p.Id));
-                
+                Notification? notification = null;
+
                 _unitOfWork.UserPlants.RemoveRange(plantsInDb);
-                
                 _allUserPlants.RemoveAll(p => plantIdsToDelete.Contains(p.UserPlantId));
                 
                 var enableSuccessNotifications = _configuration.GetValue<bool>("NotificationSettings:EnableSuccessNotifications");
                 if (enableSuccessNotifications)
                 {
-                    var notification = new Notification
+                    notification = new Notification
                     {
                         Message = $"🗑️ Успешно удалено {plantIdsToDelete.Count} растений!",
                         Timestamp = DateTime.Now,
@@ -217,10 +217,15 @@ namespace Plantify.ViewModels
                         IsDismissed = false
                     };
                     await _unitOfWork.Notifications.AddAsync(notification);
-                    _messenger.Send(new NewNotificationMessage(notification));
                 }
                 
                 await _unitOfWork.CompleteAsync();
+                _unitOfWork.DetachAllEntities();
+
+                if(notification != null)
+                {
+                    _messenger.Send(new NewNotificationMessage(notification));
+                }
                 
                 CancelMassSelection();
                 PerformFilter();
@@ -230,52 +235,35 @@ namespace Plantify.ViewModels
         private async Task ConfirmCareActionAsync(CareActionType actionType)
         {
             if (_authenticationService.CurrentUser == null) return;
-
             var selectedPlantVMs = UserPlants.Where(p => p.IsTaskCompletedToday).ToList();
             if (!selectedPlantVMs.Any()) return;
 
-            Func<UserPlantViewModel, bool> isDueTodayPredicate = vm => 
-                actionType == CareActionType.Water 
-                ? vm.DaysToNextWatering <= 0 
-                : vm.DaysToNextFertilizing <= 0;
-
+            Func<UserPlantViewModel, bool> isDueTodayPredicate = vm => actionType == CareActionType.Water ? vm.DaysToNextWatering <= 0 : vm.DaysToNextFertilizing <= 0;
             var dueTodayVMs = selectedPlantVMs.Where(isDueTodayPredicate).ToList();
             var notDueVMs = selectedPlantVMs.Except(dueTodayVMs).ToList();
-
             var confirmedForUpdateVMs = new List<UserPlantViewModel>(dueTodayVMs);
-
             bool? applyToAllDecision = null;
 
             foreach (var plantVM in notDueVMs)
             {
                 bool confirm = false;
-                if (applyToAllDecision.HasValue)
-                {
-                    confirm = applyToAllDecision.Value;
-                }
+                if (applyToAllDecision.HasValue) { confirm = applyToAllDecision.Value; }
                 else
                 {
                     var actionName = actionType == CareActionType.Water ? "полив" : "удобрение";
                     var message = $"Растению '{plantVM.Name}' сегодня не требуется {actionName}. Вы действительно хотите отметить его?";
                     var result = _dialogService.ShowConfirmationDialog(message, true);
-
                     confirm = result.Confirmed;
-                    if (result.ApplyToAll)
-                    {
-                        applyToAllDecision = result.Confirmed;
-                    }
+                    if (result.ApplyToAll) { applyToAllDecision = result.Confirmed; }
                 }
-
-                if (confirm)
-                {
-                    confirmedForUpdateVMs.Add(plantVM);
-                }
+                if (confirm) { confirmedForUpdateVMs.Add(plantVM); }
             }
 
             if (confirmedForUpdateVMs.Any())
             {
                 var plantIdsToUpdate = confirmedForUpdateVMs.Select(p => p.UserPlantId).ToList();
                 var plantsToUpdate = await _unitOfWork.UserPlants.GetAllAsync(filter: p => plantIdsToUpdate.Contains(p.Id));
+                Notification? notification = null;
 
                 foreach (var plantVM in confirmedForUpdateVMs)
                 {
@@ -299,29 +287,17 @@ namespace Plantify.ViewModels
                     var icon = actionType == CareActionType.Water ? "💧" : "🌱";
                     var actionText = actionType == CareActionType.Water ? "полито" : "удобрено";
                     var successMessage = $"{icon} Успешно {actionText} {confirmedForUpdateVMs.Count} растений!";
-                    
-                    var notification = new Notification
-                    {
-                        Message = successMessage,
-                        Timestamp = DateTime.Now,
-                        Type = NotificationType.ActionSuccess,
-                        UserId = _authenticationService.CurrentUser.Id,
-                        IsDismissed = false
-                    };
+                    notification = new Notification { Message = successMessage, Timestamp = DateTime.Now, Type = NotificationType.ActionSuccess, UserId = _authenticationService.CurrentUser.Id, IsDismissed = false };
                     await _unitOfWork.Notifications.AddAsync(notification);
-                    _messenger.Send(new NewNotificationMessage(notification));
                 }
                 
-                await _unitOfWork.CompleteAsync(); // Single save for all changes
+                await _unitOfWork.CompleteAsync();
+                _unitOfWork.DetachAllEntities();
                 
+                if (notification != null) { _messenger.Send(new NewNotificationMessage(notification)); }
                 _messenger.Send(new GardenStateChangedMessage());
             }
-
-            // Reset UI
             CancelMassSelection();
-
-            // Reload plants to show updated dates
-            // This is now handled by the GardenStateChangedMessage, which reloads the whole list.
         }
 
         [RelayCommand]
@@ -335,30 +311,19 @@ namespace Plantify.ViewModels
                 var plantName = plantVM.Name;
                 _unitOfWork.UserPlants.Delete(plantToDelete);
                 
-                var plantToRemoveFromAll = _allUserPlants.FirstOrDefault(p => p.UserPlantId == plantVM.UserPlantId);
-                if (plantToRemoveFromAll != null)
-                {
-                    _allUserPlants.Remove(plantToRemoveFromAll);
-                }
-                
+                Notification? notification = null;
                 var enableSuccessNotifications = _configuration.GetValue<bool>("NotificationSettings:EnableSuccessNotifications");
                 if (enableSuccessNotifications)
                 {
-                    var notification = new Notification
-                    {
-                        Message = $"Растение '{plantName}' успешно удалено!",
-                        Timestamp = DateTime.Now,
-                        Type = NotificationType.ActionSuccess,
-                        UserId = _authenticationService.CurrentUser.Id,
-                        IsDismissed = false
-                    };
+                    notification = new Notification { Message = $"Растение '{plantName}' успешно удалено!", Timestamp = DateTime.Now, Type = NotificationType.ActionSuccess, UserId = _authenticationService.CurrentUser.Id, IsDismissed = false };
                     await _unitOfWork.Notifications.AddAsync(notification);
-                    _messenger.Send(new NewNotificationMessage(notification));
                 }
                 
                 await _unitOfWork.CompleteAsync();
+                _unitOfWork.DetachAllEntities();
 
-                PerformFilter();
+                if (notification != null) { _messenger.Send(new NewNotificationMessage(notification)); }
+                _messenger.Send(new GardenStateChangedMessage());
             }
         }
 
