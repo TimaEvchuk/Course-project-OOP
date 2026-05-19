@@ -1,8 +1,10 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.Extensions.Configuration;
 using Plantify.Data;
 using Plantify.Messages;
+using Plantify.Models;
 using Plantify.Services;
 using System.Security;
 using System.Threading.Tasks;
@@ -17,6 +19,7 @@ namespace Plantify.ViewModels
         private readonly IUnitOfWork _unitOfWork;
         private readonly AuthenticationService _authenticationService;
         private readonly IMessenger _messenger;
+        private readonly IConfiguration _configuration;
 
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(ChangePasswordCommand))]
@@ -27,11 +30,12 @@ namespace Plantify.ViewModels
         [ObservableProperty]
         private string? _errorMessage;
 
-        public ChangePasswordViewModel(IUnitOfWork unitOfWork, AuthenticationService authenticationService, IMessenger messenger)
+        public ChangePasswordViewModel(IUnitOfWork unitOfWork, AuthenticationService authenticationService, IMessenger messenger, IConfiguration configuration)
         {
             _unitOfWork = unitOfWork;
             _authenticationService = authenticationService;
             _messenger = messenger;
+            _configuration = configuration;
         }
 
         private bool CanChangePassword()
@@ -53,7 +57,6 @@ namespace Plantify.ViewModels
                 return;
             }
 
-            // It's better to re-fetch the user to get the most current password hash for verification
             var userToUpdate = await _unitOfWork.Users.GetByIdAsync(detachedCurrentUser.Id);
             if (userToUpdate == null)
             {
@@ -68,12 +71,23 @@ namespace Plantify.ViewModels
             }
 
             userToUpdate.PasswordHash = BCrypt.Net.BCrypt.HashPassword(NewPassword);
+
+            Notification? notification = null;
+            if (_configuration.GetValue<bool>("NotificationSettings:EnableSuccessNotifications"))
+            {
+                notification = new Notification { Message = "Пароль успешно изменен!", Type = Models.Enums.NotificationType.ActionSuccess, UserId = userToUpdate.Id, Timestamp = DateTime.Now };
+                await _unitOfWork.Notifications.AddAsync(notification);
+            }
             
-            // No need to call UpdateAsync, just complete the unit of work
             await _unitOfWork.CompleteAsync();
+            _unitOfWork.DetachAllEntities();
 
             ErrorMessage = null;
-            MessageBox.Show("Пароль успешно изменен!", "Успех", MessageBoxButton.OK, MessageBoxImage.Information);
+            
+            if (notification != null)
+            {
+                _messenger.Send(new NewNotificationMessage(notification));
+            }
             _messenger.Send(new CloseOverlayMessage());
         }
 

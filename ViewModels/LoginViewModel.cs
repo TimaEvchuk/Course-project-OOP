@@ -59,7 +59,7 @@ namespace Plantify.ViewModels
             if (_authenticationService.CurrentUser != null && _authenticationService.CurrentUser.IsBlocked)
             {
                 ErrorMessage = "Данный аккаунт заблокирован.";
-                _authenticationService.SignOut(); // Sign out the blocked user
+                _authenticationService.Logout(); // Sign out the blocked user
                 return;
             }
 

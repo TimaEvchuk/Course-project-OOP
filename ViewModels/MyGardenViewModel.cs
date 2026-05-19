@@ -429,6 +429,8 @@ namespace Plantify.ViewModels
 
         private async Task GenerateNeedsCareNotifications()
         {
+            if (AppState.NeedsCareNotifiedToday) return;
+
             var enableCareNotifications = _configuration.GetValue<bool>("NotificationSettings:EnableCareNotifications");
             if (!enableCareNotifications) return;
             
@@ -436,10 +438,12 @@ namespace Plantify.ViewModels
             var userId = _authenticationService.CurrentUser.Id;
             var todayStart = DateTime.Today;
             var existingTodayNotifications = await _unitOfWork.Notifications.GetAllAsync(
-                filter: n => n.UserId == userId && n.Type == NotificationType.NeedsCare && n.Timestamp >= todayStart);
+                filter: n => n.UserId == userId && n.Type == NotificationType.NeedsCare && n.Timestamp >= todayStart,
+                withTracking: false);
+
             if (existingTodayNotifications.Any())
             {
-                // Already generated for today
+                AppState.NeedsCareNotifiedToday = true;
                 return;
             }
 
@@ -479,6 +483,8 @@ namespace Plantify.ViewModels
             if (notificationAdded)
             {
                 await _unitOfWork.CompleteAsync();
+                _unitOfWork.DetachAllEntities();
+                AppState.NeedsCareNotifiedToday = true;
             }
         }
 

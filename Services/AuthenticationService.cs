@@ -120,14 +120,10 @@ namespace Plantify.Services
             }
         }
 
-        public void SignOut()
-        {
-            CurrentUser = null;
-        }
-
         public void Logout()
         {
-            SignOut();
+            CurrentUser = null;
+            AppState.NeedsCareNotifiedToday = false;
         }
 
         public bool IsPremiumActive()

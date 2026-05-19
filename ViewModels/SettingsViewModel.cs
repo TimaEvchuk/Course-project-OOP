@@ -1,20 +1,23 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
+using Microsoft.Extensions.Configuration;
+using Microsoft.Extensions.Options;
 using Plantify.Data;
 using Plantify.Messages;
+using Plantify.Models;
+using Plantify.Models.DTOs;
 using Plantify.Services;
-using System.IO;
 using System;
-using System.Threading.Tasks;
+using System.Collections.Generic;
+using System.Configuration;
+using System.IO;
 using System.Linq;
-using Microsoft.Extensions.Configuration;
+using System.Security.AccessControl;
+using System.Text.Encodings.Web;
 using System.Text.Json;
 using System.Text.Json.Nodes;
-using System.Text.Encodings.Web;
-using Plantify.Models.DTOs;
-using System.Collections.Generic;
-using Plantify.Models;
+using System.Threading.Tasks;
 
 namespace Plantify.ViewModels
 {
@@ -160,39 +163,49 @@ namespace Plantify.ViewModels
         }
 
         [RelayCommand]
-        private async Task SubscriptionAction()
-        {
-            var detachedCurrentUser = _authenticationService.CurrentUser;
-            if (detachedCurrentUser == null) return;
+             private async Task SubscriptionAction()
+             {
+                 var detachedCurrentUser = _authenticationService.CurrentUser;
+                 if (detachedCurrentUser == null) return;
+    
+                 if (IsPremium)
+                 {
+                     var userToUpdate = await _unitOfWork.Users.GetByIdAsync(detachedCurrentUser.Id);
+                     if (userToUpdate == null) return;
+    
+                     userToUpdate.IsPremium = false;
+                     userToUpdate.PremiumStartDate = null;
+                     userToUpdate.PremiumEndDate = null;
+    
+                     Notification? notification = null;
+                     if (_configuration.GetValue<bool>("NotificationSettings:EnableSuccessNotifications"))
+                     {
+                         notification = new Notification { Message = "Подписка успешно отменена.", Type =
+       Models.Enums.NotificationType.ActionSuccess, UserId = userToUpdate.Id, Timestamp = DateTime.Now
+    };
+                         await _unitOfWork.Notifications.AddAsync(notification);
+                     }
 
-            if (IsPremium)
-            {
-                // Cancel subscription
-                var userToUpdate = await _unitOfWork.Users.GetByIdAsync(detachedCurrentUser.Id);
-                if (userToUpdate == null) return;
+                     await _unitOfWork.CompleteAsync();
+                 _unitOfWork.DetachAllEntities();
 
-                userToUpdate.IsPremium = false;
-                userToUpdate.PremiumStartDate = null;
-                userToUpdate.PremiumEndDate = null;
-                
-                await _unitOfWork.CompleteAsync();
+                     if (notification != null)
+                     {
+                         _messenger.Send(new NewNotificationMessage(notification));
+                     }
 
-                _messenger.Send(new NewNotificationMessage(new Notification { Message = "Подписка успешно отменена.", Type = Models.Enums.NotificationType.ActionSuccess }));
+                     detachedCurrentUser.IsPremium = false;
+                 detachedCurrentUser.PremiumStartDate = null;
+                 detachedCurrentUser.PremiumEndDate = null;
 
-                // Manually update the state of the service's CurrentUser to match
-                detachedCurrentUser.IsPremium = false;
-                detachedCurrentUser.PremiumStartDate = null;
-                detachedCurrentUser.PremiumEndDate = null;
-
-                // Refresh the entire view
-                LoadUserData();
-                _messenger.Send(new PremiumStatusChangedMessage(detachedCurrentUser));
-            }
-            else
-            {
-                _messenger.Send(new ShowPremiumPurchaseOverlayMessage());
-            }
-        }
+                     LoadUserData();
+                 _messenger.Send(new PremiumStatusChangedMessage(detachedCurrentUser));
+             }
+                 else
+                 {
+                     _messenger.Send(new ShowPremiumPurchaseOverlayMessage());
+                 }
+         }
         
         [RelayCommand]
         private void ShowPremiumPurchaseOverlay()
@@ -224,7 +237,6 @@ namespace Plantify.ViewModels
                 var detachedCurrentUser = _authenticationService.CurrentUser;
                 if (detachedCurrentUser == null) return;
 
-                // --- Create a unique file path ---
                 var extension = Path.GetExtension(filePath);
                 var fileName = $"avatar_{detachedCurrentUser.Id}_{DateTime.Now.Ticks}{extension}";
                 
@@ -236,110 +248,157 @@ namespace Plantify.ViewModels
 
                 File.Copy(filePath, destPath, true);
                 
-                // --- Update database using the correct pattern ---
                 var userToUpdate = await _unitOfWork.Users.GetByIdAsync(detachedCurrentUser.Id);
-                if (userToUpdate == null) return; // Should not happen if user is logged in
+                if (userToUpdate == null) return;
 
                 userToUpdate.AvatarPath = destPath;
                 await _unitOfWork.CompleteAsync();
-                
-                // --- Update UI and session state ---
-                detachedCurrentUser.AvatarPath = destPath; // Update the user object in the auth service
-                UserAvatarPath = destPath; // Update the property bound to the UI
+                _unitOfWork.DetachAllEntities();
+
+                detachedCurrentUser.AvatarPath = destPath;
+                UserAvatarPath = destPath;
                 _messenger.Send(new UserAvatarChangedMessage(destPath));
             }
         }
 
         [RelayCommand]
-        private async Task ExportGarden()
-        {
-            var currentUser = _authenticationService.CurrentUser;
-            if (currentUser == null) return;
-
-            var defaultFileName = $"plantify_garden_{currentUser.Login}_{DateTime.Now:yyyyMMdd}.json";
-            var filePath = _dialogService.ShowSaveFileDialog("JSON files (*.json)|*.json", defaultFileName);
-
-            if (string.IsNullOrEmpty(filePath)) return;
-
-            var userPlants = await _unitOfWork.UserPlants.FindAsync(up => up.UserId == currentUser.Id);
-            
-            var gardenDto = userPlants.Select(up => new UserPlantDto
-            {
-                PlantId = up.PlantId,
-                CustomName = up.CustomName,
-                Location = up.Location,
-                Description = up.Description,
-                LastUserWateringDate = up.LastUserWateringDate,
-                LastFertilizedDate = up.LastFertilizedDate
-            }).ToList();
-
-            try
-            {
-                var options = new JsonSerializerOptions
+             private async Task ExportGarden()
+             {
+                 var currentUser = _authenticationService.CurrentUser;
+                 if (currentUser == null) return;
+    
+                 var defaultFileName = $"plantify_garden_{currentUser.Login}_{DateTime.Now:yyyyMMdd}.json";
+                 var filePath = _dialogService.ShowSaveFileDialog("JSON files (*.json)|*.json", defaultFileName);
+    
+                 if (string.IsNullOrEmpty(filePath)) return;
+    
+                 var userPlants = await _unitOfWork.UserPlants.FindAsync(up => up.UserId == currentUser.Id);
+    
+                 var gardenDto = userPlants.Select(up => new UserPlantDto
+                 {
+                     PlantId = up.PlantId,
+                     CustomName = up.CustomName,
+                     Location = up.Location,
+                     Description = up.Description,
+                     LastUserWateringDate = up.LastUserWateringDate,
+                     LastFertilizedDate = up.LastFertilizedDate
+                 }).ToList();
+    
+                 try
                 {
-                    WriteIndented = true,
-                    Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
-                };
+                    var options = new JsonSerializerOptions
+                     {
+                         WriteIndented = true,
+                         Encoder = JavaScriptEncoder.UnsafeRelaxedJsonEscaping
+                     };
                 var json = JsonSerializer.Serialize(gardenDto, options);
-                await File.WriteAllTextAsync(filePath, json);
-                
-                _messenger.Send(new NewNotificationMessage(new Notification { Message = "Сад успешно экспортирован!", Type = Models.Enums.NotificationType.ActionSuccess }));
-            }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-                _messenger.Send(new NewNotificationMessage(new Notification { Message = $"Ошибка экспорта: {ex.Message}", Type = Models.Enums.NotificationType.Warning }));
-            }
-        }
+                 await File.WriteAllTextAsync(filePath, json);
+
+                 if (_configuration.GetValue<bool>("NotificationSettings:EnableSuccessNotifications"))
+                     {
+                         var notification = new Notification { Message = "Сад успешно экспортирован!", Type = Models.Enums.NotificationType.ActionSuccess, UserId = currentUser.Id, Timestamp = DateTime.Now };
+                         await _unitOfWork.Notifications.AddAsync(notification);
+                         await _unitOfWork.CompleteAsync();
+                         _unitOfWork.DetachAllEntities();
+                         _messenger.Send(new NewNotificationMessage(notification));
+                     }
+           }
+                 catch (Exception ex)
+                 {
+                     Console.WriteLine(ex);
+                 var errorNotification = new Notification { Message = $"Ошибка экспорта: {ex.Message}", Type = Models.Enums.NotificationType.Warning, UserId = currentUser.Id, Timestamp = DateTime.Now };
+                 await _unitOfWork.Notifications.AddAsync(errorNotification);
+                 await _unitOfWork.CompleteAsync();
+                 _unitOfWork.DetachAllEntities();
+                 _messenger.Send(new NewNotificationMessage(errorNotification));
+             }
+             }
 
         [RelayCommand]
-        private async Task ImportGarden()
-        {
-            var currentUser = _authenticationService.CurrentUser;
-            if (currentUser == null) return;
-
-            var filePath = _dialogService.ShowOpenFileDialog("JSON files (*.json)|*.json");
-            if (string.IsNullOrEmpty(filePath)) return;
-
-            try
-            {
-                var json = await File.ReadAllTextAsync(filePath);
-                var gardenDto = JsonSerializer.Deserialize<List<UserPlantDto>>(json);
-
-                if (gardenDto == null || !gardenDto.Any())
+             private async Task ImportGarden()
+             {
+                var currentUser = _authenticationService.CurrentUser;
+                if (currentUser == null) return;
+   
+                var filePath = _dialogService.ShowOpenFileDialog("JSON files (*.json)|*.json");
+                if (string.IsNullOrEmpty(filePath)) return;
+   
+                try
                 {
-                    _messenger.Send(new NewNotificationMessage(new Notification { Message = "Файл импорта пуст или некорректен.", Type = Models.Enums.NotificationType.Warning }));
-                    return;
-                }
+                    var json = await File.ReadAllTextAsync(filePath);
+                    var gardenDto = JsonSerializer.Deserialize<List<UserPlantDto>>(json);
+   
+                    if (gardenDto == null || !gardenDto.Any())
+                    {
+                        var warningNotification = new Notification
+                           {
+                               Message = "Файл импорта пуст или некорректен.",
+                               Type = Models.Enums.NotificationType.Warning,
+                               UserId = currentUser.Id,
+                               Timestamp = DateTime.Now
+                           };
+                        await _unitOfWork.Notifications.AddAsync(warningNotification);
+                        await _unitOfWork.CompleteAsync();
+                        _unitOfWork.DetachAllEntities();
+                        _messenger.Send(new NewNotificationMessage(warningNotification));
+                        return;
+                    }
+   
+                    var oldUserPlants = await _unitOfWork.UserPlants.FindAsync(up => up.UserId == currentUser.Id);
+                    _unitOfWork.UserPlants.RemoveRange(oldUserPlants);
+   
+                    var newUserPlants = gardenDto.Select(dto => new UserPlant
+                    {
+                        UserId = currentUser.Id,
+                        PlantId = dto.PlantId,
+                        CustomName = dto.CustomName,
+                        Location = dto.Location,
+                        Description = dto.Description,
+                        LastUserWateringDate = dto.LastUserWateringDate,
+                        LastFertilizedDate = dto.LastFertilizedDate
+                    }).ToList();
+                  await _unitOfWork.UserPlants.AddRangeAsync(newUserPlants);
 
-                // Удаляем старые растения
-                var oldUserPlants = await _unitOfWork.UserPlants.FindAsync(up => up.UserId == currentUser.Id);
-                _unitOfWork.UserPlants.RemoveRange(oldUserPlants);
+                    Notification? successNotification = null;
+                if (_configuration.GetValue<bool>("NotificationSettings:EnableSuccessNotifications"))
+                     {
+                         successNotification = new Notification
+    {
+        Message = "Сад успешно импортирован!",
+        Type =
+        Models.Enums.NotificationType.ActionSuccess,
+        UserId = currentUser.Id,
+        Timestamp = DateTime.Now
+    };
+                         await _unitOfWork.Notifications.AddAsync(successNotification);
+                    }
 
-                // Добавляем новые
-                var newUserPlants = gardenDto.Select(dto => new UserPlant
+                    await _unitOfWork.CompleteAsync();
+                 _unitOfWork.DetachAllEntities();
+
+                    _messenger.Send(new GardenStateChangedMessage());
+              if (successNotification != null)
+                     {
+                         _messenger.Send(new NewNotificationMessage(successNotification));
+                     }
+             }
+                catch (Exception ex)
                 {
-                    UserId = currentUser.Id,
-                    PlantId = dto.PlantId,
-                    CustomName = dto.CustomName,
-                    Location = dto.Location,
-                    Description = dto.Description,
-                    LastUserWateringDate = dto.LastUserWateringDate,
-                    LastFertilizedDate = dto.LastFertilizedDate
-                }).ToList();
-
-                await _unitOfWork.UserPlants.AddRangeAsync(newUserPlants);
-                await _unitOfWork.CompleteAsync();
-
-                _messenger.Send(new GardenStateChangedMessage());
-                _messenger.Send(new NewNotificationMessage(new Notification { Message = "Сад успешно импортирован!", Type = Models.Enums.NotificationType.ActionSuccess }));
+                    Console.WriteLine(ex);
+                 var errorNotification = new Notification
+{
+    Message = $"Ошибка импорта: {ex.Message}",
+    Type =
+    Models.Enums.NotificationType.Warning,
+    UserId = currentUser.Id,
+    Timestamp = DateTime.Now
+};
+                 await _unitOfWork.Notifications.AddAsync(errorNotification);
+                 await _unitOfWork.CompleteAsync();
+                 _unitOfWork.DetachAllEntities();
+                 _messenger.Send(new NewNotificationMessage(errorNotification));
+             }
             }
-            catch (Exception ex)
-            {
-                Console.WriteLine(ex);
-                _messenger.Send(new NewNotificationMessage(new Notification { Message = $"Ошибка импорта: {ex.Message}", Type = Models.Enums.NotificationType.Warning }));
-            }
-        }
     }
 }
 

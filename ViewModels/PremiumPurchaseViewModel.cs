@@ -48,29 +48,36 @@ namespace Plantify.ViewModels
             userToUpdate.PremiumStartDate = DateTime.Today;
             userToUpdate.PremiumEndDate = DateTime.Today.AddMonths(1);
 
-            // 2. Save user update to the database
+            // 2. Create a notification object and add it to the Unit of Work
+            Notification? successNotification = null;
+            var enableSuccessNotifications = _configuration.GetValue<bool>("NotificationSettings:EnableSuccessNotifications");
+            if (enableSuccessNotifications)
+            {
+                successNotification = new Notification
+                {
+                    Message = "Вы перешли на тариф 'Премиум'!",
+                    Type = Models.Enums.NotificationType.ActionSuccess,
+                    UserId = userToUpdate.Id,
+                    Timestamp = DateTime.Now
+                };
+                await _unitOfWork.Notifications.AddAsync(successNotification);
+            }
+            
+            // 3. Save all changes (user and notification) to the database
             await _unitOfWork.CompleteAsync();
+            _unitOfWork.DetachAllEntities();
 
-            // 3. Update the CurrentUser in AuthenticationService to reflect the changes in the current session
+            // 4. Update the CurrentUser in AuthenticationService to reflect the changes in the current session
             _authenticationService.CurrentUser.IsPremium = true;
             _authenticationService.CurrentUser.PremiumStartDate = userToUpdate.PremiumStartDate;
             _authenticationService.CurrentUser.PremiumEndDate = userToUpdate.PremiumEndDate;
 
-            // 4. Create a notification object BUT DO NOT SAVE IT HERE
-            var enableSuccessNotifications = _configuration.GetValue<bool>("NotificationSettings:EnableSuccessNotifications");
-            if (enableSuccessNotifications)
+            // 5. Send messages now that everything is saved
+            if (successNotification != null)
             {
-                var successNotification = new Notification
-                {
-                    Message = "Вы перешли на тариф 'Премиум'!",
-                    Type = Models.Enums.NotificationType.ActionSuccess
-                    // UserId and Timestamp will be set by the receiver (MainViewModel)
-                };
-                // 5. Send the unsaved notification to the hub (MainViewModel) which will save it
                 _messenger.Send(new NewNotificationMessage(successNotification));
             }
             
-            // 6. Send other UI-related messages
             _messenger.Send(new CloseOverlayMessage());
             _messenger.Send(new PremiumStatusChangedMessage(userToUpdate));
         }
