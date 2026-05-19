@@ -23,6 +23,10 @@ namespace Plantify.ViewModels
         private readonly IMessenger _messenger;
         private List<User> _allUsers = new();
 
+        // For dirty checking premium status
+        private bool _originalIsPremium;
+        private DateTime? _originalPremiumEndDate;
+
         [ObservableProperty]
         private string _searchText = "";
 
@@ -39,9 +43,21 @@ namespace Plantify.ViewModels
                     OnPropertyChanged(nameof(BlockButtonText));
                     OnPropertyChanged(nameof(CanChangeRole));
 
+                    if (SelectedUser != null)
+                    {
+                        IsPremiumSelectedUser = SelectedUser.IsPremium;
+                        PremiumStartDateSelectedUser = SelectedUser.PremiumStartDate;
+                        PremiumEndDateSelectedUser = SelectedUser.PremiumEndDate;
+                        // Store original values for dirty checking
+                        _originalIsPremium = SelectedUser.IsPremium;
+                        _originalPremiumEndDate = SelectedUser.PremiumEndDate;
+                    }
+
+                    OnPropertyChanged(nameof(CanSaveChanges));
                     BlockUserCommand.NotifyCanExecuteChanged();
                     ChangeUserRoleCommand.NotifyCanExecuteChanged();
                     DeleteUserCommand.NotifyCanExecuteChanged();
+                    SavePremiumCommand.NotifyCanExecuteChanged();
                 }
             }
         }
@@ -60,9 +76,58 @@ namespace Plantify.ViewModels
             }
         }
 
+        private bool _isPremiumSelectedUser;
+        public bool IsPremiumSelectedUser
+        {
+            get => _isPremiumSelectedUser;
+            set
+            {
+                if (SetProperty(ref _isPremiumSelectedUser, value))
+                {
+                    // If toggling to true for the first time, set start date to today
+                    if (value == true && _originalIsPremium == false)
+                    {
+                        PremiumStartDateSelectedUser = DateTime.Today;
+                    }
+                    
+                    OnPropertyChanged(nameof(CanSaveChanges));
+                    SavePremiumCommand.NotifyCanExecuteChanged();
+                }
+            }
+        }
+
+        private DateTime? _premiumStartDateSelectedUser;
+        public DateTime? PremiumStartDateSelectedUser
+        {
+            get => _premiumStartDateSelectedUser;
+            set
+            {
+                if (SetProperty(ref _premiumStartDateSelectedUser, value))
+                {
+                    OnPropertyChanged(nameof(CanSaveChanges));
+                    SavePremiumCommand.NotifyCanExecuteChanged();
+                }
+            }
+        }
+
+        private DateTime? _premiumEndDateSelectedUser;
+        public DateTime? PremiumEndDateSelectedUser
+        {
+            get => _premiumEndDateSelectedUser;
+            set
+            {
+                if (SetProperty(ref _premiumEndDateSelectedUser, value))
+                {
+                    OnPropertyChanged(nameof(CanSaveChanges));
+                    SavePremiumCommand.NotifyCanExecuteChanged();
+                }
+            }
+        }
+
         public bool IsUserSelected => SelectedUser != null;
         public bool CanChangeRole => SelectedUser != null && SelectedRoleForChange != null;
         public bool CanModifySelectedUser => SelectedUser != null && SelectedUser.Id != _authenticationService.CurrentUser?.Id;
+        public bool CanSaveChanges => SelectedUser != null && (IsPremiumSelectedUser != _originalIsPremium || PremiumEndDateSelectedUser != _originalPremiumEndDate);
         public string BlockButtonText => SelectedUser?.IsBlocked == true ? "Разблокировать" : "Заблокировать";
 
         public ObservableCollection<User> Users { get; } = new();
@@ -193,6 +258,36 @@ namespace Plantify.ViewModels
                     await LoadUsers();
                 }
             }
+        }
+
+        [RelayCommand(CanExecute = nameof(CanSaveChanges))]
+        private async Task SavePremium()
+        {
+            if (SelectedUser is null) return;
+
+            var userToUpdate = await _unitOfWork.Users.GetByIdAsync(SelectedUser.Id);
+            if (userToUpdate is null) return;
+
+            userToUpdate.IsPremium = IsPremiumSelectedUser;
+
+            if (IsPremiumSelectedUser)
+            {
+                userToUpdate.PremiumStartDate = PremiumStartDateSelectedUser ?? DateTime.Today;
+                userToUpdate.PremiumEndDate = PremiumEndDateSelectedUser ?? DateTime.Today.AddMonths(1);
+            }
+            else
+            {
+                userToUpdate.PremiumStartDate = null;
+                userToUpdate.PremiumEndDate = null;
+            }
+            
+            _unitOfWork.Users.Update(userToUpdate);
+            await _unitOfWork.CompleteAsync();
+
+            // Refresh the list and reset dirty state
+            var selectedUserId = SelectedUser.Id;
+            await LoadUsers();
+            SelectedUser = Users.FirstOrDefault(u => u.Id == selectedUserId);
         }
     }
 }

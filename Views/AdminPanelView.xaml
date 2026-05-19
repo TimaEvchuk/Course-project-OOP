@@ -14,7 +14,8 @@
         <Grid.RowDefinitions>
             <RowDefinition Height="Auto"/>
             <RowDefinition Height="*"/>
-            <RowDefinition Height="Auto"/>
+            <RowDefinition Height="Auto"/> <!-- New row for premium controls -->
+            <RowDefinition Height="Auto"/> <!-- Row for action buttons -->
         </Grid.RowDefinitions>
 
         <TextBox Grid.Row="0"
@@ -45,10 +46,39 @@
                     </DataGridTemplateColumn.CellTemplate>
                 </DataGridTemplateColumn>
                 <DataGridCheckBoxColumn Header="Заблокирован" Binding="{Binding IsBlocked}" Width="Auto"/>
+                <DataGridCheckBoxColumn Header="Premium" Binding="{Binding IsPremium}" IsReadOnly="True" Width="Auto"/>
             </DataGrid.Columns>
         </DataGrid>
 
-        <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
+        <!-- Premium Management Section -->
+        <GroupBox Header="Управление Premium" Grid.Row="2" Margin="0,20,0,0"
+                  Visibility="{Binding IsUserSelected, Converter={StaticResource BooleanToVisibilityConverter}}">
+            <StackPanel Orientation="Horizontal" Margin="10">
+                <CheckBox Content="Пользователь Premium"
+                          IsChecked="{Binding IsPremiumSelectedUser, Mode=TwoWay}"
+                          VerticalAlignment="Center"
+                          Margin="0,0,20,0"/>
+
+                <TextBlock Text="Дата начала:" VerticalAlignment="Center" Margin="0,0,5,0"
+                           Visibility="{Binding IsPremiumSelectedUser, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                <DatePicker SelectedDate="{Binding PremiumStartDateSelectedUser, Mode=TwoWay}"
+                            Width="120" VerticalAlignment="Center" Margin="0,0,10,0" IsEnabled="False"
+                            Visibility="{Binding IsPremiumSelectedUser, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+
+                <TextBlock Text="Дата окончания:" VerticalAlignment="Center" Margin="0,0,5,0"
+                           Visibility="{Binding IsPremiumSelectedUser, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                <DatePicker SelectedDate="{Binding PremiumEndDateSelectedUser, Mode=TwoWay}"
+                            Width="120" VerticalAlignment="Center"
+                            Visibility="{Binding IsPremiumSelectedUser, Converter={StaticResource BooleanToVisibilityConverter}}"/>
+                <Button Content="Сохранить"
+                        Command="{Binding SavePremiumCommand}"
+                        IsEnabled="{Binding CanSaveChanges}"
+                        Style="{StaticResource PrimaryActionButtonStyle}"
+                        Margin="20,0,0,0"/>
+            </StackPanel>
+        </GroupBox>
+
+        <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,20,0,0">
             <Button Content="Добавить пользователя"
                     Command="{Binding ShowAddUserOverlayCommand}"
                     Style="{StaticResource PrimaryActionButtonStyle}"

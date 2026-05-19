@@ -61,6 +61,12 @@
 
             <!-- Task View Selector -->
             <StackPanel Grid.Column="1" Orientation="Horizontal" VerticalAlignment="Bottom" HorizontalAlignment="Right">
+                <Button Content="Купить Премиум"
+                        Style="{StaticResource PrimaryActionButtonStyle}"
+                        Command="{Binding ShowPremiumPurchaseCommand}"
+                        Visibility="{Binding IsNotPremiumUser, Converter={StaticResource BooleanToVisibilityConverter}}"
+                        Margin="0,0,20,0"/>
+
                 <RadioButton Content="На сегодня" Style="{StaticResource FilterPillRadioButtonStyle}" Margin="0,0,8,0"
                              Command="{Binding SetPeriodCommand}" CommandParameter="{x:Static vm:TaskPeriod.Day}"
                              IsChecked="{Binding SelectedPeriod, Converter={StaticResource EnumToBooleanConverter}, ConverterParameter={x:Static vm:TaskPeriod.Day}}"/>

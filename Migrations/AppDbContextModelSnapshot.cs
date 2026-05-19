@@ -146,6 +146,9 @@ namespace Plantify.Migrations
                     b.Property<bool>("IsBlocked")
                         .HasColumnType("bit");
 
+                    b.Property<bool>("IsPremium")
+                        .HasColumnType("bit");
+
                     b.Property<string>("Login")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
@@ -153,6 +156,12 @@ namespace Plantify.Migrations
                     b.Property<string>("PasswordHash")
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
+
+                    b.Property<DateTime?>("PremiumEndDate")
+                        .HasColumnType("datetime2");
+
+                    b.Property<DateTime?>("PremiumStartDate")
+                        .HasColumnType("datetime2");
 
                     b.HasKey("Id");
 

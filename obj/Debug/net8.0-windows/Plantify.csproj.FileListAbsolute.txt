@@ -206,3 +206,5 @@ D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\P
 D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Plantify.genruntimeconfig.cache
 D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\ref\Plantify.dll
 D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Styles\TextBoxes.baml
+D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Views\PremiumPurchaseView.g.cs
+D:\2 курс\ООП\Course-project\Plantify\Plantify\obj\Debug\net8.0-windows\Views\PremiumPurchaseView.baml

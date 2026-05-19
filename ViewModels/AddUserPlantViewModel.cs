@@ -50,6 +50,9 @@ namespace Plantify.ViewModels
         [ObservableProperty]
         private BitmapImage? _displayImageSource;
 
+        [ObservableProperty]
+        private string? _errorMessage;
+
         public string Title => IsEditMode ? "Редактировать растение" : "Добавить растение в сад";
 
         public AddUserPlantViewModel(IUnitOfWork unitOfWork, IMessenger messenger, AuthenticationService authenticationService)
@@ -61,6 +64,7 @@ namespace Plantify.ViewModels
 
         public void Initialize(ShowAddUserPlantOverlayMessage message)
         {
+            ErrorMessage = null;
             if (message.UserPlantToEdit != null)
             {
                 // EDIT MODE
@@ -121,6 +125,8 @@ namespace Plantify.ViewModels
         {
             if (SelectedPlant == null) { MessageBox.Show("Пожалуйста, выберите растение."); return; }
             if (_authenticationService.CurrentUser == null) { MessageBox.Show("Ошибка: пользователь не авторизован."); return; }
+            
+            ErrorMessage = null;
 
             if (IsEditMode && OriginalUserPlant != null)
             {
@@ -135,6 +141,17 @@ namespace Plantify.ViewModels
             }
             else
             {
+                // Plant limit check for non-premium users
+                if (!_authenticationService.IsCurrentUserPremium())
+                {
+                    var plantCount = await _unitOfWork.UserPlants.CountAsync(p => p.UserId == _authenticationService.CurrentUser.Id);
+                    if (plantCount >= 5)
+                    {
+                        ErrorMessage = "Достигнут лимит в 5 растений. Оформите премиум-подписку для снятия ограничений.";
+                        return;
+                    }
+                }
+
                 var newUserPlant = new UserPlant
                 {
                     PlantId = SelectedPlant.Id,

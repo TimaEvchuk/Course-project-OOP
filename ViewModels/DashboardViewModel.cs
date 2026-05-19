@@ -1,24 +1,27 @@
 using CommunityToolkit.Mvvm.ComponentModel;
 using CommunityToolkit.Mvvm.Input;
+using CommunityToolkit.Mvvm.Messaging;
 using Plantify.Data;
+using Plantify.Messages;
+using Plantify.Models;
 using Plantify.Services;
 using System;
 using System.Collections.Generic;
 using System.Collections.ObjectModel;
 using System.Diagnostics;
+using System.Globalization;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows.Media;
-using Plantify.Messages;
-using CommunityToolkit.Mvvm.Messaging;
-using System.Globalization;
-using Plantify.Models;
 
 namespace Plantify.ViewModels
 {
     public enum TaskPeriod { Day, Week, Month }
 
-    public partial class DashboardViewModel : BaseViewModel, IRecipient<GardenStateChangedMessage>
+    public partial class DashboardViewModel : BaseViewModel, 
+        IRecipient<GardenStateChangedMessage>, 
+        IRecipient<UserLoggedInMessage>,
+        IRecipient<PremiumStatusChangedMessage>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly AuthenticationService _authenticationService;
@@ -32,6 +35,9 @@ namespace Plantify.ViewModels
 
         [ObservableProperty]
         private string _gardenHealthStatusText = "Нет данных";
+
+        [ObservableProperty]
+        private bool _isNotPremiumUser;
 
         // Properties for Day View
         [ObservableProperty]
@@ -96,6 +102,8 @@ namespace Plantify.ViewModels
             _messenger = messenger;
 
             _messenger.Register<GardenStateChangedMessage>(this);
+            _messenger.Register<UserLoggedInMessage>(this);
+            _messenger.Register<PremiumStatusChangedMessage>(this);
 
             // Set initial view state
             SelectedPeriod = TaskPeriod.Day;
@@ -104,7 +112,13 @@ namespace Plantify.ViewModels
             LoadedCommand.Execute(null);
         }
 
-        [RelayCommand(CanExecute = nameof(CanSetPeriod))]
+        [RelayCommand(CanExecute = nameof(IsNotPremiumUser))]
+        private void ShowPremiumPurchase()
+        {
+            _messenger.Send(new ShowPremiumPurchaseOverlayMessage());
+        }
+
+        [RelayCommand]
         private async Task SetPeriod(TaskPeriod period)
         {
             Debug.WriteLine($"[DEBUG] SetPeriod called with: {period}");
@@ -118,23 +132,48 @@ namespace Plantify.ViewModels
             await LoadTasksAsync();
         }
 
-        private bool CanSetPeriod(TaskPeriod period)
-        {
-            return true;
-        }
-
-
         public async void Receive(GardenStateChangedMessage message)
         {
-            await CalculateGardenHealth();
-            await LoadTasksAsync();
+            await UpdateDashboard();
+        }
+        
+        public void Receive(UserLoggedInMessage message)
+        {
+            // This message is sent on login
+            UpdatePremiumStatus();
+        }
+
+        public void Receive(PremiumStatusChangedMessage message)
+        {
+            // This message is sent after a premium purchase, so we also need to update the user object
+            // in the authentication service before re-evaluating the status.
+            if (_authenticationService.CurrentUser != null && _authenticationService.CurrentUser.Id == message.UpdatedUser.Id)
+            {
+                // This is a simple update, for more complex scenarios, a full re-fetch or AutoMapper would be better.
+                _authenticationService.CurrentUser.IsPremium = message.UpdatedUser.IsPremium;
+                _authenticationService.CurrentUser.PremiumStartDate = message.UpdatedUser.PremiumStartDate;
+                _authenticationService.CurrentUser.PremiumEndDate = message.UpdatedUser.PremiumEndDate;
+            }
+            UpdatePremiumStatus();
         }
 
         [RelayCommand]
         private async Task Loaded()
         {
+            await UpdateDashboard();
+        }
+
+        private async Task UpdateDashboard()
+        {
+            UpdatePremiumStatus();
             await CalculateGardenHealth();
             await LoadTasksAsync();
+        }
+
+        private void UpdatePremiumStatus()
+        {
+            IsNotPremiumUser = !_authenticationService.IsCurrentUserPremium();
+            ShowPremiumPurchaseCommand.NotifyCanExecuteChanged();
         }
 
         private async Task LoadTasksAsync()

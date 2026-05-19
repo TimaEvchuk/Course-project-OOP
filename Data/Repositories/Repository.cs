@@ -59,6 +59,15 @@ namespace Plantify.Data.Repositories
             return await _dbSet.Where(predicate).ToListAsync();
         }
 
+        public async Task<int> CountAsync(Expression<Func<T, bool>>? predicate = null)
+        {
+            if (predicate == null)
+            {
+                return await _dbSet.CountAsync();
+            }
+            return await _dbSet.CountAsync(predicate);
+        }
+
         public async Task AddAsync(T entity)
         {
             await _dbSet.AddAsync(entity);

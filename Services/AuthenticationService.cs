@@ -71,5 +71,16 @@ namespace Plantify.Services
         {
             CurrentUser = null;
         }
+
+        public bool IsCurrentUserPremium()
+        {
+            if (CurrentUser == null || !CurrentUser.IsPremium)
+            {
+                return false;
+            }
+
+            // A null end date can be treated as a permanent subscription
+            return CurrentUser.PremiumEndDate == null || CurrentUser.PremiumEndDate.Value.Date >= DateTime.Today;
+        }
     }
 }

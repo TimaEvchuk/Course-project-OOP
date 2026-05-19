@@ -19,6 +19,7 @@
             <converters:NextCareActionToBrushConverter x:Key="NextCareActionToBrushConverter"/>
             <BooleanToVisibilityConverter x:Key="BooleanToVisibilityConverter"/>
             <converters:EnumToBooleanConverter x:Key="EnumToBooleanConverter"/>
+            <converters:StringNullOrEmptyToVisibilityConverter x:Key="StringNullOrEmptyToVisibilityConverter"/>
             <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
 
             <!-- DataTemplates for MainViewModel -->
@@ -57,6 +58,9 @@
             </DataTemplate>
             <DataTemplate DataType="{x:Type vm:AddUserViewModel}">
                 <views:AddUserView/>
+            </DataTemplate>
+            <DataTemplate DataType="{x:Type vm:PremiumPurchaseViewModel}">
+                <views:PremiumPurchaseView/>
             </DataTemplate>
 
             <!-- Global Effects -->

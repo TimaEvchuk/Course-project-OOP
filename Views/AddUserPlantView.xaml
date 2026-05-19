@@ -90,6 +90,7 @@
                 <RowDefinition Height="Auto"/>
                 <RowDefinition Height="*"/>
                 <RowDefinition Height="Auto"/>
+                <RowDefinition Height="Auto"/>
             </Grid.RowDefinitions>
             
             <Grid Grid.Row="0" Margin="0,0,0,20">
@@ -129,8 +130,16 @@
                     <DatePicker SelectedDate="{Binding LastFertilizingDate, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" />
                 </StackPanel>
             </ScrollViewer>
+
+            <TextBlock Grid.Row="2"
+                       Text="{Binding ErrorMessage}"
+                       Foreground="IndianRed"
+                       FontWeight="Medium"
+                       TextWrapping="Wrap"
+                       Margin="0,15,0,0"
+                       Visibility="{Binding ErrorMessage, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
             
-            <StackPanel Grid.Row="2" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,30,0,0">
+            <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,30,0,0">
                 <Button Content="Отмена" Command="{Binding CancelCommand}" Style="{StaticResource SecondaryButtonStyle}"/>
                 <Button Content="Сохранить" Command="{Binding SaveCommand}" Margin="10,0,0,0"
                         Style="{StaticResource PrimaryActionButtonStyle}"/>
