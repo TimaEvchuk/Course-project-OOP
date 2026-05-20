@@ -192,19 +192,27 @@
         </Border>
 
         <!-- Раздел "Импорт/Экспорт" (1,1) -->
-        <Grid Grid.Row="1" Grid.Column="1" Margin="10,10,0,0">
+        <Grid Grid.Row="1" Grid.Column="1" Margin="10,10,-20,-20">
             <Border Style="{StaticResource StatWidgetStyle}" Padding="20" IsEnabled="{Binding IsPremium}">
-                <StackPanel>
-                    <TextBlock Text="Импорт/Экспорт сада" Style="{StaticResource H2}" FontSize="24" FontWeight="Bold" Margin="0,0,0,15"/>
-                    <TextBlock Text="Сохраните ваш сад в файл или загрузите его из ранее сохраненной копии."
-                               TextWrapping="Wrap"
-                               Foreground="{StaticResource BrushDarkGray}"
-                               Margin="0,0,0,20"/>
-                    <StackPanel Orientation="Horizontal">
+                <Grid>
+                    <Grid.RowDefinitions>
+                        <RowDefinition Height="*"/>
+                        <RowDefinition Height="Auto"/>
+                    </Grid.RowDefinitions>
+
+                    <StackPanel Grid.Row="0" VerticalAlignment="Top">
+                        <TextBlock Text="Импорт/Экспорт сада" Style="{StaticResource H2}" FontSize="24" FontWeight="Bold" Margin="0,0,0,15"/>
+                        <TextBlock Text="Сохраните ваш сад в файл или загрузите его из ранее сохраненной копии."
+                                   TextWrapping="Wrap"
+                                   Foreground="{StaticResource BrushDarkGray}"
+                                   Margin="0,0,0,20"/>
+                    </StackPanel>
+
+                    <StackPanel Grid.Row="1" Orientation="Horizontal" HorizontalAlignment="Left">
                         <Button Content="Экспортировать в JSON" Command="{Binding ExportGardenCommand}" Style="{StaticResource SecondaryButtonStyle}"/>
                         <Button Content="Импортировать из JSON" Command="{Binding ImportGardenCommand}" Style="{StaticResource PrimaryActionButtonStyle}" Margin="10,0,0,0"/>
                     </StackPanel>
-                </StackPanel>
+                </Grid>
             </Border>
             
             <Border Background="#D0FFFFFF" CornerRadius="8"

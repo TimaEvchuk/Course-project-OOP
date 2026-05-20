@@ -78,12 +78,12 @@ namespace Plantify.ViewModels
                 switch (SelectedPeriod)
                 {
                     case TaskPeriod.Week:
-                        return $"Сводка задач на неделю ({_weekStartDate:d MMM} - {_weekEndDate:d MMM})";
+                        return $"График ухода на неделю ({_weekStartDate:d MMM} - {_weekEndDate:d MMM})";
                     case TaskPeriod.Month:
-                        return $"Сводка задач на месяц ({_monthStartDate:d MMMM} - {_monthEndDate:d MMMM})";
+                        return $"График ухода на месяц ({_monthStartDate:d MMMM} - {_monthEndDate:d MMMM})";
                     case TaskPeriod.Day:
                     default:
-                        return $"Сводка задач на сегодня ({DateTime.Today.ToString("d MMMM", culture)})";
+                        return $"График ухода на сегодня ({DateTime.Today.ToString("d MMMM", culture)})";
                 }
             }
         }

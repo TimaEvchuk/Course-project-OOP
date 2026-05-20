@@ -229,6 +229,7 @@ namespace Plantify.ViewModels
             var result = _dialogService.ShowInputDialog("Введите новое название для вида:", "Редактировать вид", SelectedVariety.Name);
             if (result.Confirmed && !string.IsNullOrWhiteSpace(result.Text))
             {
+                _unitOfWork.DetachAllEntities();
                 SelectedVariety.Name = result.Text.Trim();
                 _unitOfWork.Varieties.Update(SelectedVariety);
                 await _unitOfWork.CompleteAsync();
@@ -243,6 +244,7 @@ namespace Plantify.ViewModels
             var result = _dialogService.ShowConfirmationDialog($"Вы уверены, что хотите удалить вид '{SelectedVariety.Name}'?");
             if (result.Confirmed)
             {
+                _unitOfWork.DetachAllEntities();
                 _unitOfWork.Varieties.Delete(SelectedVariety);
                 await _unitOfWork.CompleteAsync();
                 await LoadCategories();
@@ -269,6 +271,7 @@ namespace Plantify.ViewModels
             var result = _dialogService.ShowInputDialog("Введите новое название для требования:", "Редактировать требование", SelectedLightRequirement.Name);
             if (result.Confirmed && !string.IsNullOrWhiteSpace(result.Text))
             {
+                _unitOfWork.DetachAllEntities();
                 SelectedLightRequirement.Name = result.Text.Trim();
                 _unitOfWork.LightRequirements.Update(SelectedLightRequirement);
                 await _unitOfWork.CompleteAsync();
@@ -283,6 +286,7 @@ namespace Plantify.ViewModels
             var result = _dialogService.ShowConfirmationDialog($"Вы уверены, что хотите удалить требование '{SelectedLightRequirement.Name}'?");
             if (result.Confirmed)
             {
+                _unitOfWork.DetachAllEntities();
                 _unitOfWork.LightRequirements.Delete(SelectedLightRequirement);
                 await _unitOfWork.CompleteAsync();
                 await LoadCategories();

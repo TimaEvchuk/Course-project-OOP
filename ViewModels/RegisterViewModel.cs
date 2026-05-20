@@ -129,7 +129,8 @@ namespace Plantify.ViewModels
                 return;
             }
             
-            _messenger.Send(new UserLoggedInMessage(_authenticationService.CurrentUser!));
+            _messenger.Send(new RegistrationSuccessMessage(Login, "Регистрация прошла успешно. Пожалуйста, войдите."));
+            _messenger.Send(new NavigateMessage(typeof(LoginViewModel)));
         }
 
         [RelayCommand]

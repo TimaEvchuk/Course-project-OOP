@@ -115,7 +115,6 @@ namespace Plantify.Services
                 await unitOfWork.Users.AddAsync(newUser);
                 await unitOfWork.CompleteAsync();
 
-                CurrentUser = newUser; // Auto-sign in after registration
                 return true;
             }
         }

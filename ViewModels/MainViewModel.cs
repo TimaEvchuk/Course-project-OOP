@@ -143,7 +143,7 @@ namespace Plantify.ViewModels
         {
             if (message.Value == typeof(EncyclopediaViewModel))
             {
-                Navigate(typeof(EncyclopediaViewModel), "Энциклопедия");
+                Navigate(typeof(EncyclopediaViewModel), "Справочник");
             }
             else if (message.Value == typeof(PlantManagementViewModel))
             {
@@ -272,7 +272,7 @@ namespace Plantify.ViewModels
         private void GoToMyGarden() => Navigate(typeof(MyGardenViewModel), "Мой сад");
 
         [RelayCommand]
-        private void GoToEncyclopedia() => Navigate(typeof(EncyclopediaViewModel), "Энциклопедия");
+        private void GoToEncyclopedia() => Navigate(typeof(EncyclopediaViewModel), "Справочник");
 
         [RelayCommand]
         private void GoToDashboard() => Navigate(typeof(DashboardViewModel), "Дэшборд");

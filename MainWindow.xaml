@@ -24,7 +24,7 @@
                 <StackPanel Margin="0,20,0,0">
                     <RadioButton Content="Мой сад" Command="{Binding GoToMyGardenCommand}" Style="{StaticResource SidebarRadioButtonStyle}"
                                  IsChecked="{Binding CurrentViewModel, Converter={StaticResource ViewModelTypeToBooleanConverter}, ConverterParameter={x:Type vm:MyGardenViewModel}}"/>
-                    <RadioButton Content="Энциклопедия" Command="{Binding GoToEncyclopediaCommand}" Style="{StaticResource SidebarRadioButtonStyle}"
+                    <RadioButton Content="Справочник" Command="{Binding GoToEncyclopediaCommand}" Style="{StaticResource SidebarRadioButtonStyle}"
                                  IsChecked="{Binding CurrentViewModel, Converter={StaticResource ViewModelTypeToBooleanConverter}, ConverterParameter={x:Type vm:EncyclopediaViewModel}}"/>
                     <RadioButton Content="Дэшборд" Command="{Binding GoToDashboardCommand}" Style="{StaticResource SidebarRadioButtonStyle}"
                                  IsChecked="{Binding CurrentViewModel, Converter={StaticResource ViewModelTypeToBooleanConverter}, ConverterParameter={x:Type vm:DashboardViewModel}}"/>

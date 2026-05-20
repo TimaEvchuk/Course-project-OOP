@@ -117,6 +117,10 @@ namespace Plantify.ViewModels
                         Sections.Add(new PlantSectionViewModel { Title = section.Title, Content = section.Content });
                     }
                 }
+                else
+                {
+                    Sections.Add(new PlantSectionViewModel { Title = "Описание", Content = "" });
+                }
             }
             else
             {
@@ -129,6 +133,8 @@ namespace Plantify.ViewModels
                 WateringInterval = 7;
                 FertilizingInterval = 30;
                 ImagePath = null;
+                DisplayImageSource = LoadImage(null);
+                Sections.Add(new PlantSectionViewModel { Title = "Описание", Content = "" });
             }
             SaveCommand.NotifyCanExecuteChanged();
         }

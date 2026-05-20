@@ -52,23 +52,37 @@
                             <Run Text="*" Foreground="{StaticResource BrushTerracotta}"/>
                         </TextBlock>
                         <ComboBox ItemsSource="{Binding LightRequirements}" SelectedItem="{Binding SelectedLightRequirement}" DisplayMemberPath="Name" IsEditable="False" Style="{StaticResource FormComboBoxStyle}" HorizontalAlignment="Stretch"/>
+                        
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Интервал полива (дней)" Style="{StaticResource FormLabelStyle}"/>
+                                <TextBox Text="{Binding WateringInterval, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBoxStyle}" HorizontalAlignment="Stretch"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Интервал удобрения (дней)" Style="{StaticResource FormLabelStyle}"/>
+                                <TextBox Text="{Binding FertilizingInterval, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBoxStyle}" HorizontalAlignment="Stretch"/>
+                            </StackPanel>
+                        </Grid>
                     </StackPanel>
                     
                     <StackPanel Grid.Column="2">
                         <TextBlock Text="Изображение" Style="{StaticResource FormLabelStyle}"/>
-                        <Image Source="{Binding DisplayImageSource}" Height="100" Margin="0,0,0,10" Stretch="Uniform" HorizontalAlignment="Left"/>
+                        <Border BorderBrush="{StaticResource BrushForestGreen}" BorderThickness="1" CornerRadius="0" Height="160" Width="160" Margin="0,0,0,10" HorizontalAlignment="Left">
+                            <Image Source="{Binding DisplayImageSource}" Stretch="UniformToFill" />
+                        </Border>
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <TextBox Grid.Column="0" Text="{Binding ImagePath, Mode=OneWay}" Style="{StaticResource FormTextBoxStyle}" IsReadOnly="True"/>
+                            <TextBox Grid.Column="0" Text="{Binding ImagePath, Mode=OneWay}" Style="{StaticResource FormTextBoxStyle}" IsReadOnly="True" VerticalContentAlignment="Center"/>
                             <Button Grid.Column="1" Content="Выбрать..." Command="{Binding SelectImageCommand}" Style="{StaticResource SecondaryButtonStyle}" Margin="10,0,0,0"/>
                         </Grid>
-                        <TextBlock Text="Интервал полива (дней)" Style="{StaticResource FormLabelStyle}"/>
-                        <TextBox Text="{Binding WateringInterval, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBoxStyle}" HorizontalAlignment="Stretch"/>
-                        <TextBlock Text="Интервал удобрения (дней)" Style="{StaticResource FormLabelStyle}"/>
-                        <TextBox Text="{Binding FertilizingInterval, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBoxStyle}" HorizontalAlignment="Stretch"/>
                     </StackPanel>
 
                     <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Text="Разделы описания" Style="{StaticResource FormLabelStyle}"/>

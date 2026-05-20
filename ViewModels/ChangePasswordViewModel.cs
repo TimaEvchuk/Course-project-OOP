@@ -70,6 +70,13 @@ namespace Plantify.ViewModels
                 return;
             }
 
+            // Add check to ensure new password is not the same as the old one
+            if (BCrypt.Net.BCrypt.Verify(NewPassword, userToUpdate.PasswordHash))
+            {
+                ErrorMessage = "Новый пароль не должен совпадать с текущим.";
+                return;
+            }
+
             userToUpdate.PasswordHash = BCrypt.Net.BCrypt.HashPassword(NewPassword);
 
             Notification? notification = null;

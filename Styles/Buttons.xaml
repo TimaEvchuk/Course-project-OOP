@@ -18,7 +18,7 @@
         <Setter Property="Template">
             <Setter.Value>
                 <ControlTemplate TargetType="RadioButton">
-                    <Grid>
+                    <Grid Background="Transparent">
                         <Border x:Name="HighlightBorder" BorderBrush="{StaticResource BrushForestGreen}" BorderThickness="2,0,0,0" HorizontalAlignment="Left" Visibility="Collapsed"/>
                         <TextBlock x:Name="Content" Text="{TemplateBinding Content}" VerticalAlignment="Center" Margin="{TemplateBinding Padding}"/>
                     </Grid>

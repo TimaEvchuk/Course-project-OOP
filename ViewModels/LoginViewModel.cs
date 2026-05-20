@@ -11,7 +11,7 @@ using System.Windows;
 
 namespace Plantify.ViewModels
 {
-    public partial class LoginViewModel : BaseViewModel
+    public partial class LoginViewModel : BaseViewModel, IRecipient<RegistrationSuccessMessage>
     {
         private readonly IUnitOfWork _unitOfWork;
         private readonly IMessenger _messenger;
@@ -30,11 +30,27 @@ namespace Plantify.ViewModels
         [ObservableProperty]
         private string _errorMessage = "";
 
+        [ObservableProperty]
+        private string _statusMessage = "";
+
         public LoginViewModel(IUnitOfWork unitOfWork, IMessenger messenger, AuthenticationService authenticationService)
         {
             _unitOfWork = unitOfWork;
             _messenger = messenger;
             _authenticationService = authenticationService;
+            _messenger.Register<RegistrationSuccessMessage>(this);
+        }
+
+        partial void OnPasswordChanged(string value)
+        {
+            ErrorMessage = "";
+            StatusMessage = "";
+        }
+
+        public void Receive(RegistrationSuccessMessage message)
+        {
+            Login = message.Login;
+            StatusMessage = message.Message;
         }
 
         [RelayCommand]
@@ -47,6 +63,7 @@ namespace Plantify.ViewModels
             }
             
             ErrorMessage = "";
+            StatusMessage = "";
 
             bool success = await _authenticationService.SignIn(Login, Password);
 
@@ -70,6 +87,8 @@ namespace Plantify.ViewModels
         [RelayCommand]
         private void GoToRegister()
         {
+            ErrorMessage = "";
+            StatusMessage = "";
             _messenger.Send(new NavigateMessage(typeof(RegisterViewModel)));
         }
     }
