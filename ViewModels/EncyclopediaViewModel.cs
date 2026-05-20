@@ -80,7 +80,11 @@ namespace Plantify.ViewModels
         private async Task LoadPlants()
         {
             var plantList = await _unitOfWork.Plants.GetAllWithSectionsAsync();
-            _allPlants = plantList.Select(p => new PlantViewModel(p)).ToList();
+            
+            // Group by PlantId to get distinct plants, as the JOIN for sections can create duplicates
+            var distinctPlants = plantList.GroupBy(p => p.Id).Select(g => g.First());
+            
+            _allPlants = distinctPlants.Select(p => new PlantViewModel(p)).ToList();
             PerformFilter();
         }
 

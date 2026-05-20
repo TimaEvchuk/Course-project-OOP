@@ -7,9 +7,11 @@ using Plantify.Models;
 using Plantify.Services;
 using System;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Text.Json;
 using System.Threading.Tasks;
+using System.Windows.Media.Imaging;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Win32;
 using Plantify.Models.Enums;
@@ -35,32 +37,17 @@ namespace Plantify.ViewModels
         [NotifyCanExecuteChangedFor(nameof(SaveCommand))]
         private Variety? _selectedVariety;
 
+        [ObservableProperty]
         private int _wateringInterval;
-        public int WateringInterval
-        {
-            get => _wateringInterval;
-            set
-            {
-                if (value < 0) value = 0;
-                if (value > 365) value = 365;
-                SetProperty(ref _wateringInterval, value);
-            }
-        }
 
+        [ObservableProperty]
         private int _fertilizingInterval;
-        public int FertilizingInterval
-        {
-            get => _fertilizingInterval;
-            set
-            {
-                if (value < 0) value = 0;
-                if (value > 365) value = 365;
-                SetProperty(ref _fertilizingInterval, value);
-            }
-        }
 
         [ObservableProperty]
         private string? _imagePath;
+
+        [ObservableProperty]
+        private BitmapImage? _displayImageSource;
 
         [ObservableProperty]
         private string? _errorMessage;
@@ -78,12 +65,21 @@ namespace Plantify.ViewModels
             _authenticationService = authenticationService;
             _configuration = configuration;
 
+            WateringInterval = 7;
+            FertilizingInterval = 30;
             Varieties = new ObservableCollection<Variety>();
             LightRequirements = new ObservableCollection<LightRequirement>();
             Sections = new ObservableCollection<PlantSectionViewModel>
             {
                 new PlantSectionViewModel { Title = "Описание", Content = "" }
             };
+            DisplayImageSource = LoadImage(null);
+            _ = LoadCategoriesCommand.ExecuteAsync(null);
+        }
+
+        partial void OnImagePathChanged(string? value)
+        {
+            DisplayImageSource = LoadImage(value);
         }
 
         [RelayCommand]
@@ -138,13 +134,13 @@ namespace Plantify.ViewModels
             var newSubmission = new PlantSubmission
             {
                 Name = PlantName,
-                LightRequirementId = SelectedLightRequirement.Id,
-                VarietyId = SelectedVariety.Id,
+                LightRequirementId = SelectedLightRequirement!.Id,
+                VarietyId = SelectedVariety!.Id,
                 WateringInterval = WateringInterval,
                 FertilizingInterval = FertilizingInterval,
                 ImagePath = ImagePath,
                 Description = sectionsAsJson,
-                SubmittedByUserId = _authenticationService.CurrentUser.Id,
+                SubmittedByUserId = _authenticationService.CurrentUser!.Id,
             };
 
             await _unitOfWork.PlantSubmissions.AddAsync(newSubmission);
@@ -178,14 +174,59 @@ namespace Plantify.ViewModels
         [RelayCommand]
         private void SelectImage()
         {
-            OpenFileDialog openFileDialog = new OpenFileDialog
+            var dialog = new OpenFileDialog
             {
-                Filter = "Image files (*.png;*.jpeg;*.jpg)|*.png;*.jpeg;*.jpg|All files (*.*)|*.*"
+                Filter = "Image Files|*.jpg;*.jpeg;*.png;*.gif;*.bmp",
+                Title = "Выберите изображение растения"
             };
 
-            if (openFileDialog.ShowDialog() == true)
+            if (dialog.ShowDialog() == true)
             {
-                ImagePath = openFileDialog.FileName;
+                string sourceFilePath = dialog.FileName;
+
+                try
+                {
+                    string appDataPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData);
+                    string plantifyImagesPath = Path.Combine(appDataPath, "Plantify", "Images");
+
+                    Directory.CreateDirectory(plantifyImagesPath);
+
+                    string newFileName = $"{Guid.NewGuid()}{Path.GetExtension(sourceFilePath)}";
+                    string destinationPath = Path.Combine(plantifyImagesPath, newFileName);
+                    
+                    File.Copy(sourceFilePath, destinationPath);
+
+                    ImagePath = destinationPath;
+                }
+                catch (Exception)
+                {
+                    // Optional: Show an error message to the user
+                }
+            }
+        }
+        
+        private BitmapImage? LoadImage(string? imagePath)
+        {
+            string imageToLoad = "pack://application:,,,/Images/placeholder.png";
+
+            if (!string.IsNullOrEmpty(imagePath) && Path.IsPathRooted(imagePath) && File.Exists(imagePath))
+            {
+                imageToLoad = imagePath;
+            }
+
+            try
+            {
+                var bitmap = new BitmapImage();
+                bitmap.BeginInit();
+                bitmap.UriSource = new Uri(imageToLoad, UriKind.RelativeOrAbsolute);
+                bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                bitmap.EndInit();
+                bitmap.Freeze();
+                return bitmap;
+            }
+            catch 
+            {
+                return null; 
             }
         }
     }

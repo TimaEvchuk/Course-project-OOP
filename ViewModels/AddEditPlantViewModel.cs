@@ -24,6 +24,7 @@ namespace Plantify.ViewModels
         private bool _isEditMode;
 
         private Plant? _plantToEdit;
+        private PlantSubmission? _submissionToApprove;
 
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(SaveCommand))]
@@ -53,7 +54,7 @@ namespace Plantify.ViewModels
 
         public ObservableCollection<PlantSectionViewModel> Sections { get; set; }
 
-        public override string Title => IsEditMode ? "Редактировать растение" : "Добавить новое растение";
+        public override string Title => _submissionToApprove != null ? "Одобрение заявки" : (IsEditMode ? "Редактировать растение" : "Добавить новое растение");
         public string SaveButtonText => IsEditMode ? "Сохранить" : "Добавить";
         
         public ObservableCollection<Variety> Varieties { get; }
@@ -94,6 +95,7 @@ namespace Plantify.ViewModels
 
         public async Task InitializeAsync(Plant? plant = null)
         {
+            _submissionToApprove = null;
             await LoadCategoriesCommand.ExecuteAsync(null);
 
             Sections.Clear();
@@ -138,6 +140,49 @@ namespace Plantify.ViewModels
             }
             SaveCommand.NotifyCanExecuteChanged();
         }
+
+        public async Task InitializeAsync(PlantSubmission submission)
+        {
+            await LoadCategoriesCommand.ExecuteAsync(null);
+            Sections.Clear();
+
+            _submissionToApprove = submission;
+            IsEditMode = false; // We are creating a NEW plant from a submission
+            _plantToEdit = null;
+
+            PlantName = submission.Name;
+            SelectedVariety = Varieties.FirstOrDefault(v => v.Id == submission.VarietyId);
+            SelectedLightRequirement = LightRequirements.FirstOrDefault(l => l.Id == submission.LightRequirementId);
+            WateringInterval = submission.WateringInterval;
+            FertilizingInterval = submission.FertilizingInterval;
+            ImagePath = submission.ImagePath;
+        
+            if (!string.IsNullOrWhiteSpace(submission.Description))
+            {
+                try
+                {
+                    var sections = System.Text.Json.JsonSerializer.Deserialize<System.Collections.Generic.List<PlantSectionViewModel>>(submission.Description);
+                    if (sections != null)
+                    {
+                        foreach (var section in sections)
+                        {
+                            Sections.Add(new PlantSectionViewModel { Title = section.Title, Content = section.Content });
+                        }
+                    }
+                }
+                catch 
+                { 
+                    Sections.Add(new PlantSectionViewModel { Title = "Описание", Content = submission.Description });
+                }
+            }
+        
+            if (!Sections.Any())
+            {
+                Sections.Add(new PlantSectionViewModel { Title = "Описание", Content = "" });
+            }
+
+            SaveCommand.NotifyCanExecuteChanged();
+        }
         
         [RelayCommand]
         private void AddSection()
@@ -174,7 +219,7 @@ namespace Plantify.ViewModels
 
             if (IsEditMode && _plantToEdit != null)
             {
-                var plantToUpdate = await _unitOfWork.Plants.GetByIdAsync(_plantToEdit.Id);
+                var plantToUpdate = await _unitOfWork.Plants.GetByIdWithSectionsAsync(_plantToEdit.Id);
                 if (plantToUpdate == null)
                 {
                     ErrorMessage = "Не удалось найти редактируемое растение в базе данных.";
@@ -229,6 +274,17 @@ namespace Plantify.ViewModels
 
             await _unitOfWork.CompleteAsync();
 
+            if (_submissionToApprove != null)
+            {
+                // We need to fetch the entity again in the current context to delete it
+                var submissionToDelete = await _unitOfWork.PlantSubmissions.GetByIdAsync(_submissionToApprove.Id);
+                if (submissionToDelete != null)
+                {
+                    _unitOfWork.PlantSubmissions.Delete(submissionToDelete);
+                    await _unitOfWork.CompleteAsync();
+                }
+            }
+
             _messenger.Send(new AdminUserListChangedMessage());
             _messenger.Send(new CloseOverlayMessage());
         }
@@ -242,10 +298,34 @@ namespace Plantify.ViewModels
         [RelayCommand]
         private void SelectImage()
         {
-            var dialog = new OpenFileDialog { Filter = "Image files (*.png;*.jpeg;*.jpg)|*.png;*.jpeg;*.jpg|All files (*.*)|*.*" };
+            var dialog = new OpenFileDialog
+            {
+                Filter = "Image Files|*.jpg;*.jpeg;*.png;*.gif;*.bmp",
+                Title = "Выберите изображение растения"
+            };
+
             if (dialog.ShowDialog() == true)
             {
-                ImagePath = Path.GetFileName(dialog.FileName);
+                string sourceFilePath = dialog.FileName;
+
+                try
+                {
+                    string appDataPath = System.Environment.GetFolderPath(System.Environment.SpecialFolder.LocalApplicationData);
+                    string plantifyImagesPath = Path.Combine(appDataPath, "Plantify", "Images");
+
+                    Directory.CreateDirectory(plantifyImagesPath);
+
+                    string newFileName = $"{Guid.NewGuid()}{Path.GetExtension(sourceFilePath)}";
+                    string destinationPath = Path.Combine(plantifyImagesPath, newFileName);
+                    
+                    File.Copy(sourceFilePath, destinationPath);
+
+                    ImagePath = destinationPath;
+                }
+                catch (Exception)
+                {
+                    // Optional: Show an error message to the user, e.g., using a dialog service.
+                }
             }
         }
         

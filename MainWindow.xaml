@@ -8,6 +8,7 @@
         xmlns:vm="clr-namespace:Plantify.ViewModels"
         mc:Ignorable="d"
         Title="Plantify" Height="720" Width="1280" WindowStartupLocation="CenterScreen"
+        Icon="/Images/app_icon.ico"
         Background="{Binding CurrentBackground}">
     <Grid>
         <Grid.ColumnDefinitions>

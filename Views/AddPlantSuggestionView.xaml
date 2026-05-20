@@ -8,12 +8,6 @@
              mc:Ignorable="d" 
              d:DataContext="{d:DesignInstance Type=vm:AddPlantSuggestionViewModel, IsDesignTimeCreatable=False}">
     
-    <i:Interaction.Triggers>
-        <i:EventTrigger EventName="Loaded">
-            <i:InvokeCommandAction Command="{Binding LoadCategoriesCommand}" />
-        </i:EventTrigger>
-    </i:Interaction.Triggers>
-    
     <Border Background="{StaticResource BrushMilkWhite}" CornerRadius="12" Padding="30" Width="800">
         <Grid>
             <Grid.RowDefinitions>
@@ -40,50 +34,57 @@
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="Auto"/>
                         <RowDefinition Height="*"/>
-                        <RowDefinition Height="Auto"/>
                     </Grid.RowDefinitions>
 
-                    <!-- Column 0 -->
                     <StackPanel Grid.Column="0">
                         <TextBlock Style="{StaticResource FormLabelStyle}">
                             <Run Text="Название растения"/>
                             <Run Text="*" Foreground="{StaticResource BrushTerracotta}"/>
                         </TextBlock>
                         <TextBox Text="{Binding PlantName, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBoxStyle}" HorizontalAlignment="Stretch"/>
-
                         <TextBlock Style="{StaticResource FormLabelStyle}">
                             <Run Text="Вид"/>
                             <Run Text="*" Foreground="{StaticResource BrushTerracotta}"/>
                         </TextBlock>
-                        <ComboBox ItemsSource="{Binding Varieties}" SelectedItem="{Binding SelectedVariety}" DisplayMemberPath="Name" Style="{StaticResource FormComboBoxStyle}" HorizontalAlignment="Stretch"/>
-
+                        <ComboBox ItemsSource="{Binding Varieties}" SelectedItem="{Binding SelectedVariety}" DisplayMemberPath="Name" IsEditable="False" Style="{StaticResource FormComboBoxStyle}" HorizontalAlignment="Stretch"/>
                         <TextBlock Style="{StaticResource FormLabelStyle}">
                             <Run Text="Требования к свету"/>
                             <Run Text="*" Foreground="{StaticResource BrushTerracotta}"/>
                         </TextBlock>
-                        <ComboBox ItemsSource="{Binding LightRequirements}" SelectedItem="{Binding SelectedLightRequirement}" DisplayMemberPath="Name" Style="{StaticResource FormComboBoxStyle}" HorizontalAlignment="Stretch"/>
+                        <ComboBox ItemsSource="{Binding LightRequirements}" SelectedItem="{Binding SelectedLightRequirement}" DisplayMemberPath="Name" IsEditable="False" Style="{StaticResource FormComboBoxStyle}" HorizontalAlignment="Stretch"/>
+                        
+                        <Grid>
+                            <Grid.ColumnDefinitions>
+                                <ColumnDefinition Width="*"/>
+                                <ColumnDefinition Width="10"/>
+                                <ColumnDefinition Width="*"/>
+                            </Grid.ColumnDefinitions>
+                            <StackPanel Grid.Column="0">
+                                <TextBlock Text="Интервал полива (дней)" Style="{StaticResource FormLabelStyle}"/>
+                                <TextBox Text="{Binding WateringInterval, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBoxStyle}" HorizontalAlignment="Stretch"/>
+                            </StackPanel>
+                            <StackPanel Grid.Column="2">
+                                <TextBlock Text="Интервал удобрения (дней)" Style="{StaticResource FormLabelStyle}"/>
+                                <TextBox Text="{Binding FertilizingInterval, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBoxStyle}" HorizontalAlignment="Stretch"/>
+                            </StackPanel>
+                        </Grid>
                     </StackPanel>
                     
-                    <!-- Column 1 -->
                     <StackPanel Grid.Column="2">
-                        <TextBlock Text="Интервал полива (дней)" Style="{StaticResource FormLabelStyle}"/>
-                        <TextBox Text="{Binding WateringInterval, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBoxStyle}" HorizontalAlignment="Stretch"/>
-
-                        <TextBlock Text="Интервал удобрения (дней)" Style="{StaticResource FormLabelStyle}"/>
-                        <TextBox Text="{Binding FertilizingInterval, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBoxStyle}" HorizontalAlignment="Stretch"/>
-
                         <TextBlock Text="Изображение" Style="{StaticResource FormLabelStyle}"/>
+                        <Border BorderBrush="{StaticResource BrushForestGreen}" BorderThickness="1" CornerRadius="0" Height="160" Width="160" Margin="0,0,0,10" HorizontalAlignment="Left">
+                            <Image Source="{Binding DisplayImageSource}" Stretch="UniformToFill" />
+                        </Border>
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <TextBox Grid.Column="0" Text="{Binding ImagePath, Mode=OneWay}" IsReadOnly="True" Style="{StaticResource FormTextBoxStyle}" HorizontalAlignment="Stretch"/>
+                            <TextBox Grid.Column="0" Text="{Binding ImagePath, Mode=OneWay}" Style="{StaticResource FormTextBoxStyle}" IsReadOnly="True" VerticalContentAlignment="Center"/>
                             <Button Grid.Column="1" Content="Выбрать..." Command="{Binding SelectImageCommand}" Style="{StaticResource SecondaryButtonStyle}" Margin="10,0,0,0"/>
                         </Grid>
                     </StackPanel>
 
-                    <!-- Description spanning both columns -->
                     <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Text="Разделы описания" Style="{StaticResource FormLabelStyle}"/>
                     
                     <StackPanel Grid.Row="2" Grid.Column="0" Grid.ColumnSpan="3">
@@ -117,12 +118,7 @@
                 </Grid>
             </ScrollViewer>
 
-            <TextBlock Grid.Row="2"
-                       Text="{Binding ErrorMessage}"
-                       Foreground="IndianRed"
-                       FontWeight="Medium"
-                       TextWrapping="Wrap"
-                       Margin="0,15,0,0"
+            <TextBlock Grid.Row="2" Text="{Binding ErrorMessage}" Foreground="IndianRed" FontWeight="Medium" TextWrapping="Wrap" Margin="0,15,0,0"
                        Visibility="{Binding ErrorMessage, Converter={StaticResource StringNullOrEmptyToVisibilityConverter}}"/>
 
             <StackPanel Grid.Row="3" Orientation="Horizontal" HorizontalAlignment="Right" Margin="0,30,0,0">

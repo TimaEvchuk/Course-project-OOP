@@ -7,5 +7,6 @@ namespace Plantify.Data.Repositories
     public interface IPlantRepository : IRepository<Plant>
     {
         Task<IEnumerable<Plant>> GetAllWithSectionsAsync();
+        Task<Plant?> GetByIdWithSectionsAsync(int id);
     }
 }

@@ -20,6 +20,13 @@ namespace Plantify.Data.Repositories
                 .ToListAsync();
         }
 
+        public async Task<Plant?> GetByIdWithSectionsAsync(int id)
+        {
+            return await _appDbContext.Plants
+                .Include(p => p.Sections)
+                .FirstOrDefaultAsync(p => p.Id == id);
+        }
+
         private AppDbContext _appDbContext => (AppDbContext)_context;
     }
 }

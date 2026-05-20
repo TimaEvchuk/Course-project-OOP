@@ -17,13 +17,25 @@ namespace Plantify.ViewModels
         public string LightRequirement => PlantModel.LightRequirement.Name;
         public int WateringInterval => PlantModel.WateringInterval;
         public int FertilizingInterval => PlantModel.FertilizingInterval;
-        public ICollection<PlantSection> Sections => PlantModel.Sections;
-        public string ShortDescription => PlantModel.Sections.FirstOrDefault()?.Content ?? "";
+        public ICollection<PlantSection> Sections { get; }
+        public string ShortDescription => Sections.FirstOrDefault()?.Content ?? "";
         public string ImagePath => PlantModel.ImagePath ?? "";
 
         public PlantViewModel(Plant plant)
         {
             PlantModel = plant;
+
+            // Ensure sections are distinct before assigning them.
+            // This is a safeguard against EF materialization issues with JOINs.
+            if (plant.Sections != null)
+            {
+                Sections = plant.Sections.GroupBy(s => s.Id).Select(g => g.First()).ToList();
+            }
+            else
+            {
+                Sections = new List<PlantSection>();
+            }
+
             DisplayImageSource = LoadImage(plant.ImagePath);
         }
 

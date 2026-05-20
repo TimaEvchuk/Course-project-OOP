@@ -38,7 +38,9 @@
                           IsReadOnly="True"
                           HeadersVisibility="All"
                           RowHeaderWidth="0"
-                          CanUserAddRows="False">
+                          CanUserAddRows="False"
+                          AlternationCount="2" 
+                          RowStyle="{StaticResource AlternatingDataGridRowStyle}">
                     <DataGrid.Columns>
                         <DataGridTextColumn Header="Логин" Binding="{Binding Login}" Width="*"/>
                         <DataGridTextColumn Header="Email" Binding="{Binding Email}" Width="2*"/>

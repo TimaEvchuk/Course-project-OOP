@@ -32,7 +32,7 @@ namespace Plantify.ViewModels
         private PlantViewModel? _selectedPlant;
 
         [ObservableProperty]
-        [NotifyCanExecuteChangedFor(nameof(ApproveSubmissionCommand))]
+        [NotifyCanExecuteChangedFor(nameof(ReviewSubmissionCommand))]
         [NotifyCanExecuteChangedFor(nameof(RejectSubmissionCommand))]
         private PlantSubmission? _selectedSubmission;
         
@@ -155,44 +155,10 @@ namespace Plantify.ViewModels
         private bool CanManipulateSubmission() => SelectedSubmission != null;
 
         [RelayCommand(CanExecute = nameof(CanManipulateSubmission))]
-        private async Task ApproveSubmission()
+        private void ReviewSubmission()
         {
             if (SelectedSubmission == null) return;
-
-            var newPlant = new Plant
-            {
-                Name = SelectedSubmission.Name,
-                VarietyId = SelectedSubmission.VarietyId,
-                LightRequirementId = SelectedSubmission.LightRequirementId,
-                WateringInterval = SelectedSubmission.WateringInterval,
-                FertilizingInterval = SelectedSubmission.FertilizingInterval,
-                ImagePath = SelectedSubmission.ImagePath,
-            };
-
-            if (!string.IsNullOrWhiteSpace(SelectedSubmission.Description))
-            {
-                try
-                {
-                    var sections = JsonSerializer.Deserialize<List<PlantSectionViewModel>>(SelectedSubmission.Description);
-                    if (sections != null)
-                    {
-                        foreach (var section in sections)
-                        {
-                            newPlant.Sections.Add(new PlantSection { Title = section.Title, Content = section.Content });
-                        }
-                    }
-                }
-                catch 
-                { 
-                    newPlant.Sections.Add(new PlantSection { Title = "Описание", Content = SelectedSubmission.Description });
-                }
-            }
-
-            await _unitOfWork.Plants.AddAsync(newPlant);
-            _unitOfWork.PlantSubmissions.Delete(SelectedSubmission);
-            await _unitOfWork.CompleteAsync();
-
-            await LoadData();
+            _messenger.Send(new ShowAddEditPlantOverlayMessage(SelectedSubmission));
         }
 
         [RelayCommand(CanExecute = nameof(CanManipulateSubmission))]

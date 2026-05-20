@@ -232,7 +232,18 @@ namespace Plantify.ViewModels
         public async void Receive(ShowAddEditPlantOverlayMessage message)
         {
             var vm = _serviceProvider.GetRequiredService<AddEditPlantViewModel>();
-            await vm.InitializeAsync(message.Value);
+            if (message.Value is Plant plant)
+            {
+                await vm.InitializeAsync(plant);
+            }
+            else if (message.Value is PlantSubmission submission)
+            {
+                await vm.InitializeAsync(submission);
+            }
+            else
+            {
+                await vm.InitializeAsync((Plant?)null);
+            }
             OverlayViewModel = vm;
         }
 
