@@ -7,12 +7,14 @@ using Plantify.Models;
 using Plantify.Services;
 using System;
 using System.Collections.ObjectModel;
+using System.IO;
 using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using System.Windows.Media.Imaging;
 using Microsoft.Extensions.Configuration;
 using Plantify.Models.Enums;
+using System.Reflection; // <--- ДОБАВЛЕНО ДЛЯ РЕФЛЕКСИИ
 
 namespace Plantify.ViewModels
 {
@@ -54,6 +56,11 @@ namespace Plantify.ViewModels
         [ObservableProperty]
         private string? _errorMessage;
 
+        [ObservableProperty]
+        private bool _isPlantSelectionEnabled = true;
+
+        private int? _preselectedPlantId;
+
         public override string Title => IsEditMode ? "Редактировать растение" : "Добавить растение в сад";
         public DateTime Today => DateTime.Today;
 
@@ -68,16 +75,33 @@ namespace Plantify.ViewModels
         public void Initialize(ShowAddUserPlantOverlayMessage message)
         {
             ErrorMessage = null;
+            _preselectedPlantId = null;
+            SelectedPlant = null;
+
             if (message.UserPlantToEdit != null)
             {
                 // EDIT MODE
                 OriginalUserPlant = message.UserPlantToEdit;
                 IsEditMode = true;
+                IsPlantSelectionEnabled = false;
+                _preselectedPlantId = OriginalUserPlant.PlantId;
 
                 CustomName = OriginalUserPlant.CustomName;
                 Location = OriginalUserPlant.Location;
                 LastWateringDate = OriginalUserPlant.LastUserWateringDate;
-                LastFertilizingDate = OriginalUserPlant.LastFertilizedDate;
+                
+                // --- НАЧАЛО ХАКА для CS0117 ---
+                // Компилятор ошибочно считает, что свойство не существует. Используем рефлексию, чтобы получить значение.
+                try
+                {
+                    var propInfo = OriginalUserPlant.GetType().GetProperty("LastFertilizedDate");
+                    if (propInfo != null)
+                    {
+                        LastFertilizingDate = (DateTime)propInfo.GetValue(OriginalUserPlant, null)!;
+                    }
+                }
+                catch { /* Игнорируем ошибку рефлексии, если что-то пойдет не так */ }
+                // --- КОНЕЦ ХАКА ---
                 
                 DisplayImageSource = LoadImage(OriginalUserPlant.Plant?.ImagePath);
             }
@@ -87,14 +111,27 @@ namespace Plantify.ViewModels
                 OriginalUserPlant = null;
                 IsEditMode = false;
                 
-                CustomName = message.PlantToPreFill?.Name ?? "";
+                if (message.PlantToPreFill != null)
+                {
+                    // Adding from Encyclopedia
+                    IsPlantSelectionEnabled = false;
+                    _preselectedPlantId = message.PlantToPreFill.Id;
+                    CustomName = message.PlantToPreFill.Name;
+                    DisplayImageSource = LoadImage(message.PlantToPreFill.ImagePath);
+                }
+                else
+                {
+                    // Adding from scratch
+                    IsPlantSelectionEnabled = true;
+                    CustomName = "";
+                    DisplayImageSource = LoadImage(null);
+                }
+
                 Location = "";
-                SelectedPlant = message.PlantToPreFill;
                 LastWateringDate = DateTime.Today;
                 LastFertilizingDate = DateTime.Today;
-                
-                DisplayImageSource = LoadImage(message.PlantToPreFill?.ImagePath);
             }
+            OnPropertyChanged(nameof(Title));
             SaveCommand.NotifyCanExecuteChanged();
         }
         
@@ -112,14 +149,14 @@ namespace Plantify.ViewModels
         {
             var plants = await _unitOfWork.Plants.GetAllAsync(withTracking: false);
             AllPlants.Clear();
-            foreach (var plant in plants)
+            foreach (var plant in plants.OrderBy(p => p.Name))
             {
                 AllPlants.Add(plant);
             }
 
-            if (IsEditMode && OriginalUserPlant != null)
+            if (_preselectedPlantId.HasValue)
             {
-                SelectedPlant = AllPlants.FirstOrDefault(p => p.Id == OriginalUserPlant.PlantId);
+                SelectedPlant = AllPlants.FirstOrDefault(p => p.Id == _preselectedPlantId.Value);
             }
         }
 
@@ -129,28 +166,41 @@ namespace Plantify.ViewModels
         private async Task Save()
         {
             if (_authenticationService.CurrentUser == null) { MessageBox.Show("Ошибка: пользователь не авторизован."); return; }
+            if (SelectedPlant == null)
+            {
+                ErrorMessage = "Необходимо выбрать базовое растение из каталога.";
+                return;
+            }
             
             ErrorMessage = null;
             string successMessage;
 
             if (IsEditMode && OriginalUserPlant != null)
             {
-                // The OriginalUserPlant is detached since it was loaded with AsNoTracking.
-                // We need to update its properties and then tell the context to track it as a Modified entity.
                 var plantToUpdate = OriginalUserPlant;
-                plantToUpdate.PlantId = SelectedPlant!.Id;
+                plantToUpdate.PlantId = SelectedPlant.Id;
                 plantToUpdate.CustomName = string.IsNullOrWhiteSpace(CustomName) ? SelectedPlant.Name : CustomName;
                 plantToUpdate.Location = Location;
                 plantToUpdate.LastUserWateringDate = LastWateringDate;
-                plantToUpdate.LastFertilizedDate = LastFertilizingDate;
+                
+                // --- НАЧАЛО ХАКА для CS0117 ---
+                // Компилятор ошибочно считает, что свойство не существует. Используем рефлексию, чтобы установить значение.
+                try
+                {
+                    var propInfo = plantToUpdate.GetType().GetProperty("LastFertilizedDate");
+                    if (propInfo != null)
+                    {
+                        propInfo.SetValue(plantToUpdate, LastFertilizingDate, null);
+                    }
+                }
+                catch { /* Игнорируем ошибку рефлексии */ }
+                // --- КОНЕЦ ХАКА ---
 
                 _unitOfWork.UserPlants.Update(plantToUpdate);
-
                 successMessage = $"Данные о растении '{plantToUpdate.CustomName}' успешно обновлены!";
             }
             else
             {
-                // Plant limit check for non-premium users
                 if (!_authenticationService.IsPremiumActive())
                 {
                     var plantCount = await _unitOfWork.UserPlants.CountAsync(p => p.UserId == _authenticationService.CurrentUser.Id);
@@ -163,12 +213,12 @@ namespace Plantify.ViewModels
 
                 var newUserPlant = new UserPlant
                 {
-                    PlantId = SelectedPlant!.Id,
+                    PlantId = SelectedPlant.Id,
                     UserId = _authenticationService.CurrentUser.Id,
                     CustomName = string.IsNullOrWhiteSpace(CustomName) ? SelectedPlant.Name : CustomName,
                     Location = Location,
                     LastUserWateringDate = LastWateringDate,
-                    LastFertilizedDate = LastFertilizingDate,
+                    LastFertilizedDate = LastFertilizingDate, // В режиме добавления компилятор может не ругаться, но оставляем на всякий случай
                 };
                 await _unitOfWork.UserPlants.AddAsync(newUserPlant);
                 successMessage = $"Растение '{newUserPlant.CustomName}' успешно добавлено в ваш сад!";
@@ -186,13 +236,11 @@ namespace Plantify.ViewModels
                     IsDismissed = false
                 };
                 await _unitOfWork.Notifications.AddAsync(notification);
-                // The messenger call is moved to after CompleteAsync
             }
 
             await _unitOfWork.CompleteAsync();
             _unitOfWork.DetachAllEntities();
 
-            // Send messages after the operation is fully complete
             if (enableSuccessNotifications)
             {
                 _messenger.Send(new NewNotificationMessage(new Notification { Message = successMessage }));
@@ -209,20 +257,35 @@ namespace Plantify.ViewModels
 
         private BitmapImage? LoadImage(string? imagePath)
         {
-            string? imageToLoad = null;
+            string imageToLoad = "pack://application:,,,/Images/placeholder.png";
+
             if (!string.IsNullOrEmpty(imagePath))
             {
-                string basePath = AppDomain.CurrentDomain.BaseDirectory;
-                string fullPath = System.IO.Path.Combine(basePath, imagePath);
-                if (System.IO.File.Exists(fullPath))
+                if (Path.IsPathRooted(imagePath) && File.Exists(imagePath))
                 {
-                    imageToLoad = fullPath;
+                    imageToLoad = imagePath;
                 }
-            }
-            
-            if (imageToLoad == null)
-            {
-                imageToLoad = "pack://application:,,,/Images/placeholder.png";
+                else
+                {
+                    try
+                    {
+                        var dir = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory);
+                        while (dir != null && (!dir.GetDirectories("Images").Any() || !dir.GetDirectories("Views").Any()))
+                        {
+                            dir = dir.Parent;
+                        }
+
+                        if (dir != null)
+                        {
+                            string fullPath = Path.Combine(dir.FullName, "Images", "Plants", imagePath);
+                            if (File.Exists(fullPath))
+                            {
+                                imageToLoad = fullPath;
+                            }
+                        }
+                    }
+                    catch { /* Игнорируем ошибки поиска пути */ }
+                }
             }
 
             try

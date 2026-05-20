@@ -11,6 +11,7 @@ using System.Linq;
 using System.Threading.Tasks;
 using System.Windows;
 using Microsoft.Win32;
+using System.Windows.Media.Imaging;
 
 namespace Plantify.ViewModels
 {
@@ -40,12 +41,16 @@ namespace Plantify.ViewModels
         private int _wateringInterval;
         [ObservableProperty]
         private int _fertilizingInterval;
+
         [ObservableProperty]
         private string? _imagePath;
+
+        [ObservableProperty]
+        private BitmapImage? _displayImageSource;
         
         [ObservableProperty]
         private string? _errorMessage;
-        
+
         public ObservableCollection<PlantSectionViewModel> Sections { get; set; }
 
         public override string Title => IsEditMode ? "Редактировать растение" : "Добавить новое растение";
@@ -62,6 +67,11 @@ namespace Plantify.ViewModels
             Varieties = new ObservableCollection<Variety>();
             LightRequirements = new ObservableCollection<LightRequirement>();
             Sections = new ObservableCollection<PlantSectionViewModel>();
+        }
+
+        partial void OnImagePathChanged(string? value)
+        {
+            DisplayImageSource = LoadImage(value);
         }
 
         [RelayCommand]
@@ -85,9 +95,9 @@ namespace Plantify.ViewModels
         public async Task InitializeAsync(Plant? plant = null)
         {
             await LoadCategoriesCommand.ExecuteAsync(null);
-            
+
             Sections.Clear();
-            
+
             if (plant != null)
             {
                 IsEditMode = true;
@@ -107,10 +117,6 @@ namespace Plantify.ViewModels
                         Sections.Add(new PlantSectionViewModel { Title = section.Title, Content = section.Content });
                     }
                 }
-                else
-                {
-                    Sections.Add(new PlantSectionViewModel { Title = "Описание", Content = "" });
-                }
             }
             else
             {
@@ -123,9 +129,7 @@ namespace Plantify.ViewModels
                 WateringInterval = 7;
                 FertilizingInterval = 30;
                 ImagePath = null;
-                Sections.Add(new PlantSectionViewModel { Title = "Описание", Content = "" });
             }
-            // Manually trigger re-evaluation after initialization
             SaveCommand.NotifyCanExecuteChanged();
         }
         
@@ -156,39 +160,65 @@ namespace Plantify.ViewModels
         private async Task Save()
         {
             ErrorMessage = null;
-            
-            ProcessImageFile(ImagePath);
-
-            Plant plantToSave;
+            if (PlantName == null || SelectedVariety == null || SelectedLightRequirement == null)
+            {
+                ErrorMessage = "Все поля со звездочкой должны быть заполнены.";
+                return;
+            }
 
             if (IsEditMode && _plantToEdit != null)
             {
-                plantToSave = _plantToEdit;
+                var plantToUpdate = await _unitOfWork.Plants.GetByIdAsync(_plantToEdit.Id);
+                if (plantToUpdate == null)
+                {
+                    ErrorMessage = "Не удалось найти редактируемое растение в базе данных.";
+                    return;
+                }
+                
+                plantToUpdate.Name = PlantName;
+                plantToUpdate.VarietyId = SelectedVariety.Id;
+                plantToUpdate.LightRequirementId = SelectedLightRequirement.Id;
+                plantToUpdate.WateringInterval = WateringInterval;
+                plantToUpdate.FertilizingInterval = FertilizingInterval;
+                plantToUpdate.ImagePath = ImagePath;
+                
+                plantToUpdate.Sections.Clear();
+                foreach (var sectionVm in Sections)
+                {
+                    if (!string.IsNullOrWhiteSpace(sectionVm.Title) || !string.IsNullOrWhiteSpace(sectionVm.Content))
+                    {
+                        plantToUpdate.Sections.Add(new PlantSection
+                        {
+                            Title = sectionVm.Title,
+                            Content = sectionVm.Content
+                        });
+                    }
+                }
             }
             else
             {
-                plantToSave = new Plant();
-                await _unitOfWork.Plants.AddAsync(plantToSave);
-            }
-
-            plantToSave.Name = PlantName;
-            plantToSave.VarietyId = SelectedVariety!.Id;
-            plantToSave.LightRequirementId = SelectedLightRequirement!.Id;
-            plantToSave.WateringInterval = WateringInterval;
-            plantToSave.FertilizingInterval = FertilizingInterval;
-            plantToSave.ImagePath = ImagePath;
-
-            plantToSave.Sections.Clear();
-            foreach (var sectionVm in Sections)
-            {
-                if (!string.IsNullOrWhiteSpace(sectionVm.Title) || !string.IsNullOrWhiteSpace(sectionVm.Content))
+                var newPlant = new Plant
                 {
-                    plantToSave.Sections.Add(new PlantSection
+                    Name = PlantName,
+                    VarietyId = SelectedVariety.Id,
+                    LightRequirementId = SelectedLightRequirement.Id,
+                    WateringInterval = WateringInterval,
+                    FertilizingInterval = FertilizingInterval,
+                    ImagePath = ImagePath
+                };
+                
+                foreach (var sectionVm in Sections)
+                {
+                    if (!string.IsNullOrWhiteSpace(sectionVm.Title) || !string.IsNullOrWhiteSpace(sectionVm.Content))
                     {
-                        Title = sectionVm.Title,
-                        Content = sectionVm.Content
-                    });
+                        newPlant.Sections.Add(new PlantSection
+                        {
+                            Title = sectionVm.Title,
+                            Content = sectionVm.Content
+                        });
+                    }
                 }
+                await _unitOfWork.Plants.AddAsync(newPlant);
             }
 
             await _unitOfWork.CompleteAsync();
@@ -202,42 +232,63 @@ namespace Plantify.ViewModels
         {
             _messenger.Send(new CloseOverlayMessage());
         }
-        
+
         [RelayCommand]
         private void SelectImage()
         {
             var dialog = new OpenFileDialog { Filter = "Image files (*.png;*.jpeg;*.jpg)|*.png;*.jpeg;*.jpg|All files (*.*)|*.*" };
             if (dialog.ShowDialog() == true)
             {
-                ImagePath = dialog.FileName;
+                ImagePath = Path.GetFileName(dialog.FileName);
             }
         }
-
-        private void ProcessImageFile(string? sourcePath)
+        
+        private BitmapImage? LoadImage(string? imagePath)
         {
-            if (string.IsNullOrEmpty(sourcePath) || !File.Exists(sourcePath))
+            string imageToLoad = "pack://application:,,,/Images/placeholder.png";
+
+            if (!string.IsNullOrEmpty(imagePath))
             {
-                return;
-            }
-            
-            if (sourcePath.StartsWith("Images/"))
-            {
-                return;
+                if (Path.IsPathRooted(imagePath) && File.Exists(imagePath))
+                {
+                    imageToLoad = imagePath;
+                }
+                else
+                {
+                    try
+                    {
+                        var dir = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory);
+                        while (dir != null && (!dir.GetDirectories("Images").Any() || !dir.GetDirectories("Views").Any()))
+                        {
+                            dir = dir.Parent;
+                        }
+
+                        if (dir != null)
+                        {
+                            string fullPath = Path.Combine(dir.FullName, "Images", "Plants", imagePath);
+                            if (File.Exists(fullPath))
+                            {
+                                imageToLoad = fullPath;
+                            }
+                        }
+                    }
+                    catch { /* Игнорируем ошибки поиска пути */ }
+                }
             }
 
-            var fileName = Guid.NewGuid() + Path.GetExtension(sourcePath);
-            var targetDirectory = Path.Combine(AppDomain.CurrentDomain.BaseDirectory, "Images", "Plants");
-            
             try
             {
-                Directory.CreateDirectory(targetDirectory);
-                var destinationPath = Path.Combine(targetDirectory, fileName);
-                File.Copy(sourcePath, destinationPath, true);
-                ImagePath = Path.Combine("Images/Plants", fileName).Replace('\\', '/');
+                var bitmap = new BitmapImage();
+                bitmap.BeginInit();
+                bitmap.UriSource = new Uri(imageToLoad, UriKind.RelativeOrAbsolute);
+                bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                bitmap.EndInit();
+                bitmap.Freeze();
+                return bitmap;
             }
-            catch (Exception ex)
+            catch 
             {
-                MessageBox.Show($"Error copying image from {sourcePath}: {ex.Message}");
+                return null; 
             }
         }
     }

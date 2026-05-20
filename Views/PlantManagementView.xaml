@@ -44,8 +44,8 @@
                                   AutoGenerateColumns="False" IsReadOnly="True" SelectionMode="Single">
                             <DataGrid.Columns>
                                 <DataGridTextColumn Header="Название" Binding="{Binding Name}" Width="*"/>
-                                <DataGridTextColumn Header="Вид" Binding="{Binding Variety.Name}" Width="150"/>
-                                <DataGridTextColumn Header="Освещение" Binding="{Binding LightRequirement.Name}" Width="150"/>
+                                <DataGridTextColumn Header="Вид" Binding="{Binding Variety}" Width="150"/>
+                                <DataGridTextColumn Header="Освещение" Binding="{Binding LightRequirement}" Width="150"/>
                             </DataGrid.Columns>
                         </DataGrid>
 
@@ -83,7 +83,7 @@
 
                                             <StackPanel Grid.Row="0" Grid.Column="0" Margin="0,0,10,10">
                                                 <TextBlock Text="Вид" Style="{StaticResource Caption}"/>
-                                                <TextBlock Text="{Binding SelectedPlant.Variety.Name}" Style="{StaticResource Body}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
+                                                <TextBlock Text="{Binding SelectedPlant.Variety}" Style="{StaticResource Body}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
                                             </StackPanel>
                                             
                                             <StackPanel Grid.Row="0" Grid.Column="1" Margin="0,0,10,10">
@@ -93,7 +93,7 @@
 
                                             <StackPanel Grid.Row="1" Grid.Column="0" Margin="0,0,10,10">
                                                 <TextBlock Text="Освещение" Style="{StaticResource Caption}"/>
-                                                <TextBlock Text="{Binding SelectedPlant.LightRequirement.Name}" Style="{StaticResource Body}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
+                                                <TextBlock Text="{Binding SelectedPlant.LightRequirement}" Style="{StaticResource Body}" TextTrimming="CharacterEllipsis" TextWrapping="NoWrap"/>
                                             </StackPanel>
 
                                             <StackPanel Grid.Row="1" Grid.Column="1" Margin="0,0,10,10">

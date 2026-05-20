@@ -21,7 +21,7 @@ namespace Plantify.ViewModels
         private readonly IDialogService _dialogService;
 
         [ObservableProperty]
-        private ObservableCollection<Plant> _plants;
+        private ObservableCollection<PlantViewModel> _plants;
 
         [ObservableProperty]
         private ObservableCollection<PlantSubmission> _pendingSubmissions;
@@ -29,14 +29,13 @@ namespace Plantify.ViewModels
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(UpdatePlantCommand))]
         [NotifyCanExecuteChangedFor(nameof(DeletePlantCommand))]
-        private Plant? _selectedPlant;
+        private PlantViewModel? _selectedPlant;
 
         [ObservableProperty]
         [NotifyCanExecuteChangedFor(nameof(ApproveSubmissionCommand))]
         [NotifyCanExecuteChangedFor(nameof(RejectSubmissionCommand))]
         private PlantSubmission? _selectedSubmission;
         
-        // Category Management Properties
         [ObservableProperty]
         private ObservableCollection<Variety> _varieties;
 
@@ -58,7 +57,7 @@ namespace Plantify.ViewModels
             _unitOfWork = unitOfWork;
             _messenger = messenger;
             _dialogService = dialogService;
-            _plants = new ObservableCollection<Plant>();
+            _plants = new ObservableCollection<PlantViewModel>();
             _pendingSubmissions = new ObservableCollection<PlantSubmission>();
             _varieties = new ObservableCollection<Variety>();
             _lightRequirements = new ObservableCollection<LightRequirement>();
@@ -83,7 +82,7 @@ namespace Plantify.ViewModels
             Plants.Clear();
             foreach (var plant in plantList)
             {
-                Plants.Add(plant);
+                Plants.Add(new PlantViewModel(plant));
             }
         }
 
@@ -128,7 +127,7 @@ namespace Plantify.ViewModels
         private void UpdatePlant()
         {
             if (SelectedPlant == null) return;
-            _messenger.Send(new ShowAddEditPlantOverlayMessage(SelectedPlant));
+            _messenger.Send(new ShowAddEditPlantOverlayMessage(SelectedPlant.PlantModel));
         }
 
         [RelayCommand(CanExecute = nameof(CanUpdateOrDelete))]
@@ -140,9 +139,15 @@ namespace Plantify.ViewModels
 
             if (result.Confirmed)
             {
-                _unitOfWork.Plants.Delete(SelectedPlant);
-                await _unitOfWork.CompleteAsync();
-                SelectedPlant = null; // Hide details panel
+                // Сначала находим "свежую" версию из БД, потом удаляем
+                var plantToDelete = await _unitOfWork.Plants.GetByIdAsync(SelectedPlant.PlantModel.Id);
+                if (plantToDelete != null)
+                {
+                    _unitOfWork.Plants.Delete(plantToDelete);
+                    await _unitOfWork.CompleteAsync();
+                }
+
+                SelectedPlant = null; // Скрываем панель деталей
                 await LoadPlants();
             }
         }

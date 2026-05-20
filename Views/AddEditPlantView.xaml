@@ -55,19 +55,20 @@
                     </StackPanel>
                     
                     <StackPanel Grid.Column="2">
-                        <TextBlock Text="Интервал полива (дней)" Style="{StaticResource FormLabelStyle}"/>
-                        <TextBox Text="{Binding WateringInterval, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBoxStyle}" HorizontalAlignment="Stretch"/>
-                        <TextBlock Text="Интервал удобрения (дней)" Style="{StaticResource FormLabelStyle}"/>
-                        <TextBox Text="{Binding FertilizingInterval, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBoxStyle}" HorizontalAlignment="Stretch"/>
                         <TextBlock Text="Изображение" Style="{StaticResource FormLabelStyle}"/>
+                        <Image Source="{Binding DisplayImageSource}" Height="100" Margin="0,0,0,10" Stretch="Uniform" HorizontalAlignment="Left"/>
                         <Grid>
                             <Grid.ColumnDefinitions>
                                 <ColumnDefinition Width="*"/>
                                 <ColumnDefinition Width="Auto"/>
                             </Grid.ColumnDefinitions>
-                            <TextBox Grid.Column="0" Text="{Binding ImagePath, Mode=OneWay}" IsReadOnly="True" Style="{StaticResource FormTextBoxStyle}"/>
+                            <TextBox Grid.Column="0" Text="{Binding ImagePath, Mode=OneWay}" Style="{StaticResource FormTextBoxStyle}" IsReadOnly="True"/>
                             <Button Grid.Column="1" Content="Выбрать..." Command="{Binding SelectImageCommand}" Style="{StaticResource SecondaryButtonStyle}" Margin="10,0,0,0"/>
                         </Grid>
+                        <TextBlock Text="Интервал полива (дней)" Style="{StaticResource FormLabelStyle}"/>
+                        <TextBox Text="{Binding WateringInterval, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBoxStyle}" HorizontalAlignment="Stretch"/>
+                        <TextBlock Text="Интервал удобрения (дней)" Style="{StaticResource FormLabelStyle}"/>
+                        <TextBox Text="{Binding FertilizingInterval, UpdateSourceTrigger=PropertyChanged}" Style="{StaticResource FormTextBoxStyle}" HorizontalAlignment="Stretch"/>
                     </StackPanel>
 
                     <TextBlock Grid.Row="1" Grid.Column="0" Grid.ColumnSpan="3" Text="Разделы описания" Style="{StaticResource FormLabelStyle}"/>

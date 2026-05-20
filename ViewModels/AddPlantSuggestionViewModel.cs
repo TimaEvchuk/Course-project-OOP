@@ -42,7 +42,7 @@ namespace Plantify.ViewModels
             set
             {
                 if (value < 0) value = 0;
-                if (value > 999) value = 999;
+                if (value > 365) value = 365;
                 SetProperty(ref _wateringInterval, value);
             }
         }
@@ -54,7 +54,7 @@ namespace Plantify.ViewModels
             set
             {
                 if (value < 0) value = 0;
-                if (value > 999) value = 999;
+                if (value > 365) value = 365;
                 SetProperty(ref _fertilizingInterval, value);
             }
         }

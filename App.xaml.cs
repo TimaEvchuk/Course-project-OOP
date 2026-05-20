@@ -145,7 +145,7 @@ namespace Plantify
                         var lightShadeTolerant = await context.LightRequirements.FirstAsync(l => l.Name == "Теневыносливые");
                         var lightSunLoving = await context.LightRequirements.FirstAsync(l => l.Name == "Светолюбивые");
 
-                        var snakePlant = new Models.Plant { Name = "Замиокулькас (Денежное дерево)", WateringInterval = 21, FertilizingInterval = 45, LightRequirement = lightShadeTolerant, Variety = varietySucculent, ImagePath = "Images/Plants/zamioculcas.png" };
+                        var snakePlant = new Models.Plant { Name = "Замиокулькас (Денежное дерево)", WateringInterval = 21, FertilizingInterval = 45, LightRequirement = lightShadeTolerant, Variety = varietySucculent, ImagePath = "zamioculcas.png" };
                         var snakePlantSections = new[]
                         {
                             new Models.PlantSection { Title = "Происхождение и особенности растения", Content = "Денежное дерево, известное ботаникам как Crassula ovata, — это суккулент, родиной которого являются засушливые регионы Южной Африки . В естественной среде оно привыкло к суровым условиям: каменистой почве, яркому солнцу и редким дождям. Благодаря этому растение научилось запасать влагу в своих толстых, мясистых листьях, чтобы переживать долгие периоды засухи. Свое народное название «денежное» оно получило из-за округлой формы листьев, напоминающих монетки, и в более позднее время, с распространением учения фэн-шуй, стало считаться символом материального благополучия и удачи ." },
@@ -157,7 +157,7 @@ namespace Plantify
                         foreach(var s in snakePlantSections) snakePlant.Sections.Add(s);
 
 
-                        var monstera = new Models.Plant { Name = "Монстера Деликатесная", WateringInterval = 10, FertilizingInterval = 21, LightRequirement = lightShadeTolerant, Variety = varietyLiana, ImagePath = "Images/Plants/monstera.png" };
+                        var monstera = new Models.Plant { Name = "Монстера Деликатесная", WateringInterval = 10, FertilizingInterval = 21, LightRequirement = lightShadeTolerant, Variety = varietyLiana, ImagePath = "monstera.png" };
                         var monsteraSections = new[]
                         {
                             new Models.PlantSection { Title = "Происхождение и особенности", Content = "Монстера деликатесная (Monstera deliciosa), она же «швейцарский сыр» или «адамово ребро», — это тропическая лиана, родиной которой являются влажные леса от юга Мексики до Панамы. В дикой природе она использует свои воздушные корни, чтобы взбираться по стволам деревьев поближе к свету, пробивающемуся сквозь густую листву, и может достигать 10 метров и более в высоту. Ее знаменитые резные листья с отверстиями появляются не сразу: молодые растения имеют цельные сердцевидные листья, а характерные прорези и «окошечки» (этот процесс называется фенестрацией) формируются по мере взросления, помогая растению выдерживать тропические ливни и пропускать свет к нижним листьям. Латинское название 'monstera' означает «монстр» или «необычная» и дано растению именно за его удивительные листья." },
@@ -168,7 +168,7 @@ namespace Plantify
                         };
                         foreach(var s in monsteraSections) monstera.Sections.Add(s);
 
-                        var ficus = new Models.Plant { Name = "Фикус Бенджамина", WateringInterval = 7, FertilizingInterval = 14, LightRequirement = lightSunLoving, Variety = varietyDeciduous, ImagePath = "Images/Plants/ficus.png" };
+                        var ficus = new Models.Plant { Name = "Фикус Бенджамина", WateringInterval = 7, FertilizingInterval = 14, LightRequirement = lightSunLoving, Variety = varietyDeciduous, ImagePath = "ficus.png" };
                         var ficusSections = new[]
                         {
                             new Models.PlantSection { Title = "Происхождение и особенности", Content = "Фикус — это обширный род растений из семейства Тутовые, объединяющий более 800 видов, и его «родственником» является инжир . Большинство комнатных фикусов — вечнозеленые деревья, родиной которых являются тропические леса Индии, Китая, Юго-Восточной Азии и Африки. В природе многие из них начинают жизнь как эпифиты, оплетая воздушными корнями стволы других деревьев. В комнатной культуре самые популярные виды — это каучуконосный фикус с крупными темными листьями, изящный фикус Бенджамина с мелкими листочками и эффектный лировидный фикус, чьи листья напоминают музыкальный инструмент . Именно за свою разнообразную красоту и относительную неприхотливость фикусы уже много десятилетий остаются классикой домашнего озеленения." },

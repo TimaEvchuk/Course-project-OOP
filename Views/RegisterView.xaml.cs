@@ -17,7 +17,7 @@ namespace Plantify.Views
         {
             if (this.DataContext is RegisterViewModel viewModel)
             {
-                viewModel.Password = ((PasswordBox)sender).Password;
+                viewModel.SetPassword(((PasswordBox)sender).Password);
             }
         }
 
@@ -25,7 +25,7 @@ namespace Plantify.Views
         {
             if (this.DataContext is RegisterViewModel viewModel)
             {
-                viewModel.ConfirmPassword = ((PasswordBox)sender).Password;
+                viewModel.SetConfirmPassword(((PasswordBox)sender).Password);
             }
         }
     }

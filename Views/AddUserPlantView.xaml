@@ -89,7 +89,8 @@
                               SelectedItem="{Binding SelectedPlant}"
                               DisplayMemberPath="Name"
                               Style="{StaticResource FormComboBoxStyle}"
-                              ItemContainerStyle="{StaticResource FormComboBoxItemStyle}"/>
+                              ItemContainerStyle="{StaticResource FormComboBoxItemStyle}"
+                              IsEnabled="{Binding IsPlantSelectionEnabled}"/>
 
                     <TextBlock Text="Имя" Style="{StaticResource FormLabelStyle}"/>
                     <TextBox Text="{Binding CustomName, UpdateSourceTrigger=PropertyChanged}" HorizontalAlignment="Stretch" Style="{StaticResource FormTextBoxStyle}"/>

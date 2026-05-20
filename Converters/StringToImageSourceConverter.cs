@@ -1,6 +1,7 @@
 using System;
 using System.Globalization;
 using System.IO;
+using System.Linq;
 using System.Windows.Data;
 using System.Windows.Media.Imaging;
 
@@ -10,30 +11,26 @@ namespace Plantify.Converters
     {
         public object Convert(object value, Type targetType, object parameter, CultureInfo culture)
         {
-            string imagePath = value as string;
+            return CreateBitmapFromPath("pack://application:,,,/Images/placeholder.png");
+        }
 
-            if (string.IsNullOrEmpty(imagePath))
-            {
-                return new BitmapImage(new Uri("pack://application:,,,/Images/placeholder.png"));
-            }
-
+        private BitmapImage CreateBitmapFromPath(string path)
+        {
             try
             {
-                var fullPath = Path.GetFullPath(imagePath);
-                if (File.Exists(fullPath))
-                {
-                    var bitmap = new BitmapImage();
-                    bitmap.BeginInit();
-                    bitmap.UriSource = new Uri(fullPath, UriKind.Absolute);
-                    bitmap.CacheOption = BitmapCacheOption.OnLoad;
-                    bitmap.EndInit();
-                    bitmap.Freeze();
-                    return bitmap;
-                }
+                var bitmap = new BitmapImage();
+                bitmap.BeginInit();
+                bitmap.UriSource = new Uri(path, UriKind.RelativeOrAbsolute);
+                bitmap.CacheOption = BitmapCacheOption.OnLoad;
+                bitmap.EndInit();
+                bitmap.Freeze();
+                return bitmap;
             }
-            catch {}
-            
-            return new BitmapImage(new Uri("pack://application:,,,/Images/placeholder.png"));
+            catch
+            {
+                // In case the placeholder itself is missing, return a new empty image.
+                return new BitmapImage();
+            }
         }
 
         public object ConvertBack(object value, Type targetType, object parameter, CultureInfo culture)

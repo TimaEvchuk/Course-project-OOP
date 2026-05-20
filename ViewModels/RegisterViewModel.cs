@@ -4,8 +4,10 @@ using CommunityToolkit.Mvvm.Messaging;
 using Plantify.Data;
 using Plantify.Messages;
 using Plantify.Services;
-using System.ComponentModel.DataAnnotations;
+using System.Collections.Generic;
 using System.Linq;
+using System.Text;
+using System.Text.RegularExpressions;
 using System.Threading.Tasks;
 
 namespace Plantify.ViewModels
@@ -14,65 +16,119 @@ namespace Plantify.ViewModels
     {
         private readonly IMessenger _messenger;
         private readonly AuthenticationService _authenticationService;
+        private readonly IUnitOfWork _unitOfWork;
 
         [ObservableProperty]
-        [NotifyDataErrorInfo]
-        [Required]
-        [MinLength(3)]
         private string _login = "";
-
         [ObservableProperty]
-        [NotifyDataErrorInfo]
-        [Required]
-        [EmailAddress]
         private string _email = "";
-
-        [ObservableProperty]
-        [NotifyDataErrorInfo]
-        [Required]
-        [RegularExpression(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,20}$", ErrorMessage = "Password must have upper/lower case, a number, and be 8-20 chars long.")]
+        
         private string _password = "";
-
         private string _confirmPassword = "";
 
-        [Required]
-        [Compare(nameof(Password), ErrorMessage = "Passwords do not match.")]
-        public string ConfirmPassword
-        {
-            get => _confirmPassword;
-            set => SetProperty(ref _confirmPassword, value, true);
-        }
-        
         [ObservableProperty]
-        private string _errorMessage = "";
+        private string? _errorMessage;
 
-        public RegisterViewModel(IMessenger messenger, AuthenticationService authenticationService)
+        public RegisterViewModel(IMessenger messenger, AuthenticationService authenticationService, IUnitOfWork unitOfWork)
         {
             _messenger = messenger;
             _authenticationService = authenticationService;
+            _unitOfWork = unitOfWork;
+
+            // Trigger validation on property changes
+            PropertyChanged += (s, e) =>
+            {
+                if (e.PropertyName != nameof(ErrorMessage))
+                {
+                    Validate();
+                }
+            };
         }
 
-        [RelayCommand]
+        // These methods will be called from the View's code-behind
+        public void SetPassword(string password)
+        {
+            _password = password;
+            Validate();
+        }
+        public void SetConfirmPassword(string confirmPassword)
+        {
+            _confirmPassword = confirmPassword;
+            Validate();
+        }
+
+        private void Validate()
+        {
+            var errors = new List<string>();
+
+            // Email Validation
+            if (!string.IsNullOrWhiteSpace(Email))
+            {
+                try
+                {
+                    var mail = new System.Net.Mail.MailAddress(Email);
+                }
+                catch
+                {
+                    errors.Add("Неверный email.");
+                }
+            }
+
+            // Password Validation
+            if (!string.IsNullOrWhiteSpace(_password))
+            {
+                var passwordRegex = new Regex(@"^(?=.*[a-z])(?=.*[A-Z])(?=.*\d).{8,20}$");
+                if (!passwordRegex.IsMatch(_password))
+                {
+                    errors.Add("Пароль должен содержать от 8 до 20 символов, включая заглавные, строчные буквы и цифры.");
+                }
+            }
+
+            // Confirm Password Validation
+            if (!string.IsNullOrWhiteSpace(_password) && !string.IsNullOrWhiteSpace(_confirmPassword))
+            {
+                if (_password != _confirmPassword)
+                {
+                    errors.Add("Пароли не совпадают.");
+                }
+            }
+
+            ErrorMessage = errors.Any() ? string.Join("\n", errors) : null;
+            RegisterCommand.NotifyCanExecuteChanged();
+        }
+        
+        private bool CanRegister()
+        {
+            return !string.IsNullOrWhiteSpace(Login) &&
+                   !string.IsNullOrWhiteSpace(Email) &&
+                   !string.IsNullOrWhiteSpace(_password) &&
+                   !string.IsNullOrWhiteSpace(_confirmPassword) &&
+                   string.IsNullOrEmpty(ErrorMessage);
+        }
+
+        [RelayCommand(CanExecute = nameof(CanRegister))]
         private async Task Register()
         {
-            // Basic client-side check
-            if (string.IsNullOrWhiteSpace(Login) || string.IsNullOrWhiteSpace(Email) || string.IsNullOrWhiteSpace(Password) || Password != ConfirmPassword)
+            // Final check for uniqueness before hitting the service
+            if ((await _unitOfWork.Users.FindAsync(u => u.Login == Login)).Any())
             {
-                ErrorMessage = "Неверный email или пароль";
+                ErrorMessage = "Этот логин уже занят.";
+                return;
+            }
+            if ((await _unitOfWork.Users.FindAsync(u => u.Email == Email)).Any())
+            {
+                ErrorMessage = "Этот email уже зарегистрирован.";
                 return;
             }
             
-            ErrorMessage = "";
-
-            bool success = await _authenticationService.Register(Login, Email, Password);
+            bool success = await _authenticationService.Register(Login, Email, _password);
 
             if (!success)
             {
-                ErrorMessage = "Неверный email или пароль";
+                ErrorMessage = "Произошла ошибка при регистрации.";
                 return;
             }
             
-            // Successful registration and auto-login
             _messenger.Send(new UserLoggedInMessage(_authenticationService.CurrentUser!));
         }
 

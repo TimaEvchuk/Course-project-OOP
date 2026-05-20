@@ -72,45 +72,50 @@ namespace Plantify.ViewModels
 
         private BitmapImage? LoadImage(string? imagePath)
         {
-            string? imageToLoad = null;
+            string imageToLoad = "pack://application:,,,/Images/placeholder.png";
+
             if (!string.IsNullOrEmpty(imagePath))
             {
-                string basePath = AppDomain.CurrentDomain.BaseDirectory;
-                string fullPath = Path.Combine(basePath, imagePath);
-                if (File.Exists(fullPath))
+                if (Path.IsPathRooted(imagePath) && File.Exists(imagePath))
                 {
-                    imageToLoad = fullPath;
+                    imageToLoad = imagePath;
+                }
+                else
+                {
+                    try
+                    {
+                        var dir = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory);
+                        while (dir != null && (!dir.GetDirectories("Images").Any() || !dir.GetDirectories("Views").Any()))
+                        {
+                            dir = dir.Parent;
+                        }
+
+                        if (dir != null)
+                        {
+                            string fullPath = Path.Combine(dir.FullName, "Images", "Plants", imagePath);
+                            if (File.Exists(fullPath))
+                            {
+                                imageToLoad = fullPath;
+                            }
+                        }
+                    }
+                    catch { /* Игнорируем ошибки поиска пути */ }
                 }
             }
-            
+
             try
             {
                 var bitmap = new BitmapImage();
                 bitmap.BeginInit();
-                bitmap.UriSource = new Uri(imageToLoad ?? "pack://application:,,,/Images/placeholder.png", UriKind.RelativeOrAbsolute);
+                bitmap.UriSource = new Uri(imageToLoad, UriKind.RelativeOrAbsolute);
                 bitmap.CacheOption = BitmapCacheOption.OnLoad;
                 bitmap.EndInit();
                 bitmap.Freeze(); 
                 return bitmap;
             }
-            catch (Exception)
+            catch
             {
-                // If the primary image fails, try the placeholder as a fallback.
-                try
-                {
-                    var fallback = new BitmapImage();
-                    fallback.BeginInit();
-                    fallback.UriSource = new Uri("pack://application:,,,/Images/placeholder.png", UriKind.RelativeOrAbsolute);
-                    fallback.CacheOption = BitmapCacheOption.OnLoad;
-                    fallback.EndInit();
-                    fallback.Freeze();
-                    return fallback;
-                }
-                catch
-                {
-                    // If even the placeholder fails, return an empty image to avoid a null crash.
-                    return new BitmapImage();
-                }
+                return null;
             }
         }
     }

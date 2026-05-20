@@ -14,6 +14,7 @@ namespace Plantify.ViewModels
 
         public string Name => PlantModel.Name;
         public string Variety => PlantModel.Variety.Name;
+        public string LightRequirement => PlantModel.LightRequirement.Name;
         public int WateringInterval => PlantModel.WateringInterval;
         public int FertilizingInterval => PlantModel.FertilizingInterval;
         public ICollection<PlantSection> Sections => PlantModel.Sections;
@@ -28,24 +29,37 @@ namespace Plantify.ViewModels
 
         private BitmapImage? LoadImage(string? imagePath)
         {
-            string? imageToLoad = null;
+            string imageToLoad = "pack://application:,,,/Images/placeholder.png";
 
             if (!string.IsNullOrEmpty(imagePath))
             {
-                string basePath = AppDomain.CurrentDomain.BaseDirectory;
-                string fullPath = Path.Combine(basePath, imagePath);
-
-                if (File.Exists(fullPath))
+                if (Path.IsPathRooted(imagePath) && File.Exists(imagePath))
                 {
-                    imageToLoad = fullPath;
+                    imageToLoad = imagePath;
+                }
+                else
+                {
+                    try
+                    {
+                        var dir = new DirectoryInfo(AppDomain.CurrentDomain.BaseDirectory);
+                        while (dir != null && (!dir.GetDirectories("Images").Any() || !dir.GetDirectories("Views").Any()))
+                        {
+                            dir = dir.Parent;
+                        }
+
+                        if (dir != null)
+                        {
+                            string fullPath = Path.Combine(dir.FullName, "Images", "Plants", imagePath);
+                            if (File.Exists(fullPath))
+                            {
+                                imageToLoad = fullPath;
+                            }
+                        }
+                    }
+                    catch { /* Игнорируем ошибки поиска пути */ }
                 }
             }
 
-            if (imageToLoad == null)
-            {
-                imageToLoad = "pack://application:,,,/Images/placeholder.png";
-            }
-            
             try
             {
                 var bitmap = new BitmapImage();
@@ -56,7 +70,7 @@ namespace Plantify.ViewModels
                 bitmap.Freeze();
                 return bitmap;
             }
-            catch (Exception)
+            catch
             {
                 return null;
             }
