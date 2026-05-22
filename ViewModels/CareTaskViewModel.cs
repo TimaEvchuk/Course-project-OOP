@@ -5,7 +5,7 @@ namespace Plantify.ViewModels
     public class CareTaskViewModel
     {
         public UserPlant UserPlant { get; }
-        public string TaskType { get; } // "ÐŸÐ¾Ð»Ð¸Ð²" Ð¸Ð»Ð¸ "Ð£Ð´Ð¾Ð±Ñ€ÐµÐ½Ð¸Ðµ"
+        public string TaskType { get; } // "Ïîëèâ" èëè "Óäîáðåíèå"
 
         public string TaskDescription => $"{TaskType}: {UserPlant.CustomName ?? UserPlant.Plant.Name}";
 

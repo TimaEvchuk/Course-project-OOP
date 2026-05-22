@@ -25,8 +25,6 @@ namespace Plantify.ViewModels
         {
             PlantModel = plant;
 
-            // Ensure sections are distinct before assigning them.
-            // This is a safeguard against EF materialization issues with JOINs.
             if (plant.Sections != null)
             {
                 Sections = plant.Sections.GroupBy(s => s.Id).Select(g => g.First()).ToList();

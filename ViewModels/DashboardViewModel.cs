@@ -153,11 +153,10 @@ namespace Plantify.ViewModels
 
         public void Receive(PremiumStatusChangedMessage message)
         {
-            // This message is sent after a premium purchase, so we also need to update the user object
-            // in the authentication service before re-evaluating the status.
+            
             if (_authenticationService.CurrentUser != null && _authenticationService.CurrentUser.Id == message.UpdatedUser.Id)
             {
-                // This is a simple update, for more complex scenarios, a full re-fetch or AutoMapper would be better.
+                
                 _authenticationService.CurrentUser.IsPremium = message.UpdatedUser.IsPremium;
                 _authenticationService.CurrentUser.PremiumStartDate = message.UpdatedUser.PremiumStartDate;
                 _authenticationService.CurrentUser.PremiumEndDate = message.UpdatedUser.PremiumEndDate;
@@ -184,7 +183,7 @@ namespace Plantify.ViewModels
             OnPropertyChanged(nameof(IsPremiumUser));
             ShowPremiumPurchaseCommand.NotifyCanExecuteChanged();
 
-            // If user is not premium and is viewing the premium-only month tab, switch them back to the day view.
+            
             if (IsNotPremiumUser && SelectedPeriod == TaskPeriod.Month)
             {
                 SetPeriodCommand.Execute(TaskPeriod.Day);
@@ -242,48 +241,85 @@ namespace Plantify.ViewModels
             WeekTasks.Clear();
             var culture = new CultureInfo("ru-RU");
             var today = DateTime.Today;
-            var weekAhead = Enumerable.Range(0, 7).Select(i => today.AddDays(i)).ToList();
-
             _weekStartDate = today;
-            _weekEndDate = weekAhead.Last();
+            _weekEndDate = today.AddDays(6);
             OnPropertyChanged(nameof(SummaryTitle));
 
-            // Initialize the 7 day view models
-            foreach (var day in weekAhead)
+            var weekDays = new Dictionary<DateTime, DayTasksViewModel>();
+            for (int i = 0; i < 7; i++)
             {
+                var day = today.AddDays(i);
                 var dayName = culture.DateTimeFormat.GetDayName(day.DayOfWeek);
-                WeekTasks.Add(new DayTasksViewModel
+                var dayViewModel = new DayTasksViewModel
                 {
                     DayName = char.ToUpper(dayName[0]) + dayName.Substring(1),
                     Date = day.ToString("dd MMM", culture)
-                });
+                };
+                weekDays[day.Date] = dayViewModel;
             }
-            
+
             var userPlants = await _unitOfWork.UserPlants.GetUserPlantsWithPlantDetailsAsync(currentUser.Id);
 
             foreach (var userPlant in userPlants)
             {
-                // Check for watering tasks
-                var nextWateringDate = userPlant.LastUserWateringDate.AddDays(userPlant.Plant.WateringInterval);
-                if (nextWateringDate >= today && nextWateringDate < today.AddDays(7))
+                // --- Watering Tasks ---
+                if (userPlant.Plant.WateringInterval > 0)
                 {
-                    var dayIndex = (nextWateringDate.Date - today).Days;
-                    if (dayIndex >= 0 && dayIndex < 7)
+                    var nextDue = userPlant.LastUserWateringDate.AddDays(userPlant.Plant.WateringInterval);
+                    if (nextDue < today)
                     {
-                        WeekTasks[dayIndex].Tasks.Add(new CareTaskViewModel(userPlant, "Полив"));
+                        weekDays[today].Tasks.Add(new CareTaskViewModel(userPlant, "Полив"));
+                        while (nextDue < today)
+                        {
+                            nextDue = nextDue.AddDays(userPlant.Plant.WateringInterval);
+                        }
+                        if (nextDue == today)
+                        {
+                           nextDue = nextDue.AddDays(userPlant.Plant.WateringInterval);
+                        }
+                    }
+                    
+                    while (nextDue <= _weekEndDate)
+                    {
+                        if (weekDays.TryGetValue(nextDue.Date, out var dayVM))
+                        {
+                            dayVM.Tasks.Add(new CareTaskViewModel(userPlant, "Полив"));
+                        }
+                        nextDue = nextDue.AddDays(userPlant.Plant.WateringInterval);
                     }
                 }
 
-                // Check for fertilizing tasks
-                var nextFertilizingDate = userPlant.LastFertilizedDate.AddDays(userPlant.Plant.FertilizingInterval);
-                if (nextFertilizingDate >= today && nextFertilizingDate < today.AddDays(7))
+                // --- Fertilizing Tasks ---
+                if (userPlant.Plant.FertilizingInterval > 0)
                 {
-                    var dayIndex = (nextFertilizingDate.Date - today).Days;
-                    if (dayIndex >= 0 && dayIndex < 7)
+                    var nextDue = userPlant.LastFertilizedDate.AddDays(userPlant.Plant.FertilizingInterval);
+                    if (nextDue < today)
                     {
-                        WeekTasks[dayIndex].Tasks.Add(new CareTaskViewModel(userPlant, "Удобрение"));
+                        weekDays[today].Tasks.Add(new CareTaskViewModel(userPlant, "Удобрение"));
+                        while (nextDue < today)
+                        {
+                            nextDue = nextDue.AddDays(userPlant.Plant.FertilizingInterval);
+                        }
+                        if (nextDue == today)
+                        {
+                            nextDue = nextDue.AddDays(userPlant.Plant.FertilizingInterval);
+                        }
+                    }
+
+                    while (nextDue <= _weekEndDate)
+                    {
+                        if (weekDays.TryGetValue(nextDue.Date, out var dayVM))
+                        {
+                            dayVM.Tasks.Add(new CareTaskViewModel(userPlant, "Удобрение"));
+                        }
+                        nextDue = nextDue.AddDays(userPlant.Plant.FertilizingInterval);
                     }
                 }
+            }
+            
+            foreach (var day in weekDays.Values.OrderBy(d => d.Date))
+            {
+                WeekTasks.Add(day);
             }
         }
         
@@ -295,54 +331,89 @@ namespace Plantify.ViewModels
             MonthTasks.Clear();
             var today = DateTime.Today;
             _monthStartDate = today;
-            _monthEndDate = today.AddDays(30); // 31 days total
+            _monthEndDate = today.AddDays(30);
             OnPropertyChanged(nameof(SummaryTitle));
 
+            var tasksByDay = new Dictionary<DateTime, (int watering, int fertilizing)>();
+            for (int i = 0; i <= 30; i++)
+            {
+                tasksByDay[today.AddDays(i).Date] = (0, 0);
+            }
+
             var userPlants = await _unitOfWork.UserPlants.GetUserPlantsWithPlantDetailsAsync(currentUser.Id);
-            
-            var allTasks = new List<(DateTime Date, string Type)>();
 
             foreach (var plant in userPlants)
             {
-                // Get all watering dates in the next 31 days
-                var nextWatering = plant.LastUserWateringDate.AddDays(plant.Plant.WateringInterval);
-                while (nextWatering <= _monthEndDate)
+                // --- Watering Tasks ---
+                if (plant.Plant.WateringInterval > 0)
                 {
-                    if (nextWatering >= _monthStartDate)
+                    var nextDue = plant.LastUserWateringDate.AddDays(plant.Plant.WateringInterval);
+                    if (nextDue < today)
                     {
-                        allTasks.Add((nextWatering, "Полив"));
+                        var current = tasksByDay[today];
+                        tasksByDay[today] = (current.watering + 1, current.fertilizing);
+                        
+                        while (nextDue < today)
+                        {
+                            nextDue = nextDue.AddDays(plant.Plant.WateringInterval);
+                        }
+                        if (nextDue == today)
+                        {
+                            nextDue = nextDue.AddDays(plant.Plant.WateringInterval);
+                        }
                     }
-                    if (plant.Plant.WateringInterval == 0) break;
-                    nextWatering = nextWatering.AddDays(plant.Plant.WateringInterval);
+                    
+                    while (nextDue <= _monthEndDate)
+                    {
+                        if (tasksByDay.ContainsKey(nextDue.Date))
+                        {
+                            var current = tasksByDay[nextDue.Date];
+                            tasksByDay[nextDue.Date] = (current.watering + 1, current.fertilizing);
+                        }
+                        nextDue = nextDue.AddDays(plant.Plant.WateringInterval);
+                    }
                 }
 
-                // Get all fertilizing dates in the next 31 days
-                var nextFertilizing = plant.LastFertilizedDate.AddDays(plant.Plant.FertilizingInterval);
-                while (nextFertilizing <= _monthEndDate)
+                // --- Fertilizing Tasks ---
+                if (plant.Plant.FertilizingInterval > 0)
                 {
-                    if (nextFertilizing >= _monthStartDate)
+                    var nextDue = plant.LastFertilizedDate.AddDays(plant.Plant.FertilizingInterval);
+                    if (nextDue < today)
                     {
-                        allTasks.Add((nextFertilizing, "Удобрение"));
+                        var current = tasksByDay[today];
+                        tasksByDay[today] = (current.watering, current.fertilizing + 1);
+                        
+                        while (nextDue < today)
+                        {
+                            nextDue = nextDue.AddDays(plant.Plant.FertilizingInterval);
+                        }
+                        if (nextDue == today)
+                        {
+                            nextDue = nextDue.AddDays(plant.Plant.FertilizingInterval);
+                        }
                     }
-                    if (plant.Plant.FertilizingInterval == 0) break;
-                    nextFertilizing = nextFertilizing.AddDays(plant.Plant.FertilizingInterval);
+
+                    while (nextDue <= _monthEndDate)
+                    {
+                        if (tasksByDay.ContainsKey(nextDue.Date))
+                        {
+                            var current = tasksByDay[nextDue.Date];
+                            tasksByDay[nextDue.Date] = (current.watering, current.fertilizing + 1);
+                        }
+                        nextDue = nextDue.AddDays(plant.Plant.FertilizingInterval);
+                    }
                 }
             }
 
-            var tasksByDay = allTasks.GroupBy(t => t.Date)
-                                     .ToDictionary(g => g.Key, g => g.ToList());
-
-            for (int i = 0; i < 31; i++) // 7 columns * 5 rows
+            for (int i = 0; i <= 30; i++)
             {
                 var day = today.AddDays(i);
                 var vm = new MonthDayViewModel { FullDate = day };
-
-                if (tasksByDay.TryGetValue(day, out var tasksForDay))
+                if (tasksByDay.TryGetValue(day.Date, out var tasksForDay))
                 {
-                    vm.WateringTaskCount = tasksForDay.Count(t => t.Type == "Полив");
-                    vm.FertilizingTaskCount = tasksForDay.Count(t => t.Type == "Удобрение");
+                    vm.WateringTaskCount = tasksForDay.watering;
+                    vm.FertilizingTaskCount = tasksForDay.fertilizing;
                 }
-                
                 MonthTasks.Add(vm);
             }
         }

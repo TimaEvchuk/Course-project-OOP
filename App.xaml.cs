@@ -98,6 +98,7 @@ namespace Plantify
 
         protected override async void OnStartup(StartupEventArgs e)
         {
+
             await Host.StartAsync();
 
             using (var scope = Services.CreateScope())
@@ -106,6 +107,7 @@ namespace Plantify
                 try
                 {
                     var context = services.GetRequiredService<AppDbContext>();
+                    await context.Database.MigrateAsync();
 
                     if (!context.Roles.Any())
                     {

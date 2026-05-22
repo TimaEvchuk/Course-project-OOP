@@ -77,7 +77,6 @@
             </Grid>
         </Border>
 
-        <!-- Date and Filter Bar -->
         <Grid Grid.Row="1" Margin="30,15,30,0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="*"/>
@@ -116,7 +115,6 @@
             </StackPanel>
         </Grid>
         
-        <!-- Separator -->
         <Border Grid.Row="2" Height="1" Background="{StaticResource BrushBorderGray}" Margin="30,15,30,0"/>
 
         <!-- Plant Grid -->
@@ -230,6 +228,7 @@
                                                 CommandParameter="{Binding}">
                                             <TextBlock Text="🗑️" FontSize="14"/>
                                         </Button>
+                                        
                                     </StackPanel>
                                 </StackPanel>
                             </StackPanel>

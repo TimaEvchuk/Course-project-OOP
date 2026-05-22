@@ -48,7 +48,7 @@
             <converters:StringNullOrEmptyToVisibilityConverter x:Key="StringNullOrEmptyToVisibilityConverter"/>
             <converters:StringToVisibilityConverter x:Key="StringToVisibilityConverter"/>
             <converters:NullToFalseConverter x:Key="NullToFalseConverter"/>
-            <converters:InverseBooleanToVisibilityConverter x:Key="InverseBooleanToVisibilityConverter"/>
+            <converters:InverseBooleanToVisibilityConverter x:Key="GlobalInverseBoolConverter"/>
             <converters:NullToVisibilityCollapsedConverter x:Key="NullToVisibilityCollapsedConverter"/>
             <converters:StringToImageSourceConverter x:Key="StringToImageSourceConverter"/>
             <converters:JsonToSectionsConverter x:Key="JsonToSectionsConverter"/>

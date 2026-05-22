@@ -1,4 +1,5 @@
 using CommunityToolkit.Mvvm.ComponentModel;
+using CommunityToolkit.Mvvm.Input;
 using CommunityToolkit.Mvvm.Messaging;
 using Plantify.Messages;
 using Plantify.Models;
@@ -64,10 +65,9 @@ namespace Plantify.ViewModels
             var imagePath = _userPlant.Plant.ImagePath;
             DisplayImageSource = LoadImage(imagePath);
         }
-
         partial void OnIsTaskCompletedTodayChanged(bool value)
         {
-            _messenger.Send(new UserPlantSelectionChangedMessage(0)); // Value is not used, just triggers re-calculation
+            _messenger.Send(new UserPlantSelectionChangedMessage(0)); 
         }
 
         private BitmapImage? LoadImage(string? imagePath)

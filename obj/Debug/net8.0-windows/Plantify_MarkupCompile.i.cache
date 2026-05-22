@@ -13,8 +13,8 @@ D:\2 курс\ООП\Course-project\Plantify\Plantify\App.xaml
 26964352938
 
 125362120784
-2511793759169
+249555261112
 MainWindow.xaml;Styles\Buttons.xaml;Styles\Colors.xaml;Styles\ScrollBar.xaml;Styles\TextBoxes.xaml;Styles\Typography.xaml;Views\AddEditPlantView.xaml;Views\AddPlantSuggestionView.xaml;Views\AddUserPlantView.xaml;Views\AddUserView.xaml;Views\AdminPanelView.xaml;Views\ChangePasswordView.xaml;Views\ConfirmationDialogView.xaml;Views\DashboardView.xaml;Views\EncyclopediaView.xaml;Views\InputDialogView.xaml;Views\LoginView.xaml;Views\MyGardenView.xaml;Views\NotificationView.xaml;Views\PlantDetailView.xaml;Views\PlantManagementView.xaml;Views\PremiumPurchaseView.xaml;Views\RegisterView.xaml;Views\ScheduleView.xaml;Views\SettingsView.xaml;Views\StatisticsView.xaml;
 
-False
+True
 

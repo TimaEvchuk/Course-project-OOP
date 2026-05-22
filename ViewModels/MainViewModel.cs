@@ -82,7 +82,7 @@ namespace Plantify.ViewModels
             _messenger = messenger;
             NotificationViewModel = notificationViewModel;
 
-            // Define brushes after resources are loaded
+            
             var stops = new GradientStopCollection
             {
                 new GradientStop { Color = (Color)Application.Current.FindResource("ColorDarkGreen"), Offset = 0.5 },
@@ -109,7 +109,7 @@ namespace Plantify.ViewModels
             if (value)
             {
                 HasNewNotifications = false;
-                // Reload notifications when panel is opened to show the most recent state
+                
                 NotificationViewModel.LoadNotificationsCommand.Execute(null);
             }
         }
@@ -184,8 +184,7 @@ namespace Plantify.ViewModels
 
         public void Receive(NewNotificationMessage message)
         {
-            // The notification is already created and saved by the sender.
-            // This receiver's only job is to pass it to the UI.
+            
             NotificationViewModel.AddNewNotification(message.Notification);
             HasNewNotifications = true;
         }
@@ -197,9 +196,9 @@ namespace Plantify.ViewModels
             IsAdmin = CurrentUser.Roles.Any(r => r.Name == "Администратор");
             IsContentManager = CurrentUser.Roles.Any(r => r.Name == "Контент-менеджер");
             CurrentUserAvatarPath = CurrentUser.AvatarPath;
-            CurrentBackground = _defaultBackground; // Set default background on login
+            CurrentBackground = _defaultBackground; 
             
-            // Also load notifications on login
+            
             await NotificationViewModel.LoadNotificationsCommand.ExecuteAsync(null);
             Navigate(typeof(MyGardenViewModel), "Мой сад");
         }

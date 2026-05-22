@@ -43,12 +43,10 @@ namespace Plantify.ViewModels
                 return;
             }
 
-            // 1. Update user properties
             userToUpdate.IsPremium = true;
             userToUpdate.PremiumStartDate = DateTime.Today;
             userToUpdate.PremiumEndDate = DateTime.Today.AddMonths(1);
 
-            // 2. Create a notification object and add it to the Unit of Work
             Notification? successNotification = null;
             var enableSuccessNotifications = _configuration.GetValue<bool>("NotificationSettings:EnableSuccessNotifications");
             if (enableSuccessNotifications)
@@ -63,16 +61,15 @@ namespace Plantify.ViewModels
                 await _unitOfWork.Notifications.AddAsync(successNotification);
             }
             
-            // 3. Save all changes (user and notification) to the database
+    
             await _unitOfWork.CompleteAsync();
             _unitOfWork.DetachAllEntities();
 
-            // 4. Update the CurrentUser in AuthenticationService to reflect the changes in the current session
+   
             _authenticationService.CurrentUser.IsPremium = true;
             _authenticationService.CurrentUser.PremiumStartDate = userToUpdate.PremiumStartDate;
             _authenticationService.CurrentUser.PremiumEndDate = userToUpdate.PremiumEndDate;
 
-            // 5. Send messages now that everything is saved
             if (successNotification != null)
             {
                 _messenger.Send(new NewNotificationMessage(successNotification));

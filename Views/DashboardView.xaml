@@ -17,14 +17,14 @@
             <RowDefinition Height="*"/>
         </Grid.RowDefinitions>
 
-        <!-- Top Widgets -->
+       
         <Grid Grid.Row="0">
             <Grid.ColumnDefinitions>
                 <ColumnDefinition Width="Auto"/>
                 <ColumnDefinition Width="*"/>
             </Grid.ColumnDefinitions>
 
-            <!-- Garden Health Widget -->
+           
             <Border Grid.Column="0"
                     MinWidth="250"
                     Padding="20"
@@ -59,7 +59,7 @@
                 </StackPanel>
             </Border>
 
-            <!-- Task View Selector -->
+           
             <StackPanel Grid.Column="1" Orientation="Vertical" VerticalAlignment="Bottom" HorizontalAlignment="Right">
                 <StackPanel Orientation="Horizontal" HorizontalAlignment="Right">
                     <Button Content="Купить Премиум"
@@ -179,49 +179,51 @@
                                     <DropShadowEffect ShadowDepth="4" BlurRadius="15" Color="{StaticResource ColorForestGreen}" Opacity="0.1"/>
                                 </Border.Effect>
                                 <Grid>
-                                    <StackPanel Margin="10">
-                                        <TextBlock FontWeight="Bold" 
-                                                   Text="{Binding DayName}"
-                                                   FontSize="18"
-                                                   Foreground="{StaticResource BrushDarkGreen}"/>
-                                        <TextBlock Text="{Binding Date}" 
-                                                   FontSize="14"
-                                                   Foreground="{StaticResource BrushGray}" 
-                                                   Margin="0,0,0,10"/>
-                                        <ItemsControl x:Name="TasksList" ItemsSource="{Binding Tasks}"
-                                                      Visibility="{Binding HasItems, ElementName=TasksList, Converter={StaticResource BooleanToVisibilityConverter}}">
-                                            <ItemsControl.ItemTemplate>
-                                                <DataTemplate>
-                                                    <Border BorderBrush="{StaticResource BrushBorderGray}" BorderThickness="0,0,0,1" Padding="0,8">
-                                                        <Grid>
-                                                            <Grid.ColumnDefinitions>
-                                                                <ColumnDefinition Width="Auto"/>
-                                                                <ColumnDefinition Width="*"/>
-                                                            </Grid.ColumnDefinitions>
-                                                            <TextBlock Grid.Column="0" FontWeight="Bold" FontSize="14" Margin="0,0,8,0" VerticalAlignment="Center">
-                                                                <TextBlock.Style>
-                                                                    <Style TargetType="TextBlock">
-                                                                        <Setter Property="Text" Value="[?]"/>
-                                                                        <Style.Triggers>
-                                                                            <DataTrigger Binding="{Binding TaskType}" Value="Полив">
-                                                                                <Setter Property="Text" Value="[П]"/>
-                                                                                <Setter Property="Foreground" Value="{StaticResource BrushForestGreen}"/>
-                                                                            </DataTrigger>
-                                                                            <DataTrigger Binding="{Binding TaskType}" Value="Удобрение">
-                                                                                <Setter Property="Text" Value="[У]"/>
-                                                                                <Setter Property="Foreground" Value="{StaticResource BrushTerracotta}"/>
-                                                                            </DataTrigger>
-                                                                        </Style.Triggers>
-                                                                    </Style>
-                                                                </TextBlock.Style>
-                                                            </TextBlock>
-                                                            <TextBlock Grid.Column="1" Text="{Binding TaskDescription}" FontSize="14" VerticalAlignment="Center" TextWrapping="Wrap" Foreground="{StaticResource BrushDarkGreen}" FontWeight="Medium"/>
-                                                        </Grid>
-                                                    </Border>
-                                                </DataTemplate>
-                                            </ItemsControl.ItemTemplate>
-                                        </ItemsControl>
-                                    </StackPanel>
+                                    <ScrollViewer VerticalScrollBarVisibility="Auto" MaxHeight="300" Style="{StaticResource ScrollBarStyle}">
+                                        <StackPanel Margin="10">
+                                            <TextBlock FontWeight="Bold" 
+                                                       Text="{Binding DayName}"
+                                                       FontSize="18"
+                                                       Foreground="{StaticResource BrushDarkGreen}"/>
+                                            <TextBlock Text="{Binding Date}" 
+                                                       FontSize="14"
+                                                       Foreground="{StaticResource BrushGray}" 
+                                                       Margin="0,0,0,10"/>
+                                            <ItemsControl x:Name="TasksList" ItemsSource="{Binding Tasks}"
+                                                          Visibility="{Binding HasItems, ElementName=TasksList, Converter={StaticResource BooleanToVisibilityConverter}}">
+                                                <ItemsControl.ItemTemplate>
+                                                    <DataTemplate>
+                                                        <Border BorderBrush="{StaticResource BrushBorderGray}" BorderThickness="0,0,0,1" Padding="0,8">
+                                                            <Grid>
+                                                                <Grid.ColumnDefinitions>
+                                                                    <ColumnDefinition Width="Auto"/>
+                                                                    <ColumnDefinition Width="*"/>
+                                                                </Grid.ColumnDefinitions>
+                                                                <TextBlock Grid.Column="0" FontWeight="Bold" FontSize="14" Margin="0,0,8,0" VerticalAlignment="Center">
+                                                                    <TextBlock.Style>
+                                                                        <Style TargetType="TextBlock">
+                                                                            <Setter Property="Text" Value="[?]"/>
+                                                                            <Style.Triggers>
+                                                                                <DataTrigger Binding="{Binding TaskType}" Value="Полив">
+                                                                                    <Setter Property="Text" Value="[П]"/>
+                                                                                    <Setter Property="Foreground" Value="{StaticResource BrushForestGreen}"/>
+                                                                                </DataTrigger>
+                                                                                <DataTrigger Binding="{Binding TaskType}" Value="Удобрение">
+                                                                                    <Setter Property="Text" Value="[У]"/>
+                                                                                    <Setter Property="Foreground" Value="{StaticResource BrushTerracotta}"/>
+                                                                                </DataTrigger>
+                                                                            </Style.Triggers>
+                                                                        </Style>
+                                                                    </TextBlock.Style>
+                                                                </TextBlock>
+                                                                <TextBlock Grid.Column="1" Text="{Binding TaskDescription}" FontSize="14" VerticalAlignment="Center" TextWrapping="Wrap" Foreground="{StaticResource BrushDarkGreen}" FontWeight="Medium"/>
+                                                            </Grid>
+                                                        </Border>
+                                                    </DataTemplate>
+                                                </ItemsControl.ItemTemplate>
+                                            </ItemsControl>
+                                        </StackPanel>
+                                    </ScrollViewer>
                                     <TextBlock Text="На текущий день задач нету"
                                                Foreground="{StaticResource BrushGray}"
                                                HorizontalAlignment="Center"
@@ -275,7 +277,7 @@
                   Foreground="{StaticResource BrushDarkGreen}"
                   Margin="0,0,5,0"/>
                                         
-                                        <!-- Separator after Date -->
+                                       
                                         
                                         <Border BorderBrush="{StaticResource BrushBorderGray}" BorderThickness="0,0,0,1" Margin="5,5,5,0"/>
                                         
